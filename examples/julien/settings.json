@@ -1,0 +1,20 @@
+{
+  "includeCoAuthoredBy": false,
+  "gitAttribution": false,
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "deny": [
+      "Read(./**/*.key)",
+      "Read(./**/*.pem)",
+      "Read(./secrets/**)",
+      "Bash(git add -A)",
+      "Bash(git add --all)",
+      "Bash(git add .)",
+      "Bash(git commit -a *)",
+      "Bash(git commit --all *)",
+      "Bash(git push origin main)",
+      "Bash(git push origin HEAD:main)",
+      "Bash(gh pr merge * --admin*)"
+    ]
+  }
+}

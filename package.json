@@ -1,0 +1,15 @@
+{
+  "name": "hug",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Human-Gated Flow (HuG Flow): specification, examples and tooling",
+  "license": "MIT",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  },
+  "packageManager": "pnpm@10.23.0+sha1.b4a44ab0dc2adf2e36371d11d8eb0dc78ffc976c"
+}
