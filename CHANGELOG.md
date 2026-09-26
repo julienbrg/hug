@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- `publish` workflow and `scripts/publish-post.mjs`: publish `article/hug-flow.md` to the blog through blog-mcp when it changes on `main`, then check that the live post matches. Needs the `MCP_BEARER_TOKEN` repository secret.
+- `post` job in the `check` workflow and `scripts/publish-post.mjs`: compare `article/hug-flow.md` with the live post, print the diff on pull requests, and on `main` publish it through blog-mcp when they differ, then check that the live post matches. Needs the `MCP_BEARER_TOKEN` repository secret.
+- Article §9 and §11: the editor workflow and machine requirements from the reference setup, and a link to its files in `examples/julien`.
 - `/check-article` skill: reports what the post is missing, or has out of date, given the repo.
 - Project `CLAUDE.md`: run `/check-article` right before each pull request's changelog chunk, and fix any drift in the article.
 - Link to this repository in §1 of the published article.
@@ -21,4 +22,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Removed
 
-- `/update-post` skill, replaced by the `publish` workflow.
+- `/update-post` skill, replaced by the `post` job.
