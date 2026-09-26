@@ -1,6 +1,6 @@
 ---
 title: Human-Gated Flow (HuG Flow)
-description: A formal specification of the Human-Gated Flow (HuG Flow), an issue-driven development lifecycle in which a coding agent executes the process and a human gates every line of content, built on VS Code, Claude Code and GitHub.
+description: A formal specification of the Human-Gated Flow (HuG Flow), an issue-driven development lifecycle in which a coding agent executes the process and a human approves every chunk of content, built on VS Code, Claude Code and GitHub.
 date: 2026-09-25
 lang: en-US
 author: Julien Béranger
