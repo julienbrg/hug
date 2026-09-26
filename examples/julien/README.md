@@ -30,7 +30,7 @@ This is the setup I use every day to run [HuG Flow](../../spec/hug-flow.md). It 
 
 The maintainer works in VS Code with the Claude Code extension open in a side panel. The agent writes into the working tree. The maintainer reads the diff in the _Source Control_ view and stages hunks or files from there. Nothing else is needed on the editor side.
 
-Requirements on the machine: `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter at commit time.
+Requirements on the machine: `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter at commit time. On Windows, [Git for Windows](https://gitforwindows.org/) also provides the Bash shell that Claude Code runs commands in, so the shell snippets below work unchanged.
 
 ## Process layer: `CLAUDE.md`
 
@@ -142,8 +142,6 @@ This setup diverges from the specification in three places:
 - **Existing issues.** Step 2 of `CLAUDE.md` always creates an issue. When the work starts from an existing issue, for example one filed in P0, a literal reading creates a duplicate. P1 requires reusing the existing issue.
 - **Repositories without CI.** The file applies to every project, including those with no checks. There, step 10 has nothing to wait for and I3 is vacuous. A setup that follows the spec MUST either configure CI or run the full local pipeline (tests, typecheck, build) before P6.
 - **Label mismatch.** The intake skill labels issues `help wanted`, while `CLAUDE.md` uses `enhancement` or `bug`. An issue filed in P0 keeps its intake label unless relabelled in P1.
-
-The scratch copy under `/private/tmp` is specific to macOS. Other systems need another path.
 
 ## Further reading
 
