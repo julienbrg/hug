@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- `examples/minimal/`: a generic setup to start from and adapt, with a `CLAUDE.md` free of personal conventions and without the three known deviations, a `/intake` skill targeting the current repository, a GitHub `ruleset.json` for `main`, and a README separating what the spec requires from what each maintainer can adapt. Article §11 links to it.
 - Cross-platform support: HuG Flow now runs on macOS, Linux and Windows. `.gitattributes` forces LF line endings, so prettier checks and the byte-identical article hold on Windows, and the `check` workflow runs on Ubuntu, macOS and Windows.
 - `pnpm typecheck` (TypeScript, `tsconfig.json`), run in the `check` workflow.
 - `scripts/publish-post.mjs`, run by two workflows: the `post` job in `check` prints the diff between `article/hug-flow.md` and the live post on pull requests, and `publish` publishes it through blog-mcp on every push to `main` when they differ, then waits up to 5 minutes for the live post to match. Needs the `MCP_BEARER_TOKEN` repository secret.
@@ -24,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- The spec abstract points to both example setups instead of calling `examples/julien` the reference implementation.
 - Pipelining in P3 now uses a linked `git worktree` instead of a scratch copy under `/private/tmp`, in the spec, the reference `CLAUDE.md` and the article. The agent prepares at most one chunk ahead.
 - `scripts/publish-post.mjs` is now `scripts/publish-post.ts`, run directly by Node's type stripping, and diffs with `git diff --no-index` instead of the system `diff`.
 

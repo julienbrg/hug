@@ -16,7 +16,8 @@ Original article: <https://julienberanger.com/hug-flow>
 | [`article/hug-flow.md`](article/hug-flow.md)                             | The [published article](https://julienberanger.com/hug-flow), verbatim                              |
 | [`.claude/skills/check-article/`](.claude/skills/check-article/SKILL.md) | `/check-article`: reports what the post is missing, or has out of date, given the repo              |
 | [`scripts/publish-post.ts`](scripts/publish-post.ts)                     | Publishes the article to the blog when it differs from the live post; run by the `publish` workflow |
-| [`examples/julien/`](examples/julien/README.md)                          | A reference setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI    |
+| [`examples/minimal/`](examples/minimal/README.md)                        | A generic setup to start from and adapt: `CLAUDE.md`, an intake skill, a GitHub ruleset             |
+| [`examples/julien/`](examples/julien/README.md)                          | A personal setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI     |
 
 ## The flow in one paragraph
 
