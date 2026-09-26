@@ -143,17 +143,23 @@ source, tests, scripts, docs, config, everything:
 - Rejection: if I don't like a chunk, I say what's wrong instead of
   staging it. Propose a fix and wait for my "go" (per Task confirmation)
   before rewriting it — don't silently redo it unprompted.
-- Don't idle while I review: write chunk N+1 in a scratch copy of the
-  repo under `/private/tmp`, on top of chunk N. Chunk 1 is written
-  straight in the repo — nothing is under review yet, so no scratch
-  copy until chunk 2. Copy without `node_modules` and symlink it. Run
-  the check pipeline only in the real repo, at commit time.
-  - When I stage chunk N: check, commit, then copy chunk N+1 from the
-    scratch copy into the repo as unstaged changes, say it's ready for
-    review, and start chunk N+2 in the scratch copy.
+- Don't idle while I review: write chunk N+1 in a linked worktree, on
+  top of chunk N. Chunk 1 is written straight in the repo — nothing is
+  under review yet, so no worktree until chunk 2. Create it outside the
+  repo with `git worktree add --detach <path> HEAD` (the branch is
+  already checked out in the repo), copy chunk N into it and commit it
+  there as a local WIP commit, so chunk N+1 diffs cleanly against it.
+  WIP commits never leave the worktree. Run the install (`pnpm install`)
+  in the worktree — never symlink dependencies. Run the check pipeline
+  only in the real repo, at commit time. Stay one chunk ahead, no more.
+  - When I stage chunk N: check, commit, then apply chunk N+1 to the
+    repo with `git -C <path> diff HEAD | git apply` — Git carries
+    deletions and renames — say it's ready for review, WIP-commit it in
+    the worktree, and start chunk N+2 there.
   - When I ask for a change to chunk N: apply it to chunk N in the
-    repo, carry it into the scratch copy, and rework chunk N+1 so it
+    repo, carry it into the worktree, and rework chunk N+1 so it
     still fits.
+  - When the step's work is done: `git worktree remove --force <path>`.
 
 Repeat until the step's work is done.
 
