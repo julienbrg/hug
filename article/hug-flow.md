@@ -17,6 +17,8 @@ The Human-Gated Flow (HuG Flow) is a development lifecycle for building software
 
 The key words MUST, MUST NOT, SHOULD and MAY are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
 
+The specification is maintained in [julienbrg/hug](https://github.com/julienbrg/hug), where changes go through issues and pull requests.
+
 ## 2. Scope
 
 HuG Flow applies to projects that meet three conditions:
