@@ -16,6 +16,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node scripts/publish-post.mjs article/hug-flow.md
+      - run: node scripts/publish-post.ts article/hug-flow.md
         env:
           MCP_BEARER_TOKEN: ${{ secrets.MCP_BEARER_TOKEN }}
