@@ -1,6 +1,6 @@
 ---
 title: Human-Gated Flow (HuG Flow)
-description: A formal specification of the Human-Gated Flow (HuG Flow), an issue-driven development lifecycle in which a coding agent executes the process and a human gates every line of content, built on VS Code, Claude Code and GitHub.
+description: A formal specification of the Human-Gated Flow (HuG Flow), an issue-driven development lifecycle in which a coding agent executes the process and a human approves every chunk of content, built on VS Code, Claude Code and GitHub.
 date: 2026-09-25
 lang: en-US
 author: Julien Béranger
@@ -231,7 +231,7 @@ This section describes the setup I use every day. It is one way to implement HuG
 
 The files, and where to install each one, are in [`examples/julien`](https://github.com/julienbrg/hug/tree/main/examples/julien).
 
-To start your own, use [`examples/minimal`](https://github.com/julienbrg/hug/tree/main/examples/minimal) instead: the same flow without my personal conventions, meant to be adapted to your own needs and habits.
+To start your own, use [`examples/minimal`](https://github.com/julienbrg/hug/tree/main/examples/minimal) instead: the same flow without my personal conventions, meant to be adapted to your own needs and habits. Once it works for you, feel free to add it to `examples/` with a pull request (see [CONTRIBUTING.md](https://github.com/julienbrg/hug/blob/main/CONTRIBUTING.md)).
 
 | Layer | Artifact | Covers | Strength |
 | --- | --- | --- | --- |

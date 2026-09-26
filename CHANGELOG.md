@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- `CONTRIBUTING.md`: requirements, the rules of the flow for contributors, and how to add your own setup under `examples/`. The README links to it and invites new setups, and article §11 does too.
+- README: Contact and Credits sections.
 - `examples/minimal/`: a generic setup to start from and adapt, with a `CLAUDE.md` free of personal conventions and without the three known deviations, a `/intake` skill targeting the current repository, a GitHub `ruleset.json` for `main`, and a README separating what the spec requires from what each maintainer can adapt. Article §11 links to it.
 - Cross-platform support: HuG Flow now runs on macOS, Linux and Windows. `.gitattributes` forces LF line endings, so prettier checks and the byte-identical article hold on Windows, and the `check` workflow runs on Ubuntu, macOS and Windows.
 - `pnpm typecheck` (TypeScript, `tsconfig.json`), run in the `check` workflow.
@@ -25,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- The article's description says a human "approves every chunk of content" instead of "gates every line", matching the README.
 - The spec abstract points to both example setups instead of calling `examples/julien` the reference implementation.
 - Pipelining in P3 now uses a linked `git worktree` instead of a scratch copy under `/private/tmp`, in the spec, the reference `CLAUDE.md` and the article. The agent prepares at most one chunk ahead.
 - `scripts/publish-post.mjs` is now `scripts/publish-post.ts`, run directly by Node's type stripping, and diffs with `git diff --no-index` instead of the system `diff`.

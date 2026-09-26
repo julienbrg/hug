@@ -27,6 +27,22 @@ A request becomes an issue. The agent branches from `main`, then writes one smal
 
 This repository is maintained with HuG Flow. Open an issue, or a pull request from a branch linked to one. The check pipeline is `pnpm format:check`. CI also runs `pnpm typecheck`, on Ubuntu, macOS and Windows.
 
+You're welcome to add your own setup to [`examples/`](examples/), next to `minimal` and `julien`: the more ways of running HuG Flow, the better.
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the requirements, the rules of the flow, and how to add a setup.
+
+## Contact
+
+**Julien Béranger** ([GitHub](https://github.com/julienbrg))
+
+- Element: [@julienbrg:matrix.org](https://matrix.to/#/@julienbrg:matrix.org)
+- Farcaster: [julien-](https://warpcast.com/julien-)
+- Telegram: [@julienbrg](https://t.me/julienbrg)
+
+## Credits
+
+Special thanks to [bertux](https://github.com/bertux), who had the patience to teach me everything about the GitHub Flow.
+
 ## License
 
 [MIT](LICENSE)
