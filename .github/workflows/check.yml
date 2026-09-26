@@ -6,8 +6,11 @@ on:
     branches: [main]
 
 jobs:
-  format:
-    runs-on: ubuntu-latest
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -17,6 +20,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
+      - run: pnpm typecheck
 
   post:
     if: github.event_name == 'pull_request'
