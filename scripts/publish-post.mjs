@@ -1,19 +1,51 @@
-// Publishes article/<slug>.md to julienberanger.com through blog-mcp, then
-// waits until the live /raw page matches the file.
-//   MCP_BEARER_TOKEN=... node scripts/publish-post.mjs [article/hug-flow.md]
+// Compares article/<slug>.md with the live post on julienberanger.com and, if
+// they differ, publishes the file through blog-mcp, then waits until the live
+// /raw page matches it. --dry-run only prints the difference.
+//   MCP_BEARER_TOKEN=... node scripts/publish-post.mjs [--dry-run] [article/hug-flow.md]
 
-import { readFileSync } from "node:fs";
-import { basename } from "node:path";
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { basename, join } from "node:path";
 
 const MCP_URL = "https://blog.mcp.w3hc.org/mcp";
 const SITE_URL = "https://julienberanger.com";
 
-const file = process.argv[2] ?? "article/hug-flow.md";
+const args = process.argv.slice(2);
+const dryRun = args.includes("--dry-run");
+const file = args.find((a) => !a.startsWith("--")) ?? "article/hug-flow.md";
 const slug = basename(file, ".md");
+const rawUrl = `${SITE_URL}/${slug}/raw`;
+
+const raw = readFileSync(file, "utf8");
+
+async function fetchLive() {
+  const res = await fetch(rawUrl, { cache: "no-store" });
+  if (res.status === 404) return "";
+  if (!res.ok) throw new Error(`${rawUrl}: HTTP ${res.status}`);
+  return res.text();
+}
+
+const live = await fetchLive();
+if (live === raw) {
+  console.log(`${SITE_URL}/${slug} is up to date`);
+  process.exit(0);
+}
+
+const liveFile = join(mkdtempSync(join(tmpdir(), "post-")), "live.md");
+writeFileSync(liveFile, live);
+spawnSync("diff", ["-u", liveFile, file], { stdio: "inherit" });
+
+if (dryRun) {
+  console.log(
+    `dry run: merging to main will publish this to ${SITE_URL}/${slug}`,
+  );
+  process.exit(0);
+}
+
 const token = process.env.MCP_BEARER_TOKEN;
 if (!token) throw new Error("MCP_BEARER_TOKEN is not set");
 
-const raw = readFileSync(file, "utf8");
 const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
 if (!match) throw new Error(`${file} has no frontmatter`);
 
@@ -61,8 +93,8 @@ async function callTool(name, args) {
   return out ? JSON.parse(out) : null;
 }
 
-const live = await callTool("posts_latest", { prefix: slug });
-const existing = live?.slug === slug ? live : {};
+const stored = await callTool("posts_latest", { prefix: slug });
+const existing = stored?.slug === slug ? stored : {};
 
 const post = {
   slug,
@@ -86,11 +118,10 @@ await callTool("posts_upsert", post);
 console.log(`upserted "${slug}"`);
 
 for (let attempt = 1; attempt <= 9; attempt++) {
-  const res = await fetch(`${SITE_URL}/${slug}/raw`, { cache: "no-store" });
-  if (res.ok && (await res.text()) === raw) {
+  await new Promise((r) => setTimeout(r, 10_000));
+  if ((await fetchLive()) === raw) {
     console.log(`${SITE_URL}/${slug} matches ${file}`);
     process.exit(0);
   }
-  await new Promise((r) => setTimeout(r, 10_000));
 }
-throw new Error(`${SITE_URL}/${slug}/raw still differs from ${file} after 90s`);
+throw new Error(`${rawUrl} still differs from ${file} after 90s`);
