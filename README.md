@@ -6,12 +6,16 @@ HuG Flow is an issue-driven development lifecycle for building software with a c
 
 It extends the [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow) with an explicit division of labor between a human and an agent: **process autonomy, content control**.
 
+Original article: <https://julienberanger.com/hug-flow>
+
 ## Contents
 
-| Path                                            | What it is                                                                                       |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| [`spec/hug-flow.md`](spec/hug-flow.md)          | The specification: roles, artifacts, lifecycle phases, approval matrix, invariants               |
-| [`examples/julien/`](examples/julien/README.md) | A reference setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI |
+| Path                                                                 | What it is                                                                                       |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| [`spec/hug-flow.md`](spec/hug-flow.md)                               | The specification: roles, artifacts, lifecycle phases, approval matrix, invariants               |
+| [`article/hug-flow.md`](article/hug-flow.md)                         | The [published article](https://julienberanger.com/hug-flow), verbatim                           |
+| [`.claude/skills/update-post/`](.claude/skills/update-post/SKILL.md) | `/update-post`: sync the article with the blog through the JB Blog Post connector                |
+| [`examples/julien/`](examples/julien/README.md)                      | A reference setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI |
 
 ## The flow in one paragraph
 
