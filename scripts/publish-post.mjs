@@ -117,11 +117,14 @@ for (const key of Object.keys(post)) if (post[key] == null) delete post[key];
 await callTool("posts_upsert", post);
 console.log(`upserted "${slug}"`);
 
-for (let attempt = 1; attempt <= 9; attempt++) {
-  await new Promise((r) => setTimeout(r, 10_000));
+// The site's cache can take a couple of minutes to serve the new version.
+const started = Date.now();
+while (Date.now() - started < 300_000) {
+  await new Promise((r) => setTimeout(r, 15_000));
   if ((await fetchLive()) === raw) {
-    console.log(`${SITE_URL}/${slug} matches ${file}`);
+    const seconds = Math.round((Date.now() - started) / 1000);
+    console.log(`${SITE_URL}/${slug} matches ${file} after ${seconds}s`);
     process.exit(0);
   }
 }
-throw new Error(`${rawUrl} still differs from ${file} after 90s`);
+throw new Error(`${rawUrl} still differs from ${file} after 5 minutes`);
