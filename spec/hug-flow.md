@@ -10,7 +10,7 @@
 
 ## Abstract
 
-HuG Flow is an issue-driven development lifecycle in which a coding agent executes every process step and a human maintainer approves every chunk of content by staging it in the Git index. This document specifies the roles, artifacts, phases, approval points and invariants of the flow. It does not prescribe tools: a reference implementation built on VS Code, Claude Code and GitHub is described in [`examples/julien`](../examples/julien/README.md).
+HuG Flow is an issue-driven development lifecycle in which a coding agent executes every process step and a human maintainer approves every chunk of content by staging it in the Git index. This document specifies the roles, artifacts, phases, approval points and invariants of the flow. It does not prescribe tools. Two example setups built on Claude Code and GitHub are provided: a generic one to adapt, in [`examples/minimal`](../examples/minimal/README.md), and a personal one, in [`examples/julien`](../examples/julien/README.md).
 
 ## 1. Purpose
 
