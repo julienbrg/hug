@@ -27,6 +27,8 @@ HuG Flow applies to projects that meet three conditions:
 - the code is hosted on [GitHub](https://github.com/) and changes reach the default branch only through pull requests;
 - a coding agent writes most of the code, and a human is accountable for everything that is merged.
 
+HuG Flow is independent of the operating system. Every step relies on Git and the forge's command-line client, so the flow runs the same on macOS, Linux and Windows.
+
 HuG Flow does not cover how to build an agent, how to deploy, or how to monitor in production. Section 10 explains how these relate to the Agent Development Lifecycle (ADLC).
 
 ## 3. Design principles
@@ -117,7 +119,7 @@ After confirmation, the agent MUST run P2 to P6 without further permission promp
 
 - **Input:** the confirmed spec.
 - **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in [VS Code](https://code.visualstudio.com/) and stages what they approve. Once something is staged, the agent runs the local check pipeline (format and lint only), then commits exactly what is staged.
-- **Pipelining:** while chunk *N* is under review, the agent writes chunk *N+1* in a scratch copy of the repository. Once *N* is committed, it moves *N+1* into the repository as unstaged changes.
+- **Pipelining:** while chunk *N* is under review, the agent writes chunk *N+1* in a [linked worktree](https://git-scm.com/docs/git-worktree) (`git worktree add`), on top of chunk *N*. Once *N* is committed, it applies the worktree's diff to the repository as unstaged changes. Git carries deletions and renames across, and the worktree installs its own dependencies rather than sharing them through a link.
 - **Output:** a series of small commits.
 - **Exit criterion:** the spec is fully implemented.
 
@@ -127,6 +129,7 @@ Rules for this phase:
 - A partial stage MUST be committed as-is. The remainder stays unstaged.
 - If a check fails, the agent unstages the affected files and reports the failure. It MUST NOT modify staged changes it did not write.
 - If the maintainer rejects a chunk, the agent proposes a fix and waits for confirmation before rewriting.
+- The agent SHOULD NOT prepare more than one chunk ahead. A queue of chunks pressures the maintainer to hurry the review.
 - A question from the maintainer does not pause the loop. The agent answers it, then checks the staging area within the same turn.
 
 ### P4. Integrate
@@ -195,7 +198,7 @@ The following MUST hold at all times:
 
 The maintainer works in VS Code with the Claude Code extension open in a side panel. The agent writes into the working tree. The maintainer reads the diff in the *Source Control* view and stages hunks or files from there. Nothing else is needed on the editor side.
 
-Requirements on the machine: `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter at commit time.
+Requirements on the machine: `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter at commit time. On Windows, [Git for Windows](https://gitforwindows.org/) also provides the Bash shell that Claude Code runs commands in, so the shell snippets below work unchanged.
 
 Configuration lives in three layers: `CLAUDE.md` for the process, skills for intake, and permissions plus branch protection to enforce the invariants. Section 11 shows the setup I use day to day.
 
@@ -384,17 +387,23 @@ source, tests, scripts, docs, config, everything:
 - Rejection: if I don't like a chunk, I say what's wrong instead of
   staging it. Propose a fix and wait for my "go" (per Task confirmation)
   before rewriting it — don't silently redo it unprompted.
-- Don't idle while I review: write chunk N+1 in a scratch copy of the
-  repo under `/private/tmp`, on top of chunk N. Chunk 1 is written
-  straight in the repo — nothing is under review yet, so no scratch
-  copy until chunk 2. Copy without `node_modules` and symlink it. Run
-  the check pipeline only in the real repo, at commit time.
-  - When I stage chunk N: check, commit, then copy chunk N+1 from the
-    scratch copy into the repo as unstaged changes, say it's ready for
-    review, and start chunk N+2 in the scratch copy.
+- Don't idle while I review: write chunk N+1 in a linked worktree, on
+  top of chunk N. Chunk 1 is written straight in the repo — nothing is
+  under review yet, so no worktree until chunk 2. Create it outside the
+  repo with `git worktree add --detach <path> HEAD` (the branch is
+  already checked out in the repo), copy chunk N into it and commit it
+  there as a local WIP commit, so chunk N+1 diffs cleanly against it.
+  WIP commits never leave the worktree. Run the install (`pnpm install`)
+  in the worktree — never symlink dependencies. Run the check pipeline
+  only in the real repo, at commit time. Stay one chunk ahead, no more.
+  - When I stage chunk N: check, commit, then apply chunk N+1 to the
+    repo with `git -C <path> diff HEAD | git apply` — Git carries
+    deletions and renames — say it's ready for review, WIP-commit it in
+    the worktree, and start chunk N+2 there.
   - When I ask for a change to chunk N: apply it to chunk N in the
-    repo, carry it into the scratch copy, and rework chunk N+1 so it
+    repo, carry it into the worktree, and rework chunk N+1 so it
     still fits.
+  - When the step's work is done: `git worktree remove --force <path>`.
 
 Repeat until the step's work is done.
 
@@ -667,11 +676,10 @@ My setup diverges from this specification in three places:
 - **Repositories without CI.** The file applies to every project, including those with no checks. There, step 10 has nothing to wait for and I3 is vacuous. A setup that follows the spec MUST either configure CI or run the full local pipeline (tests, typecheck, build) before P6.
 - **Label mismatch.** The intake skill labels issues `help wanted`, while `CLAUDE.md` uses `enhancement` or `bug`. An issue filed in P0 keeps its intake label unless relabelled in P1.
 
-The scratch copy under `/private/tmp` is specific to macOS. Other systems need another path.
-
 ## Further reading
 
 - [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow), GitHub documentation
+- [git worktree](https://git-scm.com/docs/git-worktree), Git documentation
 - [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) by Vincent Driessen, and [trunk-based development](https://trunkbaseddevelopment.com/), the two main alternatives
 - [The Agent Development Lifecycle](https://www.arthur.ai/blog/introducing-adlc), Arthur
 - [Agent Development Lifecycle guide](https://architect.salesforce.com/docs/architect/fundamentals/guide/agent-development-lifecycle), Salesforce Architects
