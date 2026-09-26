@@ -34,7 +34,9 @@ if (live === raw) {
 
 const liveFile = join(mkdtempSync(join(tmpdir(), "post-")), "live.md");
 writeFileSync(liveFile, live);
-spawnSync("diff", ["-u", liveFile, file], { stdio: "inherit" });
+spawnSync("git", ["--no-pager", "diff", "--no-index", liveFile, file], {
+  stdio: "inherit",
+});
 
 if (dryRun) {
   console.log(
