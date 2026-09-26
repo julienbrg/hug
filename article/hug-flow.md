@@ -193,6 +193,10 @@ The following MUST hold at all times:
 | CI | [GitHub Actions](https://docs.github.com/en/actions) | Tests, typecheck and build on every pull request |
 | Tooling | [pnpm](https://pnpm.io/) or [Foundry](https://getfoundry.sh/) | Detected per project; provides the format and lint commands |
 
+The maintainer works in VS Code with the Claude Code extension open in a side panel. The agent writes into the working tree. The maintainer reads the diff in the *Source Control* view and stages hunks or files from there. Nothing else is needed on the editor side.
+
+Requirements on the machine: `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter at commit time.
+
 Configuration lives in three layers: `CLAUDE.md` for the process, skills for intake, and permissions plus branch protection to enforce the invariants. Section 11 shows the setup I use day to day.
 
 ## 10. Relationship to the ADLC
@@ -221,6 +225,8 @@ The two can be combined. A project that ships LLM features can run HuG Flow for 
 ## 11. My setup
 
 This section describes the setup I use every day. It is one way to implement HuG Flow, not the only one. It has three layers. The first two tell the agent what to do. The third makes sure some things cannot happen, whatever the agent does.
+
+The files, and where to install each one, are in [`examples/julien`](https://github.com/julienbrg/hug/tree/main/examples/julien).
 
 | Layer | Artifact | Covers | Strength |
 | --- | --- | --- | --- |

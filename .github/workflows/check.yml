@@ -17,3 +17,18 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
+
+  post:
+    runs-on: ubuntu-latest
+    concurrency: post-${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - if: github.event_name == 'pull_request'
+        run: node scripts/publish-post.mjs --dry-run article/hug-flow.md
+      - if: github.event_name == 'push'
+        run: node scripts/publish-post.mjs article/hug-flow.md
+        env:
+          MCP_BEARER_TOKEN: ${{ secrets.MCP_BEARER_TOKEN }}

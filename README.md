@@ -10,12 +10,13 @@ Original article: <https://julienberanger.com/hug-flow>
 
 ## Contents
 
-| Path                                                                 | What it is                                                                                       |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| [`spec/hug-flow.md`](spec/hug-flow.md)                               | The specification: roles, artifacts, lifecycle phases, approval matrix, invariants               |
-| [`article/hug-flow.md`](article/hug-flow.md)                         | The [published article](https://julienberanger.com/hug-flow), verbatim                           |
-| [`.claude/skills/update-post/`](.claude/skills/update-post/SKILL.md) | `/update-post`: sync the article with the blog through the JB Blog Post connector                |
-| [`examples/julien/`](examples/julien/README.md)                      | A reference setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI |
+| Path                                                                     | What it is                                                                                       |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| [`spec/hug-flow.md`](spec/hug-flow.md)                                   | The specification: roles, artifacts, lifecycle phases, approval matrix, invariants               |
+| [`article/hug-flow.md`](article/hug-flow.md)                             | The [published article](https://julienberanger.com/hug-flow), verbatim                           |
+| [`.claude/skills/check-article/`](.claude/skills/check-article/SKILL.md) | `/check-article`: reports what the post is missing, or has out of date, given the repo           |
+| [`scripts/publish-post.mjs`](scripts/publish-post.mjs)                   | Publishes the article to the blog when it differs from the live post; run by the `post` CI job   |
+| [`examples/julien/`](examples/julien/README.md)                          | A reference setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI |
 
 ## The flow in one paragraph
 
