@@ -231,7 +231,7 @@ This section describes the setup I use every day. It is one way to implement HuG
 
 The files, and where to install each one, are in [`examples/julien`](https://github.com/julienbrg/hug/tree/main/examples/julien).
 
-To start your own, use [`examples/minimal`](https://github.com/julienbrg/hug/tree/main/examples/minimal) instead: the same flow without my personal conventions, meant to be adapted to your own needs and habits.
+To start your own, use [`examples/minimal`](https://github.com/julienbrg/hug/tree/main/examples/minimal) instead: the same flow without my personal conventions, meant to be adapted to your own needs and habits. Once it works for you, feel free to add it to `examples/` with a pull request (see [CONTRIBUTING.md](https://github.com/julienbrg/hug/blob/main/CONTRIBUTING.md)).
 
 | Layer | Artifact | Covers | Strength |
 | --- | --- | --- | --- |
