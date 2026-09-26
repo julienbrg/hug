@@ -4,12 +4,16 @@
   "private": true,
   "description": "Human-Gated Flow (HuG Flow): specification, examples and tooling",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "typecheck": "tsc"
   },
   "devDependencies": {
-    "prettier": "^3.6.2"
+    "@types/node": "^22.20.4",
+    "prettier": "^3.6.2",
+    "typescript": "^7.0.2"
   },
   "packageManager": "pnpm@10.23.0+sha1.b4a44ab0dc2adf2e36371d11d8eb0dc78ffc976c"
 }

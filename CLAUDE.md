@@ -9,7 +9,7 @@ setup (`examples/julien/`) were extracted from it.
 - Never reformat `article/`: it must stay byte-identical to the live post's
   `/raw` page. It is in `.prettierignore` for that reason.
 - Don't publish the post by hand. Both workflows run
-  `scripts/publish-post.mjs`:
+  `scripts/publish-post.ts`:
   - `check.yml`, on pull requests: prints the diff between the live post
     and the file (dry run). It's a check like any other: never merge on red.
   - `publish.yml`, on every push to `main`: publishes when they differ, and

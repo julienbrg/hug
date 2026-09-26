@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Cross-platform support: HuG Flow now runs on macOS, Linux and Windows. `.gitattributes` forces LF line endings, so prettier checks and the byte-identical article hold on Windows, and the `check` workflow runs on Ubuntu, macOS and Windows.
+- `pnpm typecheck` (TypeScript, `tsconfig.json`), run in the `check` workflow.
 - `scripts/publish-post.mjs`, run by two workflows: the `post` job in `check` prints the diff between `article/hug-flow.md` and the live post on pull requests, and `publish` publishes it through blog-mcp on every push to `main` when they differ, then waits up to 5 minutes for the live post to match. Needs the `MCP_BEARER_TOKEN` repository secret.
 - Article §9 and §11: the editor workflow and machine requirements from the reference setup, and a link to its files in `examples/julien`.
 - `/check-article` skill: reports what the post is missing, or has out of date, given the repo.
@@ -20,6 +22,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `examples/julien/`: reference setup on VS Code, Claude Code and GitHub, with the global `CLAUDE.md`, the `super-app-issue` intake skill, Claude Code `settings.json`, a `repo-settings.sh` script and a README covering the stack, the three layers, enforcement, coverage and known deviations.
 - MIT license, prettier check pipeline and a GitHub Actions workflow running it on pull requests.
 
+### Changed
+
+- Pipelining in P3 now uses a linked `git worktree` instead of a scratch copy under `/private/tmp`, in the spec, the reference `CLAUDE.md` and the article. The agent prepares at most one chunk ahead.
+- `scripts/publish-post.mjs` is now `scripts/publish-post.ts`, run directly by Node's type stripping, and diffs with `git diff --no-index` instead of the system `diff`.
+
 ### Removed
+
+- The macOS-only `/private/tmp` known deviation.
 
 - `/update-post` skill, replaced by the `publish` workflow.

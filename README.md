@@ -15,7 +15,7 @@ Original article: <https://julienberanger.com/hug-flow>
 | [`spec/hug-flow.md`](spec/hug-flow.md)                                   | The specification: roles, artifacts, lifecycle phases, approval matrix, invariants                  |
 | [`article/hug-flow.md`](article/hug-flow.md)                             | The [published article](https://julienberanger.com/hug-flow), verbatim                              |
 | [`.claude/skills/check-article/`](.claude/skills/check-article/SKILL.md) | `/check-article`: reports what the post is missing, or has out of date, given the repo              |
-| [`scripts/publish-post.mjs`](scripts/publish-post.mjs)                   | Publishes the article to the blog when it differs from the live post; run by the `publish` workflow |
+| [`scripts/publish-post.ts`](scripts/publish-post.ts)                     | Publishes the article to the blog when it differs from the live post; run by the `publish` workflow |
 | [`examples/julien/`](examples/julien/README.md)                          | A reference setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI    |
 
 ## The flow in one paragraph
@@ -24,7 +24,7 @@ A request becomes an issue. The agent branches from `main`, then writes one smal
 
 ## Contributing
 
-This repository is maintained with HuG Flow. Open an issue, or a pull request from a branch linked to one. The check pipeline is `pnpm format:check`.
+This repository is maintained with HuG Flow. Open an issue, or a pull request from a branch linked to one. The check pipeline is `pnpm format:check`. CI also runs `pnpm typecheck`, on Ubuntu, macOS and Windows.
 
 ## License
 

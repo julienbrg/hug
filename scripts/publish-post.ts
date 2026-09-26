@@ -1,7 +1,7 @@
 // Compares article/<slug>.md with the live post on julienberanger.com and, if
 // they differ, publishes the file through blog-mcp, then waits until the live
 // /raw page matches it. --dry-run only prints the difference.
-//   MCP_BEARER_TOKEN=... node scripts/publish-post.mjs [--dry-run] [article/hug-flow.md]
+//   MCP_BEARER_TOKEN=... node scripts/publish-post.ts [--dry-run] [article/hug-flow.md]
 
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
@@ -19,7 +19,7 @@ const rawUrl = `${SITE_URL}/${slug}/raw`;
 
 const raw = readFileSync(file, "utf8");
 
-async function fetchLive() {
+async function fetchLive(): Promise<string> {
   const res = await fetch(rawUrl, { cache: "no-store" });
   if (res.status === 404) return "";
   if (!res.ok) throw new Error(`${rawUrl}: HTTP ${res.status}`);
@@ -34,7 +34,9 @@ if (live === raw) {
 
 const liveFile = join(mkdtempSync(join(tmpdir(), "post-")), "live.md");
 writeFileSync(liveFile, live);
-spawnSync("diff", ["-u", liveFile, file], { stdio: "inherit" });
+spawnSync("git", ["--no-pager", "diff", "--no-index", liveFile, file], {
+  stdio: "inherit",
+});
 
 if (dryRun) {
   console.log(
@@ -49,7 +51,7 @@ if (!token) throw new Error("MCP_BEARER_TOKEN is not set");
 const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
 if (!match) throw new Error(`${file} has no frontmatter`);
 
-const data = {};
+const data: Record<string, string> = {};
 for (const line of match[1].split("\n")) {
   const i = line.indexOf(": ");
   if (i === -1) continue;
@@ -60,7 +62,10 @@ for (const line of match[1].split("\n")) {
 const content = match[2].replace(/^\n# .*\n/, "");
 
 let id = 0;
-async function callTool(name, args) {
+async function callTool(
+  name: string,
+  args: Record<string, unknown>,
+): Promise<any> {
   const res = await fetch(MCP_URL, {
     method: "POST",
     headers: {
@@ -96,7 +101,7 @@ async function callTool(name, args) {
 const stored = await callTool("posts_latest", { prefix: slug });
 const existing = stored?.slug === slug ? stored : {};
 
-const post = {
+const post: Record<string, unknown> = {
   slug,
   title: data.title,
   content,
