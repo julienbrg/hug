@@ -26,6 +26,8 @@ HuG Flow applies to projects that meet three conditions:
 - the code is hosted on [GitHub](https://github.com/) and changes reach the default branch only through pull requests;
 - a coding agent writes most of the code, and a human is accountable for everything that is merged.
 
+HuG Flow is independent of the operating system. Every step relies on Git and the forge's command-line client, so the flow runs the same on macOS, Linux and Windows.
+
 HuG Flow does not cover how to build an agent, how to deploy, or how to monitor in production. Section 9 explains how these relate to the Agent Development Lifecycle (ADLC).
 
 ## 3. Design principles
@@ -116,7 +118,7 @@ After confirmation, the agent MUST run P2 to P6 without further permission promp
 
 - **Input:** the confirmed spec.
 - **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in [VS Code](https://code.visualstudio.com/) and stages what they approve. Once something is staged, the agent runs the local check pipeline (format and lint only), then commits exactly what is staged.
-- **Pipelining:** while chunk _N_ is under review, the agent writes chunk _N+1_ in a scratch copy of the repository. Once _N_ is committed, it moves _N+1_ into the repository as unstaged changes.
+- **Pipelining:** while chunk _N_ is under review, the agent writes chunk _N+1_ in a [linked worktree](https://git-scm.com/docs/git-worktree) (`git worktree add`), on top of chunk _N_. Once _N_ is committed, it applies the worktree's diff to the repository as unstaged changes. Git carries deletions and renames across, and the worktree installs its own dependencies rather than sharing them through a link.
 - **Output:** a series of small commits.
 - **Exit criterion:** the spec is fully implemented.
 
@@ -126,6 +128,7 @@ Rules for this phase:
 - A partial stage MUST be committed as-is. The remainder stays unstaged.
 - If a check fails, the agent unstages the affected files and reports the failure. It MUST NOT modify staged changes it did not write.
 - If the maintainer rejects a chunk, the agent proposes a fix and waits for confirmation before rewriting.
+- The agent SHOULD NOT prepare more than one chunk ahead. A queue of chunks pressures the maintainer to hurry the review.
 - A question from the maintainer does not pause the loop. The agent answers it, then checks the staging area within the same turn.
 
 ### P4. Integrate
@@ -207,6 +210,7 @@ The two can be combined. A project that ships LLM features can run HuG Flow for 
 ## Further reading
 
 - [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow), GitHub documentation
+- [git worktree](https://git-scm.com/docs/git-worktree), Git documentation
 - [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) by Vincent Driessen, and [trunk-based development](https://trunkbaseddevelopment.com/), the two main alternatives
 - [Key words for use in RFCs to Indicate Requirement Levels](https://www.rfc-editor.org/rfc/rfc2119), RFC 2119
 - [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
