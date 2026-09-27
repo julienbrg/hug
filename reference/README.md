@@ -3,7 +3,7 @@
 A [Claude Code plugin](https://code.claude.com/docs/en/plugins) and a small CLI that enforce [HuG Flow](../spec/hug-flow.md) instead of only instructing it.
 
 ```text
-implements: hug-flow@0.2.0
+implements: hug-flow@0.3.0
 level: L2 (L3 once `hug init` has applied the ruleset)
 ```
 

@@ -234,7 +234,7 @@ There are three conformance levels. Each level includes every requirement of the
 
 An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
 
-The reference implementation, a Claude Code plugin in [`reference`](../reference/README.md), declares `implements: hug-flow@0.2.0` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](../conformance/), runs in CI.
+The reference implementation, a Claude Code plugin in [`reference`](../reference/README.md), declares `implements: hug-flow@0.3.0` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](../conformance/), runs in CI.
 
 ### Invariant predicates
 
