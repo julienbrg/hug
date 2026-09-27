@@ -80,33 +80,20 @@ comment_out() {
 settings_on() {
   added=$STATE_DIR/added-settings.json
   in=$(cat "$SETTINGS" 2>/dev/null || echo '{}')
-  if have jq; then
-    printf '%s' "$in" | jq -c --argjson deny "$DENY" \
-      '{keys: [("includeCoAuthoredBy", "gitAttribution") as $k | select(has($k) | not) | $k],
-        deny: ($deny - (.permissions.deny // []))}' > "$added"
-    printf '%s' "$in" | jq --slurpfile a "$added" \
-      '$a[0] as $a | . + ($a.keys | map({(.): false}) | add // {})
-       | if ($a.deny | length) > 0 then .permissions.deny = ((.permissions.deny // []) + $a.deny) else . end' \
-      > "$SETTINGS.tmp"
-  elif have node; then
-    printf '%s' "$in" | node -e '
-      const fs = require("fs");
-      const [deny, added, out] = process.argv.slice(1);
-      const s = JSON.parse(fs.readFileSync(0, "utf8"));
-      const have = (s.permissions && s.permissions.deny) || [];
-      const a = {
-        keys: ["includeCoAuthoredBy", "gitAttribution"].filter((k) => !(k in s)),
-        deny: JSON.parse(deny).filter((d) => !have.includes(d)),
-      };
-      for (const k of a.keys) s[k] = false;
-      if (a.deny.length) s.permissions = { ...s.permissions, deny: [...have, ...a.deny] };
-      fs.writeFileSync(added, JSON.stringify(a) + "\n");
-      fs.writeFileSync(out, JSON.stringify(s, null, 2) + "\n");
-    ' "$DENY" "$added" "$SETTINGS.tmp"
-  else
-    echo "hug: neither jq nor node found; $SETTINGS left unchanged" >&2
-    return 0
-  fi
+  printf '%s' "$in" | node -e '
+    const fs = require("fs");
+    const [deny, added, out] = process.argv.slice(1);
+    const s = JSON.parse(fs.readFileSync(0, "utf8"));
+    const have = (s.permissions && s.permissions.deny) || [];
+    const a = {
+      keys: ["includeCoAuthoredBy", "gitAttribution"].filter((k) => !(k in s)),
+      deny: JSON.parse(deny).filter((d) => !have.includes(d)),
+    };
+    for (const k of a.keys) s[k] = false;
+    if (a.deny.length) s.permissions = { ...s.permissions, deny: [...have, ...a.deny] };
+    fs.writeFileSync(added, JSON.stringify(a) + "\n");
+    fs.writeFileSync(out, JSON.stringify(s, null, 2) + "\n");
+  ' "$DENY" "$added" "$SETTINGS.tmp"
   replace "$SETTINGS"
 }
 
@@ -114,30 +101,19 @@ settings_on() {
 settings_off() {
   added=$STATE_DIR/added-settings.json
   [ -f "$added" ] && [ -f "$SETTINGS" ] || return 0
-  if have jq; then
-    jq --slurpfile a "$added" \
-      '$a[0] as $a | reduce $a.keys[] as $k (.; del(.[$k]))
-       | if .permissions.deny then .permissions.deny -= $a.deny else . end
-       | if .permissions.deny == [] then del(.permissions.deny) else . end
-       | if .permissions == {} then del(.permissions) else . end' \
-      "$SETTINGS" > "$SETTINGS.tmp"
-  elif have node; then
-    node -e '
-      const fs = require("fs");
-      const [file, added] = process.argv.slice(1);
-      const s = JSON.parse(fs.readFileSync(file, "utf8"));
-      const a = JSON.parse(fs.readFileSync(added, "utf8"));
-      for (const k of a.keys) delete s[k];
-      if (s.permissions && s.permissions.deny) {
-        s.permissions.deny = s.permissions.deny.filter((d) => !a.deny.includes(d));
-        if (!s.permissions.deny.length) delete s.permissions.deny;
-        if (!Object.keys(s.permissions).length) delete s.permissions;
-      }
-      fs.writeFileSync(file + ".tmp", JSON.stringify(s, null, 2) + "\n");
-    ' "$SETTINGS" "$added"
-  else
-    die "neither jq nor node found; remove the entries in $added from $SETTINGS by hand"
-  fi
+  node -e '
+    const fs = require("fs");
+    const [file, added] = process.argv.slice(1);
+    const s = JSON.parse(fs.readFileSync(file, "utf8"));
+    const a = JSON.parse(fs.readFileSync(added, "utf8"));
+    for (const k of a.keys) delete s[k];
+    if (s.permissions && s.permissions.deny) {
+      s.permissions.deny = s.permissions.deny.filter((d) => !a.deny.includes(d));
+      if (!s.permissions.deny.length) delete s.permissions.deny;
+      if (!Object.keys(s.permissions).length) delete s.permissions;
+    }
+    fs.writeFileSync(file + ".tmp", JSON.stringify(s, null, 2) + "\n");
+  ' "$SETTINGS" "$added"
   replace "$SETTINGS"
   if [ "$(get settings_existed)" = 0 ] && [ "$(tr -d ' \n' < "$SETTINGS")" = "{}" ]; then rm -f "$SETTINGS"; fi
   rm -f "$added"
@@ -177,6 +153,7 @@ repo_off() {
 }
 
 cmd_on() {
+  have node || die "needs node"
   comments=
   repo=
   while [ $# -gt 0 ]; do
@@ -228,6 +205,7 @@ cmd_on() {
 }
 
 cmd_off() {
+  have node || die "needs node"
   if [ "$(get state)" != on ]; then echo "HuG Flow is already off"; return 0; fi
 
   if [ "$(get import)" = 1 ] && [ -f "$INSTRUCTIONS" ]; then
