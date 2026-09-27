@@ -37,7 +37,7 @@ HuG Flow does not cover how to build an agent, how to deploy, or how to monitor 
 - **Chunk.** One logical, reviewable unit of change, small enough to read in one sitting. The unit of approval in HuG Flow.
 - **Approval surface.** Where the reviewer approves a chunk. It has three properties: only the reviewer writes to it, it can hold a subset of the changes, and the author records exactly its contents. In [Git](https://git-scm.com/), the version control system this document assumes, the approval surface is the staging area (index).
 - **Check pipeline.** The local, deterministic checks that gate every commit: the format check and the linter only. Tests, typecheck and build are not part of it; they run in CI (P5).
-- **Fingerprint.** The identifier of the tree a checked chunk would commit as, recorded when the chunk appears as unstaged changes and kept only if it passes the check pipeline. At commit time, a staged tree equal to the fingerprint was approved untouched and commits without a second pipeline run.
+- **Fingerprint.** The identifier of the tree a checked chunk would commit as, recorded once the chunk is complete as unstaged changes and kept only if it passes the check pipeline. At commit time, a staged tree equal to the fingerprint was approved untouched and commits without a second pipeline run.
 - **Forge.** The service that hosts the repository and provides issues, pull requests and CI, driven from its command-line client. [GitHub](https://github.com/) and [`gh`](https://cli.github.com/) are the worked example throughout this document; every forge command stands for an abstract operation (create an issue, open a pull request, watch checks, squash-merge) that any forge's client can fill.
 
 ## 4. Design principles
