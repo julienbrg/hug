@@ -44,8 +44,9 @@ only revert what the script recorded.
      admin merges, added to `~/.claude/settings.json` where missing;
    - the `/intake` skill in `~/.claude/skills/intake/`, if absent;
    - with `--repo`: squash-only merges, merged branches deleted, and
-     the `hug-flow` ruleset requiring the checks of the last merged
-     pull request. This needs admin rights, is visible to
+     the `hug-flow` ruleset requiring the checks that passed on the
+     last merged pull request, through `hug init`, which refuses if
+     none did. This needs admin rights, is visible to
      collaborators, and rulesets on private repositories may need a
      paid GitHub plan.
 

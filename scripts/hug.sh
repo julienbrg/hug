@@ -143,51 +143,21 @@ settings_off() {
   rm -f "$added"
 }
 
-# The minimal ruleset, requiring the checks that ran on the last merged pull request.
-ruleset() {
-  pr=$(gh pr list -R "$1" --state merged -L 1 --json number --jq '.[0].number // empty')
-  checks='[]'
-  if [ -n "$pr" ]; then checks=$(gh pr checks "$pr" -R "$1" --json name --jq '[.[].name] | unique' || true); fi
-  [ -n "$checks" ] || checks='[]'
-  if have jq; then
-    jq --argjson c "$checks" \
-      '.rules |= if ($c | length) > 0
-        then map(if .type == "required_status_checks" then .parameters.required_status_checks = ($c | map({context: .})) else . end)
-        else map(select(.type != "required_status_checks")) end' \
-      "$ROOT/examples/minimal/ruleset.json"
-  elif have node; then
-    node -e '
-      const [file, checks] = process.argv.slice(1);
-      const r = JSON.parse(require("fs").readFileSync(file, "utf8"));
-      const c = JSON.parse(checks);
-      r.rules = c.length
-        ? r.rules.map((x) => x.type === "required_status_checks"
-            ? { ...x, parameters: { ...x.parameters, required_status_checks: c.map((context) => ({ context })) } }
-            : x)
-        : r.rules.filter((x) => x.type !== "required_status_checks");
-      console.log(JSON.stringify(r, null, 2));
-    ' "$ROOT/examples/minimal/ruleset.json" "$checks"
-  else
-    die "neither jq nor node found; apply examples/minimal/ruleset.json by hand"
-  fi
-}
-
-# Squash-only merges and the hug-flow ruleset. Needs admin rights on the repository.
+# Squash-only merges and the hug-flow ruleset, through `hug init`. Needs admin rights on the repository.
 repo_on() {
   have gh || die "--repo needs gh, logged in"
   dir=$(get backup)
   gh api "repos/$1" > "$dir/repo.json"
   gh api "repos/$1/rulesets" > "$dir/rulesets.json"
-  set_state repo "$1"
-  set_state repo_merge "$(gh api "repos/$1" --jq '[.allow_merge_commit, .allow_rebase_merge, .allow_squash_merge, .delete_branch_on_merge, .squash_merge_commit_title, .squash_merge_commit_message] | map(tostring) | join(" ")')"
-  sh "$ROOT/examples/julien/repo-settings.sh" "$1" >/dev/null
+  merge=$(gh api "repos/$1" --jq '[.allow_merge_commit, .allow_rebase_merge, .allow_squash_merge, .delete_branch_on_merge, .squash_merge_commit_title, .squash_merge_commit_message] | map(tostring) | join(" ")')
   if gh api "repos/$1/rulesets" --jq '.[].name' | grep -qx hug-flow; then
     echo "hug: $1 already has a hug-flow ruleset; left as is"
-    set_state ruleset ""
-  else
-    ruleset "$1" > "$STATE_DIR/ruleset.json"
-    set_state ruleset "$(gh api -X POST "repos/$1/rulesets" --input "$STATE_DIR/ruleset.json" --jq .id)"
+    return 0
   fi
+  node "$ROOT/reference/src/cli/hug.ts" init "$1" >/dev/null || die "hug init $1 failed; nothing was changed"
+  set_state repo "$1"
+  set_state repo_merge "$merge"
+  set_state ruleset "$(gh api "repos/$1/rulesets" --jq '.[] | select(.name == "hug-flow") | .id')"
 }
 
 repo_off() {
@@ -222,6 +192,8 @@ cmd_on() {
   for c in $comments; do [ "${c%:*}" = "$INSTRUCTIONS" ] || files="$files ${c%:*}"; done
   # shellcheck disable=SC2086
   backup $files
+  set_state repo ""
+  if [ -n "$repo" ]; then repo_on "$repo"; fi
   set_state instructions_existed "$([ -e "$INSTRUCTIONS" ] && echo 1 || echo 0)"
   set_state settings_existed "$([ -e "$SETTINGS" ] && echo 1 || echo 0)"
   : > "$STATE_DIR/commented"
@@ -251,8 +223,6 @@ cmd_on() {
   fi
 
   settings_on
-  set_state repo ""
-  if [ -n "$repo" ]; then repo_on "$repo"; fi
   set_state state on
   echo "HuG Flow is on. Backup: $(get backup). Revert with: hug.sh off"
 }
