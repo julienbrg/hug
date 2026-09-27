@@ -58,7 +58,8 @@ work, and nothing is committed unreviewed.
 The project's check pipeline is the format check and the linter
 only, with whatever tools the project uses (see Tooling). Tests,
 typecheck and build run in CI. Commit only staged content that passed
-it: run it on your chunks before announcing them, and at commit time
+it: run it on your chunks as soon as they appear as unstaged changes,
+while I review them, and at commit time
 on anything staged that differs from what you checked (my chunks,
 partial or edited stages), reading the staged content
 (`git show :<file>`), not the working tree. If it fails,
@@ -68,20 +69,23 @@ didn't write, and never commit on a failing check.
 
 When you write a chunk (code, tests, docs, config, anything):
 
-- Write one logical chunk, small enough to read in one sitting. Run
-  the check pipeline on it and fix what fails. Leave it unstaged, say
-  in one line what it is, and stop.
-- Record the tree you checked, built in a throwaway index:
-  `GIT_INDEX_FILE=<tmp> sh -c 'git read-tree HEAD && git add -A && git write-tree'`.
+- Write one logical chunk, small enough to read in one sitting. Leave
+  it unstaged, say in one line what it is, and stop.
+- The moment it's on disk, in one command, record the tree it would
+  commit as, built in a throwaway index
+  (`GIT_INDEX_FILE=<tmp> sh -c 'git read-tree HEAD && git add -A && git write-tree'`),
+  and run the check pipeline on it. Keep the recorded tree only if the
+  check passes. If it fails, tell me, fix it as new unstaged changes,
+  and check again.
 - Never run `git add` on your own work, and never `git add -A` or
   `git add .`.
 - I review the diff in my editor and stage what I approve.
 - Right after leaving a chunk unstaged, start a background watcher,
   such as
-  `until [ -n "$(git diff --cached --name-only)" ]; do sleep 5; done`.
+  `until [ -n "$(git diff --cached --name-only)" ]; do sleep 1; done`.
   When something is staged, compare `git write-tree` with the recorded
-  tree. If they match, commit right away; otherwise run the check
-  pipeline on the staged content first. Then push and start the next
+  tree in the same command as the commit. If they match, commit right
+  away; otherwise run the check pipeline on the staged content first. Then push and start the next
   chunk. Start a fresh watcher after every commit.
 - If I stage only part of a chunk, commit that part and leave the rest
   unstaged.
@@ -96,10 +100,11 @@ stage what you approve, and I commit.
 
 While I review chunk N, you may write chunk N+1 in a linked worktree
 outside the repository (`git worktree add --detach <path> HEAD`), on
-top of a local copy of chunk N, and check it there. Install
-dependencies there rather than linking them. Once chunk N is committed, apply the worktree's diff to
-the repository (`git -C <path> diff HEAD | git apply`) as the next
-unstaged chunk. Stay one chunk ahead, no more. Remove the worktree when
+top of a local copy of chunk N. Install dependencies there rather than
+linking them. Once chunk N is staged, in a single command, commit it,
+apply the worktree's diff to the repository
+(`git -C <path> diff HEAD | git apply`) as the next unstaged chunk, and
+record and check that chunk. Stay one chunk ahead, no more. Remove the worktree when
 the work is done.
 
 # Issues
