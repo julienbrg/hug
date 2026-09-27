@@ -8,6 +8,14 @@ It extends the [GitHub Flow](https://docs.github.com/en/get-started/using-github
 
 Original article: <https://julienberanger.com/hug-flow>
 
+## Motivation
+
+In July 2026, Linus Torvalds said this:
+
+> AI is a great tool, but it's a tool.
+
+Some devs brag about how they let LLMs code entire apps and services overnight with no human in the loop, while others feel AI has taken the fun out of coding. It's up to us to stay in control of what we hack. Whatever your setup, a single instruction file is enough to make the most of our new toys without selling our souls to the devil.
+
 ## Get started
 
 There are two ways to try HuG Flow with [Claude Code](https://code.claude.com/docs). Both are reversible. The levels are defined in [§10 of the spec](spec/hug-flow.md).

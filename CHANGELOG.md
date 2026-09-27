@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- A Motivation section in the README and the article.
+
+### Changed
+
+- `hug.sh on --repo` delegates to `hug init` instead of re-implementing it, so both apply the same ruleset and require only the checks that passed on the last merged pull request. It runs before any local change, and stops with nothing changed when `hug init` refuses. It no longer calls `examples/julien/repo-settings.sh`.
+
+### Removed
+
+- The `jq` code path in `hug.sh`: `on` and `off` use `node`, and stop up front without it.
+- The dead `notes/hug-toggle-spec.md` reference in `hug.sh`.
+
 ## [0.3.0] - 2026-09-27
 
 ### Added
