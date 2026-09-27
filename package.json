@@ -1,6 +1,6 @@
 {
   "name": "hug",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "description": "Human-Gated Flow (HuG Flow): specification, examples and tooling",
   "license": "MIT",

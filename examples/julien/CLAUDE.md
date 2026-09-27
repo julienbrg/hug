@@ -90,9 +90,10 @@ The project's check pipeline consists of the format check and the
 linter only, using the tool that matches the project (see Tooling
 below). Tests, typecheck and build are not part of it; the full test
 suite runs in the PR checks (step 10). Nothing is committed unless
-exactly what is staged passed it. You check your own chunks before
-announcing them, so a fully staged chunk of yours commits with no
-check wait. Anything else staged, including my chunks and partial or
+exactly what is staged passed it. You check your own chunks as soon
+as they appear as unstaged changes, while I review them, so a fully
+staged chunk of yours commits with no check wait. Anything else
+staged, including my chunks and partial or
 edited stages of yours, is checked at commit time, on the staged
 content itself (`git show :<file>` piped to the tool's stdin mode),
 not the working tree. If the pipeline passes, commit exactly what is
@@ -116,30 +117,32 @@ When I write the chunk:
 When you write the chunk — you implementing a task, and this covers
 source, tests, scripts, docs, config, everything:
 
-- You write one logical chunk, run the check pipeline on it and fix
-  what fails, leave it **unstaged**, say in one line what it is and
-  that it's ready for review, and stop. Never run
+- You write one logical chunk, leave it **unstaged**, say in one line
+  what it is and that it's ready for review, and stop. Never run
   `git add` on your own work. Not for a doc, not for a script, not for
   a file you consider uncontroversial, and never `git add -A` or
   `git add .`.
 - I review the unstaged diff in my IDE and `git add` what I approve.
-- You watch for that by polling `git status` — no nudges, no check-ins,
-  no asking me whether I'm done reviewing — and the moment something is
-  staged, commit exactly what's staged, then immediately start the
-  next chunk as new unstaged changes.
-- Right after announcing a checked chunk, record the fingerprint of
-  what you checked: the tree it would commit as, built in a throwaway
-  index so mine is untouched —
-  `GIT_INDEX_FILE=<tmp> sh -c 'git read-tree HEAD && git add -A && git write-tree'`.
-  When something is staged, compare `git write-tree` with it: equal
-  means I staged the checked chunk untouched, so commit without
-  re-running the pipeline; different means run it on the staged
-  content first.
+- The moment the chunk is on disk, in the same command, record its
+  fingerprint — the tree it would commit as, built in a throwaway
+  index so mine is untouched,
+  `GIT_INDEX_FILE=<tmp> sh -c 'git read-tree HEAD && git add -A && git write-tree'` —
+  and run the check pipeline on it. I'm already reading the diff, so
+  the check costs me no wait. Keep the fingerprint only if the check
+  passes. If it fails, tell me what failed, fix it as new unstaged
+  changes, and check again.
+- You watch for my staging by polling `git status` — no nudges, no
+  check-ins, no asking me whether I'm done reviewing — and the moment
+  something is staged, commit exactly what's staged, then immediately
+  start the next chunk as new unstaged changes. Compare `git write-tree`
+  with the fingerprint in the same command as the commit: equal means I
+  staged the checked chunk untouched, so commit without re-running the
+  pipeline; different means run it on the staged content first.
 - Polling means a background watcher, never ending the turn: you only
   run while a turn is active, so a turn that ends unwatched misses my
   staging. Right after leaving a chunk unstaged, start a Bash
   `run_in_background` loop such as
-  `until [ -n "$(git diff --cached --name-only)" ]; do sleep 5; done`
+  `until [ -n "$(git diff --cached --name-only)" ]; do sleep 1; done`
   — it re-invokes you when something is staged. Start a fresh one after
   every commit.
 - While I'm reviewing I'll often ask questions about the code — why a
@@ -163,14 +166,15 @@ source, tests, scripts, docs, config, everything:
   already checked out in the repo), copy chunk N into it and commit it
   there as a local WIP commit, so chunk N+1 diffs cleanly against it.
   WIP commits never leave the worktree. Run the install (`pnpm install`)
-  in the worktree — never symlink dependencies. Run the check pipeline
-  on chunk N+1 in the worktree while I review chunk N, and fix it there,
-  so it lands already checked. Stay one chunk ahead, no more.
-  - When I stage chunk N: commit it (re-checking only if the
-    fingerprint differs), then apply chunk N+1 to the repo with
+  in the worktree — never symlink dependencies. Stay one chunk ahead,
+  no more.
+  - When I stage chunk N, do the whole handoff in one Bash command, so
+    it costs a single round-trip: commit chunk N (re-checking only if
+    the fingerprint differs), apply chunk N+1 to the repo with
     `git -C <path> diff HEAD | git apply` — Git carries deletions and
-    renames — say it's ready for review, record its fingerprint,
-    WIP-commit it in the worktree, and start chunk N+2 there.
+    renames — record its fingerprint and check it, and WIP-commit it in
+    the worktree. Then start the watcher, say chunk N+1 is ready for
+    review, and start chunk N+2 in the worktree.
   - When I ask for a change to chunk N: apply it to chunk N in the
     repo, carry it into the worktree, and rework chunk N+1 so it
     still fits.
