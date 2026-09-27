@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - The spec is now version 0.2.0. Its abstract and §10 point to the reference implementation, and so does the `examples/julien` README, which describes the setup as L1. The article mirrors both (§10, §13, §13.3).
+- Stage-then-commit loop, immediate handoff: once chunk N is staged, the agent commits it and applies chunk N+1 from the worktree right away, finished or not, then pushes chunk N last, so neither an unfinished chunk nor the network delays the handoff. An unfinished chunk is announced as in progress and finished in place; it is fingerprinted, checked and announced as ready once complete. The maintainer may stage part of an in-progress chunk, which is checked on the staged content before it is committed. Updated in the spec (§3 Fingerprint, P3), both example setups, `reference/rules.md` and the article (§3, §7, §13.1).
 
 ## [0.1.2] - 2026-09-27
 
