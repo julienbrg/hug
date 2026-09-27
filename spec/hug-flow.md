@@ -117,8 +117,8 @@ After confirmation, the agent MUST run P2 to P6 without further permission promp
 ### P3. Build (inner loop)
 
 - **Input:** the confirmed spec.
-- **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in [VS Code](https://code.visualstudio.com/) and stages what they approve. Once something is staged, the agent runs the local check pipeline (format and lint only), then commits exactly what is staged.
-- **Pipelining:** while chunk _N_ is under review, the agent writes chunk _N+1_ in a [linked worktree](https://git-scm.com/docs/git-worktree) (`git worktree add`), on top of chunk _N_. Once _N_ is committed, it applies the worktree's diff to the repository as unstaged changes. Git carries deletions and renames across, and the worktree installs its own dependencies rather than sharing them through a link.
+- **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in [VS Code](https://code.visualstudio.com/) and stages what they approve. The agent runs the local check pipeline (format and lint only) on each chunk before announcing it, and records a fingerprint of what it checked: the tree the chunk would commit as. Once something is staged, the agent commits exactly what is staged. It runs the pipeline again first only when the staged tree differs from the fingerprint, as with a partial stage or a chunk the maintainer wrote, and then on the staged content itself rather than the working tree.
+- **Pipelining:** while chunk _N_ is under review, the agent writes and checks chunk _N+1_ in a [linked worktree](https://git-scm.com/docs/git-worktree) (`git worktree add`), on top of chunk _N_. Once _N_ is committed, with no check wait when it was staged whole, it applies the worktree's diff to the repository as unstaged changes. Git carries deletions and renames across, and the worktree installs its own dependencies rather than sharing them through a link.
 - **Output:** a series of small commits.
 - **Exit criterion:** the spec is fully implemented.
 
@@ -126,6 +126,7 @@ Rules for this phase:
 
 - The agent MUST NOT stage its own work, including with `git add -A` or `git add .`.
 - A partial stage MUST be committed as-is. The remainder stays unstaged.
+- The agent MUST NOT commit staged content that has not passed the check pipeline, either before it was announced or at commit time.
 - If a check fails, the agent unstages the affected files and reports the failure. It MUST NOT modify staged changes it did not write.
 - If the maintainer rejects a chunk, the agent proposes a fix and waits for confirmation before rewriting.
 - The agent SHOULD NOT prepare more than one chunk ahead. A queue of chunks pressures the maintainer to hurry the review.
