@@ -32,3 +32,15 @@ test("the session starts with the rules and the declared level", () => {
   assert.match(context.additionalContext, /implements: hug-flow@0\.2\.0/);
   assert.match(context.additionalContext, /level: L2/);
 });
+
+test("the repository's marketplace lists the plugin", () => {
+  const read = (path: string) =>
+    JSON.parse(readFileSync(join(plugin, "..", path), "utf8"));
+  const { name, plugins } = read(".claude-plugin/marketplace.json");
+  const entry = plugins.find((p: { name: string }) => p.name === "hug");
+  assert.equal(`${entry.name}@${name}`, "hug@hug");
+  assert.equal(
+    read(join(entry.source, ".claude-plugin", "plugin.json")).name,
+    entry.name,
+  );
+});

@@ -16,11 +16,14 @@ The example setups in [`examples/`](../examples/) are L1: they rely on the model
 
 ## Install
 
-From a clone of this repository:
+In a Claude Code session, from the marketplace this repository provides:
 
-```sh
-claude --plugin-dir ./reference
+```text
+/plugin marketplace add julienbrg/hug
+/plugin install hug@hug
 ```
+
+Or, from a clone, for one session: `claude --plugin-dir ./reference`.
 
 Then, once per repository, apply the forge side (L3):
 

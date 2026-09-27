@@ -8,6 +8,29 @@ It extends the [GitHub Flow](https://docs.github.com/en/get-started/using-github
 
 Original article: <https://julienberanger.com/hug-flow>
 
+## Get started
+
+There are two ways to try HuG Flow with [Claude Code](https://code.claude.com/docs). Both are reversible. The levels are defined in [§10 of the spec](spec/hug-flow.md).
+
+**One phrase (L1, instructed).** In a Claude Code session, type:
+
+```text
+Switch me to HuG Flow: github.com/julienbrg/hug
+```
+
+An agent asked to switch someone to HuG Flow follows [`SETUP.md`](SETUP.md): it clones this repository to `~/.claude/hug/` and installs the [`/hug`](skills/hug/SKILL.md) skill. The skill reviews your existing instructions with you for conflicts, then adds one import line to `~/.claude/CLAUDE.md`, plus attribution settings and deny rules where missing. `/hug status` shows what was added, and `/hug off` removes exactly that.
+
+**Plugin (L2, enforced).** In a Claude Code session, type:
+
+```text
+/plugin marketplace add julienbrg/hug
+/plugin install hug@hug
+```
+
+The [`reference`](reference/README.md) plugin's hooks block bulk staging, pushes to `main`, merges on red or missing checks and attribution lines, whatever the model does. To have GitHub enforce the rest (L3), run `pnpm hug init <owner>/<repo>` from a clone. `/plugin uninstall hug@hug` removes the plugin.
+
+Either way, ask for a small change in a repository, then review the first chunk: read the unstaged diff in your editor, and stage what you approve.
+
 ## Contents
 
 | Path                                                                     | What it is                                                                                               |
@@ -16,6 +39,9 @@ Original article: <https://julienberanger.com/hug-flow>
 | [`article/hug-flow.md`](article/hug-flow.md)                             | The [published article](https://julienberanger.com/hug-flow), verbatim                                   |
 | [`.claude/skills/check-article/`](.claude/skills/check-article/SKILL.md) | `/check-article`: reports what the post is missing, or has out of date, given the repo                   |
 | [`scripts/publish-post.ts`](scripts/publish-post.ts)                     | Publishes the article to the blog when it differs from the live post; run by the `publish` workflow      |
+| [`SETUP.md`](SETUP.md)                                                   | Setup steps for an agent, behind the one-phrase install                                                  |
+| [`skills/hug/`](skills/hug/SKILL.md)                                     | `/hug on \| off \| status`: turns the minimal setup on, and back off                                     |
+| [`scripts/hug.sh`](scripts/hug.sh)                                       | Records, applies and reverts the setup for `/hug`, in POSIX `sh`                                         |
 | [`reference/`](reference/README.md)                                      | The reference implementation: a Claude Code plugin whose hooks enforce the flow, `hug init`, `hug audit` |
 | [`conformance/`](conformance/)                                           | Scenario tests proving the reference implementation's L2 level, run by `pnpm test`                       |
 | [`examples/minimal/`](examples/minimal/README.md)                        | A generic setup to start from and adapt: `CLAUDE.md`, an intake skill, a GitHub ruleset                  |
