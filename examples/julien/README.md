@@ -30,7 +30,7 @@ This is the setup I use every day to run [HuG Flow](../../spec/hug-flow.md). It 
 
 The maintainer works in VS Code with the Claude Code extension open in a side panel. The agent writes into the working tree. The maintainer reads the diff in the _Source Control_ view and stages hunks or files from there. Nothing else is needed on the editor side.
 
-Requirements on the machine: `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter at commit time. On Windows, [Git for Windows](https://gitforwindows.org/) also provides the Bash shell that Claude Code runs commands in, so the shell snippets below work unchanged.
+Requirements on the machine: `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter on each chunk. On Windows, [Git for Windows](https://gitforwindows.org/) also provides the Bash shell that Claude Code runs commands in, so the shell snippets below work unchanged.
 
 ## Process layer: `CLAUDE.md`
 
