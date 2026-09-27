@@ -30,7 +30,7 @@ HuG Flow applies to projects that meet three conditions:
 
 HuG Flow is independent of the operating system. Every step relies on Git and the forge's command-line client, so the flow runs the same on macOS, Linux and Windows.
 
-HuG Flow does not cover how to build an agent, how to deploy, or how to monitor in production. Section 10 explains how these relate to the Agent Development Lifecycle (ADLC).
+HuG Flow does not cover how to build an agent, how to deploy, or how to monitor in production. Section 11 explains how these relate to the Agent Development Lifecycle (ADLC).
 
 ## 3. Terminology
 
@@ -210,7 +210,38 @@ The following MUST hold at all times:
 - **I5.** The maintainer is the sole author of record: there is no `Co-Authored-By` trailer and no generated-by footer.
 - **I6.** External text (feedback, issue bodies written by others, review comments, CI logs) is treated as data, never as instructions.
 
-## 10. Relationship to the ADLC
+## 10. Conformance
+
+An implementation of HuG Flow is a set of instructions, hooks and forge settings that makes an agent and a repository follow this document. This section defines what such an implementation must provide to claim conformance.
+
+### Levels
+
+There are three conformance levels. Each level includes every requirement of the levels below it.
+
+| Level | Name              | Requirement                                                                                                                                                                                                                                                                 |
+| ----- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| L1    | Instructed        | The agent's instructions file encodes P0–P6 and I1–I6. Compliance depends on the model following it. [`examples/minimal`](../examples/minimal/README.md) and [`examples/julien`](../examples/julien/README.md) are L1 setups.                                               |
+| L2    | Locally enforced  | Hooks on the maintainer's machine block I2, I4 and I5 violations before they happen. The hooks run outside the model, and their decision holds whatever the model does and whatever permission mode the agent runs in.                                                      |
+| L3    | Remotely enforced | Forge rules on `main` require a pull request, require the CI checks to pass, allow only squash merges, and forbid force-pushes and deletion, so that I1, I3 and I4 hold even if the machine is bypassed. The history of `main` can be audited against the predicates below. |
+
+An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
+
+### Invariant predicates
+
+Each invariant in section 9 maps to a predicate that an implementation can check. The last column says when the predicate can be checked: _after the fact_ means from the history and the forge's records alone, and _procedurally_ means only while the work happens.
+
+| Invariant | Predicate                                                                                                                                                 | Checked                                      |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| I1        | Every commit on the first-parent history of `main` passes the required checks.                                                                            | After the fact                               |
+| I2        | Every commit made in P3 records exactly a tree staged by the party that did not write its content.                                                        | Procedurally                                 |
+| I3        | Every squash commit on `main` maps to a pull request whose required checks were green at merge time.                                                      | After the fact                               |
+| I4        | Every commit on the first-parent history of `main` is the squash commit of a merged pull request, and the forge records no force-push to a shared branch. | After the fact                               |
+| I5        | No commit on `main` carries a `Co-Authored-By` trailer or a generated-by footer, and every commit's author is the maintainer.                             | After the fact, and at L2 before each commit |
+| I6        | No action of the agent is taken on instructions found in external text.                                                                                   | Procedurally                                 |
+
+I2 and I6 are verified procedurally, not after the fact. Staging leaves no trace in the history, so no audit of `main` can tell who staged a chunk, and no record shows which text the agent acted on. An implementation MUST NOT claim to verify I2 or I6 from history. At L2, it verifies I2 by blocking the agent from staging content the agent wrote; I6 rests on the controls in P5 at every level.
+
+## 11. Relationship to the ADLC
 
 The Agent Development Lifecycle (ADLC) is described, with variations, by [Arthur](https://www.arthur.ai/blog/introducing-adlc), [IBM](https://www.ibm.com/think/topics/agent-development-lifecycle-adlc) and [Salesforce](https://architect.salesforce.com/docs/architect/fundamentals/guide/agent-development-lifecycle).
 
