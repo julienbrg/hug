@@ -225,6 +225,8 @@ There are three conformance levels. Each level includes every requirement of the
 
 An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
 
+The reference implementation, a Claude Code plugin in [`reference`](https://github.com/julienbrg/hug/tree/main/reference), declares `implements: hug-flow@0.2.0` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](https://github.com/julienbrg/hug/tree/main/conformance), runs in CI.
+
 ### Invariant predicates
 
 Each invariant in section 9 maps to a predicate that an implementation can check. The last column says when the predicate can be checked: _after the fact_ means from the history and the forge's records alone, and _procedurally_ means only while the work happens.
@@ -287,6 +289,8 @@ This section describes the setup I use every day. It is one way to implement HuG
 The files, and where to install each one, are in [`examples/julien`](https://github.com/julienbrg/hug/tree/main/examples/julien).
 
 To start your own, use [`examples/minimal`](https://github.com/julienbrg/hug/tree/main/examples/minimal) instead: the same flow without my personal conventions, meant to be adapted to your own needs and habits. Once it works for you, feel free to add it to `examples/` with a pull request (see [CONTRIBUTING.md](https://github.com/julienbrg/hug/blob/main/CONTRIBUTING.md)).
+
+Both setups are L1: they instruct the agent. To have the invariants enforced as well, add the [`reference`](https://github.com/julienbrg/hug/tree/main/reference) plugin, whose hooks and ruleset cover what section 13.3 lists as additions.
 
 | Layer | Artifact | Covers | Strength |
 | --- | --- | --- | --- |
@@ -711,7 +715,7 @@ The rules block bulk staging, commits that bypass the staging area, direct pushe
 
 `git add` is not denied outright, because the loop is symmetric: when the maintainer writes a chunk, the agent is the reviewer and stages it. A maintainer who never writes chunks MAY deny `Bash(git add *)` entirely. The agent side of I2 then becomes a hard guarantee.
 
-The Claude Code documentation is explicit that a Bash rule is not a security boundary. It matches the command as written, so `git -C . add -A` or `sh -c 'git add .'` slip past the rules above. My own allow list contains `git -C <path> add` and `git -C <path> commit` entries, so the agent does use that form. For a stricter check, a `PreToolUse` hook can inspect the full command text and block it with exit code 2, which takes precedence over allow rules. Verify the active rules with `/permissions`.
+The Claude Code documentation is explicit that a Bash rule is not a security boundary. It matches the command as written, so `git -C . add -A` or `sh -c 'git add .'` slip past the rules above. My own allow list contains `git -C <path> add` and `git -C <path> commit` entries, so the agent does use that form. The [`reference`](https://github.com/julienbrg/hug/tree/main/reference) plugin closes that gap with a `PreToolUse` hook that parses the full command, including compound commands, `sh -c`, `eval` and `git -C`, and blocks it with exit code 2, which takes precedence over allow rules. Verify the active rules with `/permissions`.
 
 #### What I would add: a GitHub ruleset on `main`
 

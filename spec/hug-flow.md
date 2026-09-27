@@ -3,14 +3,14 @@
 | Field   | Value           |
 | ------- | --------------- |
 | Status  | Draft           |
-| Version | 0.1.0           |
+| Version | 0.2.0           |
 | Author  | Julien Béranger |
 | Created | 2026-09-25      |
 | License | MIT             |
 
 ## Abstract
 
-HuG Flow is an issue-driven development lifecycle in which a coding agent executes every process step and a human maintainer approves every chunk of content by staging it in the Git index. This document specifies the roles, artifacts, phases, approval points and invariants of the flow. Its core is tool-neutral: each step is described by what it does, not by the command that runs it, with Git and GitHub as the worked example. Two example setups built on Claude Code and GitHub are provided: a generic one to adapt, in [`examples/minimal`](../examples/minimal/README.md), and a personal one, in [`examples/julien`](../examples/julien/README.md).
+HuG Flow is an issue-driven development lifecycle in which a coding agent executes every process step and a human maintainer approves every chunk of content by staging it in the Git index. This document specifies the roles, artifacts, phases, approval points and invariants of the flow. Its core is tool-neutral: each step is described by what it does, not by the command that runs it, with Git and GitHub as the worked example. Two example setups built on Claude Code and GitHub are provided: a generic one to adapt, in [`examples/minimal`](../examples/minimal/README.md), and a personal one, in [`examples/julien`](../examples/julien/README.md). A reference implementation that enforces the flow with hooks and forge rules is in [`reference`](../reference/README.md).
 
 ## 1. Purpose
 
@@ -225,6 +225,8 @@ There are three conformance levels. Each level includes every requirement of the
 | L3    | Remotely enforced | Forge rules on `main` require a pull request, require the CI checks to pass, allow only squash merges, and forbid force-pushes and deletion, so that I1, I3 and I4 hold even if the machine is bypassed. The history of `main` can be audited against the predicates below. |
 
 An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
+
+The reference implementation, a Claude Code plugin in [`reference`](../reference/README.md), declares `implements: hug-flow@0.2.0` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](../conformance/), runs in CI.
 
 ### Invariant predicates
 

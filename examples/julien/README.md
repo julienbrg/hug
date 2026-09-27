@@ -8,6 +8,8 @@ This is the setup I use every day to run [HuG Flow](../../spec/hug-flow.md). It 
 | Intake      | Skills                                                                                                                                                                                                            | P0                                                                            | Instructed, invoked only by the maintainer   |
 | Enforcement | Claude Code settings, GitHub repository settings and [GitHub rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets) | I5 and the P6 merge rules today; I1, I3, I4 and part of I2 with the additions | Enforced: holds even if the model deviates   |
 
+This setup is L1 (spec §10): it instructs the agent. To have the invariants enforced as well, add the [`reference`](../../reference/README.md) plugin, whose hooks and ruleset cover what the enforcement layer below lists as additions.
+
 ## Files
 
 | File                                                                 | Install to                                       | Layer       |
@@ -81,7 +83,7 @@ The rules block bulk staging, commits that bypass the staging area, direct pushe
 
 `git add` is not denied outright, because the loop is symmetric: when the maintainer writes a chunk, the agent is the reviewer and stages it. A maintainer who never writes chunks MAY deny `Bash(git add *)` entirely. The agent side of I2 then becomes a hard guarantee.
 
-The Claude Code documentation is explicit that a Bash rule is not a security boundary. It matches the command as written, so `git -C . add -A` or `sh -c 'git add .'` slip past the rules above. My own allow list contains `git -C <path> add` and `git -C <path> commit` entries, so the agent does use that form. For a stricter check, a `PreToolUse` hook can inspect the full command text and block it with exit code 2, which takes precedence over allow rules. Verify the active rules with `/permissions`.
+The Claude Code documentation is explicit that a Bash rule is not a security boundary. It matches the command as written, so `git -C . add -A` or `sh -c 'git add .'` slip past the rules above. My own allow list contains `git -C <path> add` and `git -C <path> commit` entries, so the agent does use that form. The [`reference`](../../reference/README.md) plugin closes that gap with a `PreToolUse` hook that parses the full command, including compound commands, `sh -c`, `eval` and `git -C`, and blocks it with exit code 2, which takes precedence over allow rules. Verify the active rules with `/permissions`.
 
 ### GitHub repository settings
 

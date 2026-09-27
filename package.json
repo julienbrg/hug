@@ -8,7 +8,9 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "test": "node --test \"conformance/**/*.test.ts\"",
+    "hug": "node reference/src/cli/hug.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",
