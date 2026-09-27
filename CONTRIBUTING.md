@@ -33,7 +33,7 @@ Before each commit, run the check pipeline:
 pnpm format:check
 ```
 
-CI also runs `pnpm typecheck` on Ubuntu, macOS and Windows.
+CI also runs `pnpm typecheck` and the conformance suite, `pnpm test`, on Ubuntu, macOS and Windows.
 
 [`article/hug-flow.md`](article/hug-flow.md) is the verbatim copy of the [published post](https://julienberanger.com/hug-flow). Don't reformat it: it must stay byte-identical to the live version. If your change makes the post incomplete or out of date, say so in the pull request.
 

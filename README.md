@@ -10,14 +10,16 @@ Original article: <https://julienberanger.com/hug-flow>
 
 ## Contents
 
-| Path                                                                     | What it is                                                                                          |
-| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| [`spec/hug-flow.md`](spec/hug-flow.md)                                   | The specification: roles, artifacts, lifecycle phases, approval matrix, invariants                  |
-| [`article/hug-flow.md`](article/hug-flow.md)                             | The [published article](https://julienberanger.com/hug-flow), verbatim                              |
-| [`.claude/skills/check-article/`](.claude/skills/check-article/SKILL.md) | `/check-article`: reports what the post is missing, or has out of date, given the repo              |
-| [`scripts/publish-post.ts`](scripts/publish-post.ts)                     | Publishes the article to the blog when it differs from the live post; run by the `publish` workflow |
-| [`examples/minimal/`](examples/minimal/README.md)                        | A generic setup to start from and adapt: `CLAUDE.md`, an intake skill, a GitHub ruleset             |
-| [`examples/julien/`](examples/julien/README.md)                          | A personal setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI     |
+| Path                                                                     | What it is                                                                                               |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| [`spec/hug-flow.md`](spec/hug-flow.md)                                   | The specification: roles, artifacts, lifecycle phases, approval matrix, invariants                       |
+| [`article/hug-flow.md`](article/hug-flow.md)                             | The [published article](https://julienberanger.com/hug-flow), verbatim                                   |
+| [`.claude/skills/check-article/`](.claude/skills/check-article/SKILL.md) | `/check-article`: reports what the post is missing, or has out of date, given the repo                   |
+| [`scripts/publish-post.ts`](scripts/publish-post.ts)                     | Publishes the article to the blog when it differs from the live post; run by the `publish` workflow      |
+| [`reference/`](reference/README.md)                                      | The reference implementation: a Claude Code plugin whose hooks enforce the flow, `hug init`, `hug audit` |
+| [`conformance/`](conformance/)                                           | Scenario tests proving the reference implementation's L2 level, run by `pnpm test`                       |
+| [`examples/minimal/`](examples/minimal/README.md)                        | A generic setup to start from and adapt: `CLAUDE.md`, an intake skill, a GitHub ruleset                  |
+| [`examples/julien/`](examples/julien/README.md)                          | A personal setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI          |
 
 ## The flow in one paragraph
 
@@ -25,7 +27,7 @@ A request becomes an issue. The agent branches from `main`, then writes one smal
 
 ## Contributing
 
-This repository is maintained with HuG Flow. Open an issue, or a pull request from a branch linked to one. The check pipeline is `pnpm format:check`. CI also runs `pnpm typecheck`, on Ubuntu, macOS and Windows.
+This repository is maintained with HuG Flow. Open an issue, or a pull request from a branch linked to one. The check pipeline is `pnpm format:check`. CI also runs `pnpm typecheck` and `pnpm test`, on Ubuntu, macOS and Windows.
 
 You're welcome to add your own setup to [`examples/`](examples/), next to `minimal` and `julien`: the more ways of running HuG Flow, the better.
 

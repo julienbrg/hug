@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Spec §10 Conformance: three levels (L1 Instructed, L2 Locally enforced by hooks against I2, I4 and I5 violations, L3 Remotely enforced by forge rules plus an auditable history), a MUST rule that an implementation declares the spec version and level it implements, and a checkable predicate for each invariant. I2 and I6 are marked as verified procedurally, not after the fact, since staging leaves no trace in history. Both example setups are L1. The ADLC section moves to §11.
 - The article mirrors it as §10 Conformance; its Stack, ADLC and setup sections are now §11–§13, and cross-references follow. The `/check-article` section map is updated to match.
+- `reference/`: the reference implementation, a Claude Code plugin declaring `implements: hug-flow@0.2.0`, `level: L2`. A command parser unwraps compound commands, `sh -c`, `eval`, `env`, substitutions and git's global options, and fails closed on git or `gh` calls it cannot read. A PreToolUse guard then blocks, with exit code 2 and in every permission mode, bulk staging, staging a path the agent wrote, commits that bypass the index or its hooks, other writers of the index, pushes to `main`, force-pushes other than `--force-with-lease` on the issue branch, non-squash, admin or auto merges, merges on red, pending or missing checks, and attribution lines. A ledger records the paths the agent writes through Edit, Write or Bash, so the symmetric loop keeps working. A Stop hook refuses to end a turn while the agent's staged work is uncommitted, and a SessionStart hook loads the rules.
+- `hug init <owner/repo>`: squash-only merges, merged branches deleted, and the `hug-flow` ruleset on the default branch, requiring the checks that passed on the last merged pull request. It takes the repository to L3.
+- `hug audit <owner/repo>`: a pass or fail per after-the-fact predicate of §10 (I1, I3, I4, I5) over the default branch's history.
+- `conformance/`: deterministic L2 scenario tests of the parser, hooks and CLI on the Node.js test runner, with `gh` stubbed through `PATH`. `pnpm test` runs them, in a new `test` job on Ubuntu, macOS and Windows.
+
+### Changed
+
+- The spec is now version 0.2.0. Its abstract and §10 point to the reference implementation, and so does the `examples/julien` README, which describes the setup as L1. The article mirrors both (§10, §13, §13.3).
 
 ## [0.1.2] - 2026-09-27
 
