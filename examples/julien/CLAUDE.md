@@ -123,7 +123,7 @@ source, tests, scripts, docs, config, everything:
   a file you consider uncontroversial, and never `git add -A` or
   `git add .`.
 - I review the unstaged diff in my IDE and `git add` what I approve.
-- The moment the chunk is on disk, in the same command, record its
+- The moment the chunk is complete on disk, in the same command, record its
   fingerprint — the tree it would commit as, built in a throwaway
   index so mine is untouched,
   `GIT_INDEX_FILE=<tmp> sh -c 'git read-tree HEAD && git add -A && git write-tree'` —
@@ -170,11 +170,19 @@ source, tests, scripts, docs, config, everything:
   no more.
   - When I stage chunk N, do the whole handoff in one Bash command, so
     it costs a single round-trip: commit chunk N (re-checking only if
-    the fingerprint differs), apply chunk N+1 to the repo with
+    the fingerprint differs) and apply chunk N+1 to the repo with
     `git -C <path> diff HEAD | git apply` — Git carries deletions and
-    renames — record its fingerprint and check it, and WIP-commit it in
-    the worktree. Then start the watcher, say chunk N+1 is ready for
-    review, and start chunk N+2 in the worktree.
+    renames — right away, finished or not, so I never wait for it to
+    appear. Then start the watcher.
+  - If chunk N+1 is finished, record its fingerprint and check it in
+    that same command, WIP-commit it in the worktree, say it's ready
+    for review, and start chunk N+2 in the worktree.
+  - If it isn't, say it's still in progress and finish it in place, in
+    the repo, while I start reading. Once it's complete, record its
+    fingerprint and check it, say it's ready for review, carry it into
+    the worktree as a WIP commit, and start chunk N+2 there. If I stage
+    part of it before then, there's no fingerprint yet: check the
+    staged content and commit it.
   - When I ask for a change to chunk N: apply it to chunk N in the
     repo, carry it into the worktree, and rework chunk N+1 so it
     still fits.
