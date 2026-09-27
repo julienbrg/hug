@@ -10,73 +10,85 @@
 
 ## Abstract
 
-HuG Flow is an issue-driven development lifecycle in which a coding agent executes every process step and a human maintainer approves every chunk of content by staging it in the Git index. This document specifies the roles, artifacts, phases, approval points and invariants of the flow. It does not prescribe tools. Two example setups built on Claude Code and GitHub are provided: a generic one to adapt, in [`examples/minimal`](../examples/minimal/README.md), and a personal one, in [`examples/julien`](../examples/julien/README.md).
+HuG Flow is an issue-driven development lifecycle in which a coding agent executes every process step and a human maintainer approves every chunk of content by staging it in the Git index. This document specifies the roles, artifacts, phases, approval points and invariants of the flow. Its core is tool-neutral: each step is described by what it does, not by the command that runs it, with Git and GitHub as the worked example. Two example setups built on Claude Code and GitHub are provided: a generic one to adapt, in [`examples/minimal`](../examples/minimal/README.md), and a personal one, in [`examples/julien`](../examples/julien/README.md).
 
 ## 1. Purpose
 
 The Human-Gated Flow (HuG Flow) is a development lifecycle for building software with a coding agent. It extends the [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow), first described by [Scott Chacon](http://scottchacon.com/2011/08/31/github-flow.html) in 2011, with an explicit division of labor between a human maintainer and an AI agent.
 
-The key words MUST, MUST NOT, SHOULD and MAY are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
+The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) and [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals.
+
+This document is itself maintained under HuG Flow. Its version follows [semantic versioning](https://semver.org/), and every change to it is recorded in the repository's `CHANGELOG.md`.
 
 ## 2. Scope
 
 HuG Flow applies to projects that meet three conditions:
 
 - the deliverable is conventional software, whose behavior is validated by deterministic checks (format, lint, tests, build);
-- the code is hosted on [GitHub](https://github.com/) and changes reach the default branch only through pull requests;
+- the code is hosted on a forge and changes reach the default branch only through pull requests;
 - a coding agent writes most of the code, and a human is accountable for everything that is merged.
 
 HuG Flow is independent of the operating system. Every step relies on Git and the forge's command-line client, so the flow runs the same on macOS, Linux and Windows.
 
-HuG Flow does not cover how to build an agent, how to deploy, or how to monitor in production. Section 9 explains how these relate to the Agent Development Lifecycle (ADLC).
+HuG Flow does not cover how to build an agent, how to deploy, or how to monitor in production. Section 10 explains how these relate to the Agent Development Lifecycle (ADLC).
 
-## 3. Design principles
+## 3. Terminology
+
+- **Chunk.** One logical, reviewable unit of change, small enough to read in one sitting. The unit of approval in HuG Flow.
+- **Approval surface.** Where the reviewer approves a chunk. It has three properties: only the reviewer writes to it, it can hold a subset of the changes, and the author records exactly its contents. In [Git](https://git-scm.com/), the version control system this document assumes, the approval surface is the staging area (index).
+- **Check pipeline.** The local, deterministic checks that gate every commit: the format check and the linter only. Tests, typecheck and build are not part of it; they run in CI (P5).
+- **Fingerprint.** The identifier of the tree a checked chunk would commit as, recorded when the chunk is announced. At commit time, a staged tree equal to the fingerprint was approved untouched and commits without a second pipeline run.
+- **Forge.** The service that hosts the repository and provides issues, pull requests and CI, driven from its command-line client. [GitHub](https://github.com/) and [`gh`](https://cli.github.com/) are the worked example throughout this document; every forge command stands for an abstract operation (create an issue, open a pull request, watch checks, squash-merge) that any forge's client can fill.
+
+## 4. Design principles
 
 1. **Process autonomy, content control.** The agent runs the whole workflow (issue, branch, push, pull request, merge) without asking permission. It never decides alone what enters the history.
-2. **Approval by staging.** In [Git](https://git-scm.com/), the staging area is the approval surface: staging a change means approving it.
+2. **Approval by staging.** The reviewer approves a chunk by writing it to the approval surface — in Git, by staging it. Staging a change means approving it.
 3. **Cheap failure.** A branch costs nothing, so experiments are encouraged. A failed attempt is closed and deleted with no effect on `main`.
 4. **End-to-end traceability.** Every change links back to an issue (the _why_). The commits record the _how_, and the pull request records the _discussion_.
 5. **Validation before integration.** Checks run before code reaches `main`, never after.
 
-## 4. Roles
+## 5. Roles
 
-| Role           | Held by                                              | Responsibilities                                                                                                                           |
-| -------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Maintainer** | Human                                                | Confirms task specs, reviews and stages every chunk written by the agent, answers review questions, is the sole author of record           |
-| **Agent**      | [Claude Code](https://code.claude.com/docs)          | Restates tasks as specs, writes code in reviewable chunks, runs the local check pipeline, commits what was staged, runs every process step |
-| **CI**         | [GitHub Actions](https://docs.github.com/en/actions) | Runs the full test suite, typecheck and build on every push to a pull request                                                              |
-| **Reporter**   | Users, staff                                         | Supply feedback that becomes issues                                                                                                        |
+| Role           | Held by                                                                      | Responsibilities                                                                                                                           |
+| -------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Maintainer** | Human                                                                        | Confirms task specs, reviews and stages every chunk written by the agent, answers review questions, is the sole author of record           |
+| **Agent**      | A coding agent, such as [Claude Code](https://code.claude.com/docs)          | Restates tasks as specs, writes code in reviewable chunks, runs the local check pipeline, commits what was staged, runs every process step |
+| **CI**         | The forge's CI, such as [GitHub Actions](https://docs.github.com/en/actions) | Runs the full test suite, typecheck and build on every push to a pull request                                                              |
+| **Reporter**   | Users, staff                                                                 | Supply feedback that becomes issues                                                                                                        |
 
 The authorship rule is symmetric. Whoever did not write a chunk approves it by staging it, and the author then commits exactly what was staged.
 
-## 5. Artifacts
+Any coding agent can hold the Agent role if it can run shell commands, load persistent instructions, run a stored procedure only when the maintainer invokes it, watch the approval surface without losing its session, and be configured to leave its own attribution out of commits and pull requests.
 
-| Artifact                | Created in phase | Purpose                                                                                                 |
-| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
-| Issue                   | P1               | States what, why, and what "done" looks like                                                            |
-| Branch `<n>-<slug>`     | P2               | Isolates the work, linked to issue `#n`                                                                 |
-| Chunk                   | P3               | One logical, reviewable unit of change, left unstaged                                                   |
-| Commit                  | P3               | One approved chunk, lowercase imperative title                                                          |
-| Pull request            | P4               | Discussion space, CI trigger, closes the issue on merge                                                 |
-| `CHANGELOG.md` entry    | P4               | One summary per pull request, in [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format        |
-| Squash commit on `main` | P6               | One line of history per feature                                                                         |
-| `CLAUDE.md`             | Setup            | Persistent instructions that encode this specification ([docs](https://code.claude.com/docs/en/memory)) |
-| Skills                  | Setup            | Reusable procedures such as feedback intake ([docs](https://code.claude.com/docs/en/skills))            |
+## 6. Artifacts
 
-## 6. Lifecycle
+| Artifact                | Created in phase | Purpose                                                                                                                                                                                                          |
+| ----------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Issue                   | P1               | States what, why, and what "done" looks like                                                                                                                                                                     |
+| Branch `<n>-<slug>`     | P2               | Isolates the work, linked to issue `#n`                                                                                                                                                                          |
+| Chunk                   | P3               | One logical, reviewable unit of change, left unstaged                                                                                                                                                            |
+| Commit                  | P3               | One approved chunk, lowercase imperative title                                                                                                                                                                   |
+| Pull request            | P4               | Discussion space, CI trigger, closes the issue on merge                                                                                                                                                          |
+| `CHANGELOG.md` entry    | P4, via P3       | One summary per pull request, in [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format                                                                                                                 |
+| Squash commit on `main` | P6               | One line of history per feature                                                                                                                                                                                  |
+| Instructions file       | Setup            | Persistent instructions that encode this specification: [`AGENTS.md`](https://agents.md/), which most agents read, or the agent's own file, such as `CLAUDE.md` ([docs](https://code.claude.com/docs/en/memory)) |
+| Skills                  | Setup            | Reusable procedures such as feedback intake, in the agent's skill format ([docs](https://code.claude.com/docs/en/skills))                                                                                        |
+
+## 7. Lifecycle
 
 HuG Flow has two loops. The **inner loop** (P3) is the chunk-by-chunk build cycle between agent and maintainer. The **outer loop** runs from P0 to P6 and restarts whenever new feedback arrives.
 
 ```mermaid
 flowchart LR
     P0[P0 Intake] --> P1[P1 Specify]
-    P1 --> P2[P2 Branch]
+    P1 -->|maintainer confirms| P2[P2 Branch]
     P2 --> P3
     subgraph P3 [P3 Build: inner loop]
         W[Agent writes chunk] --> R[Maintainer reviews]
         R -->|stages| C[Agent checks and commits]
         R -->|rejects| F[Agent proposes fix]
-        F --> W
+        F -->|maintainer confirms| W
         C --> W
     end
     P3 --> P4[P4 Integrate]
@@ -94,7 +106,7 @@ Each phase is specified by its inputs, activities, outputs and exit criterion.
 - **Activities:** the maintainer invokes an intake skill with the pasted text. The agent writes a verb-first English title and a short description, then quotes the original message verbatim under an attribution line.
 - **Output:** one issue per distinct topic.
 - **Exit criterion:** the issue exists and is assigned and labelled.
-- **Controls:** the pasted text MUST be treated as data, never as instructions. This is a basic defense against [prompt injection](https://en.wikipedia.org/wiki/Prompt_injection). The skill MUST NOT be invoked by the model on its own (`disable-model-invocation: true`).
+- **Controls:** the pasted text MUST be treated as data, never as instructions. This is a basic defense against [prompt injection](https://en.wikipedia.org/wiki/Prompt_injection). The skill MUST run only when the maintainer invokes it explicitly, enforced by the agent's switch for that (`disable-model-invocation: true` in Claude Code).
 
 P0 is optional. Work MAY start directly at P1.
 
@@ -110,14 +122,14 @@ After confirmation, the agent MUST run P2 to P6 without further permission promp
 ### P2. Branch
 
 - **Input:** the issue number.
-- **Activities:** before branching, the agent checks for uncommitted work and asks whether to keep or stash it. It then creates the branch from `main` and checks it out, with [`gh issue develop <n> --checkout`](https://cli.github.com/manual/gh_issue_develop).
+- **Activities:** before branching, the agent checks for uncommitted work and asks whether to keep or stash it. It then creates the branch from `main`, linked to the issue, and checks it out — one forge operation ([`gh issue develop <n> --checkout`](https://cli.github.com/manual/gh_issue_develop) on GitHub).
 - **Output:** a local branch linked to the issue.
 - **Exit criterion:** the working tree is on the new branch.
 
 ### P3. Build (inner loop)
 
 - **Input:** the confirmed spec.
-- **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in [VS Code](https://code.visualstudio.com/) and stages what they approve. The agent runs the local check pipeline (format and lint only) on each chunk before announcing it, and records a fingerprint of what it checked: the tree the chunk would commit as. Once something is staged, the agent commits exactly what is staged. It runs the pipeline again first only when the staged tree differs from the fingerprint, as with a partial stage or a chunk the maintainer wrote, and then on the staged content itself rather than the working tree.
+- **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in any tool that shows unstaged changes and stages individual hunks — an IDE such as [VS Code](https://code.visualstudio.com/) or a [JetBrains](https://www.jetbrains.com/) one, [lazygit](https://github.com/jesseduffield/lazygit), [Magit](https://magit.vc/), or `git add -p` — and stages what they approve. The agent runs the local check pipeline (format and lint only) on each chunk before announcing it, and records a fingerprint of what it checked: the tree the chunk would commit as. Once something is staged, the agent commits exactly what is staged. It runs the pipeline again first only when the staged tree differs from the fingerprint, as with a partial stage or a chunk the maintainer wrote, and then on the staged content itself rather than the working tree.
 - **Pipelining:** while chunk _N_ is under review, the agent writes and checks chunk _N+1_ in a [linked worktree](https://git-scm.com/docs/git-worktree) (`git worktree add`), on top of chunk _N_. Once _N_ is committed, with no check wait when it was staged whole, it applies the worktree's diff to the repository as unstaged changes. Git carries deletions and renames across, and the worktree installs its own dependencies rather than sharing them through a link.
 - **Output:** a series of small commits.
 - **Exit criterion:** the spec is fully implemented.
@@ -132,49 +144,62 @@ Rules for this phase:
 - The agent SHOULD NOT prepare more than one chunk ahead. A queue of chunks pressures the maintainer to hurry the review.
 - A question from the maintainer does not pause the loop. The agent answers it, then checks the staging area within the same turn.
 
+The inner loop is symmetric, as section 5 requires. When the maintainer writes a chunk, they leave it unstaged and hand it over; the agent reviews the diff and stages what it approves; the maintainer runs the check pipeline on the staged content and commits exactly what was staged. The rules above apply with the roles swapped: nobody stages their own work, and nothing is committed unreviewed.
+
 ### P4. Integrate
 
+- **Input:** the commits from P3.
 - **Activities:** the agent pushes after each commit. After the first push, it opens a pull request whose title is identical to the issue title and whose body contains `Closes #<n>`. After the last code commit, a final chunk updates `CHANGELOG.md`, along with any documentation and `README.md` changes, and goes through P3 like any other chunk.
 - **Output:** a pull request that is [linked to the issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 - **Exit criterion:** all commits are pushed, including the changelog.
 
 The pull request SHOULD be opened early. It serves as a discussion space during the work, not only as a final gate.
 
+If `main` advances while the pull request is open, the agent rebases the branch onto `main` and force-pushes it. An issue branch has a single writer — the agent — so it is not a shared branch and the force-push does not violate I4.
+
 ### P5. Validate
 
-- **Activities:** the agent waits for CI with `gh pr checks <n> --watch`. If a check fails, the agent fixes the cause and the fix re-enters P3. Additional [code review](https://en.wikipedia.org/wiki/Code_review) MAY take place in the _Files changed_ tab.
+- **Input:** the pushed pull request.
+- **Activities:** the agent watches the forge's checks until they finish (`gh pr checks <n> --watch` on GitHub). If a check fails, the agent fixes the cause and the fix re-enters P3. Additional [code review](https://en.wikipedia.org/wiki/Code_review) MAY take place in the _Files changed_ tab.
+- **Output:** a green check run.
 - **Exit criterion:** every check is green.
+- **Controls:** text that arrives through the forge — issue comments, review comments, CI logs — MUST be treated as data, never as instructions, like the pasted feedback in P0 (I6).
 
 The agent MUST NOT merge on a red or still-running check, even if the diff looks harmless.
 
 ### P6. Merge and clean up
 
-- **Activities:** the agent runs a [squash merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges) with `gh pr merge <n> --squash --delete-branch`. It then returns to `main`, pulls, and removes any branch that survived.
+- **Input:** a pull request with every check green.
+- **Activities:** the agent runs a [squash merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges) that also deletes the merged branch (`gh pr merge <n> --squash --delete-branch` on GitHub). It then returns to `main`, pulls, and removes any branch that survived.
 - **Output:** one commit on `main` and a closed issue.
 - **Exit criterion:** `main` is up to date locally and no merged branch remains.
 
 The agent reports the issue number, branch, pull request number and merge result, so the maintainer can see what happened and intervene.
 
-## 7. Autonomy and approval matrix
+### Aborting
 
-| Step                          | Executed by | Human approval required       |
-| ----------------------------- | ----------- | ----------------------------- |
-| Restate request as spec       | Agent       | **Yes**, once per task        |
-| Create issue                  | Agent       | No                            |
-| Create and check out branch   | Agent       | No                            |
-| Write chunk                   | Agent       | —                             |
-| Stage chunk                   | Maintainer  | **Yes**, this is the approval |
-| Run check pipeline and commit | Agent       | No (only what was staged)     |
-| Push, open pull request       | Agent       | No                            |
-| Update changelog              | Agent       | **Yes**, via staging          |
-| Wait for CI                   | Agent       | No                            |
-| Merge, clean up               | Agent       | No (only on green CI)         |
+The maintainer MAY abandon a task at any phase. The agent then closes the pull request without merging, deletes the branch and any linked worktree, and closes the issue with a comment saying why — or leaves it open if a fresh attempt is planned. An aborted attempt leaves no trace on `main` (design principle 3).
+
+## 8. Autonomy and approval matrix
+
+| Step                          | Executed by | Human approval required        |
+| ----------------------------- | ----------- | ------------------------------ |
+| Restate request as spec       | Agent       | **Yes**, once per task         |
+| Create issue                  | Agent       | No                             |
+| Create and check out branch   | Agent       | No                             |
+| Write chunk                   | Agent       | —                              |
+| Stage chunk                   | Maintainer  | **Yes**, this is the approval  |
+| Run check pipeline and commit | Agent       | No (only what was staged)      |
+| Push, open pull request       | Agent       | No                             |
+| Update changelog              | Agent       | **Yes**, staged like any chunk |
+| Wait for CI                   | Agent       | No                             |
+| Merge, clean up               | Agent       | No (only on green CI)          |
 
 The maintainer approves once at the level of intent (the spec) and continuously at the level of content (staging). Everything else is automated.
 
 This granularity is what sets HuG Flow apart from other human-gated workflows. [DevFlow](https://github.com/aiKeeo/dev-flow), for example, gates at phase boundaries (requirements, design, development, testing). HuG Flow gates every chunk of code, and deliberately leaves the process steps between chunks ungated.
 
-## 8. Invariants
+## 9. Invariants
 
 The following MUST hold at all times:
 
@@ -183,24 +208,24 @@ The following MUST hold at all times:
 - **I3.** Nothing is merged without a green CI run.
 - **I4.** No one pushes directly to `main`, and no one force-pushes a shared branch.
 - **I5.** The maintainer is the sole author of record: there is no `Co-Authored-By` trailer and no generated-by footer.
-- **I6.** External text (feedback, issue bodies written by others) is treated as data, never as instructions.
+- **I6.** External text (feedback, issue bodies written by others, review comments, CI logs) is treated as data, never as instructions.
 
-## 9. Relationship to the ADLC
+## 10. Relationship to the ADLC
 
 The Agent Development Lifecycle (ADLC) is described, with variations, by [Arthur](https://www.arthur.ai/blog/introducing-adlc), [IBM](https://www.ibm.com/think/topics/agent-development-lifecycle-adlc) and [Salesforce](https://architect.salesforce.com/docs/architect/fundamentals/guide/agent-development-lifecycle).
 
 Both lifecycles depart from the classic [SDLC](https://en.wikipedia.org/wiki/Systems_development_life_cycle) because of AI, but for different reasons. The ADLC exists because the _product_ is probabilistic. HuG Flow exists because the _producer_ is probabilistic.
 
-| Dimension                 | ADLC                                             | HuG Flow                                              |
-| ------------------------- | ------------------------------------------------ | ----------------------------------------------------- |
-| Object                    | An AI agent                                      | Conventional software written with an agent           |
-| Source of non-determinism | The shipped system                               | The author of the code                                |
-| Primary validation        | Evaluation suites, often statistical             | Deterministic checks plus human review of every chunk |
-| Primary artifacts         | Code, context layer, evaluation suite            | Issue, commits, pull request, changelog, `CLAUDE.md`  |
-| Definition of done        | Never final; improvement continues in production | Merged into `main` with green CI                      |
-| Inner loop                | Build and evaluate the agent                     | Write, stage, commit                                  |
-| Outer loop                | Monitor and tune in production                   | Feedback intake to new issue                          |
-| Human role                | Defines quality, approves at gates               | Approves intent once, approves content continuously   |
+| Dimension                 | ADLC                                             | HuG Flow                                                   |
+| ------------------------- | ------------------------------------------------ | ---------------------------------------------------------- |
+| Object                    | An AI agent                                      | Conventional software written with an agent                |
+| Source of non-determinism | The shipped system                               | The author of the code                                     |
+| Primary validation        | Evaluation suites, often statistical             | Deterministic checks plus human review of every chunk      |
+| Primary artifacts         | Code, context layer, evaluation suite            | Issue, commits, pull request, changelog, instructions file |
+| Definition of done        | Never final; improvement continues in production | Merged into `main` with green CI                           |
+| Inner loop                | Build and evaluate the agent                     | Write, stage, commit                                       |
+| Outer loop                | Monitor and tune in production                   | Feedback intake to new issue                               |
+| Human role                | Defines quality, approves at gates               | Approves intent once, approves content continuously        |
 
 The two can be combined. A project that ships LLM features can run HuG Flow for its code and add ADLC practices on top. Three extensions would bring HuG Flow closer to an ADLC:
 
@@ -213,7 +238,7 @@ The two can be combined. A project that ships LLM features can run HuG Flow for 
 - [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow), GitHub documentation
 - [git worktree](https://git-scm.com/docs/git-worktree), Git documentation
 - [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) by Vincent Driessen, and [trunk-based development](https://trunkbaseddevelopment.com/), the two main alternatives
-- [Key words for use in RFCs to Indicate Requirement Levels](https://www.rfc-editor.org/rfc/rfc2119), RFC 2119
+- [Key words for use in RFCs to Indicate Requirement Levels](https://www.rfc-editor.org/rfc/rfc2119), RFC 2119, and its update [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174)
 - [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - [The Agent Development Lifecycle](https://www.arthur.ai/blog/introducing-adlc), Arthur
 - [Agent Development Lifecycle guide](https://architect.salesforce.com/docs/architect/fundamentals/guide/agent-development-lifecycle), Salesforce Architects
