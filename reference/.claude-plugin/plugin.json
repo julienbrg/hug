@@ -1,7 +1,7 @@
 {
   "name": "hug",
   "version": "0.1.0",
-  "description": "HuG Flow reference implementation: hooks that enforce the flow's invariants, implementing hug-flow@0.2.0 at level L2",
+  "description": "HuG Flow reference implementation: hooks that enforce the flow's invariants, implementing hug-flow@0.3.0 at level L2",
   "author": { "name": "Julien Béranger" },
   "homepage": "https://github.com/julienbrg/hug/tree/main/reference",
   "repository": "https://github.com/julienbrg/hug",

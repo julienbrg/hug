@@ -52,15 +52,22 @@ HuG Flow applies to projects that meet three conditions:
 
 HuG Flow is independent of the operating system. Every step relies on Git and the forge's command-line client, so the flow runs the same on macOS, Linux and Windows.
 
+HuG Flow is also independent of the agent, the forge and the editor. This document names tools only as examples. The bindings, which are informative, say how each tool fills each step:
+
+- [agents](https://github.com/julienbrg/hug/blob/main/spec/bindings/agents.md): Claude Code, Codex, GitHub Copilot, Cursor, Gemini CLI;
+- [forges](https://github.com/julienbrg/hug/blob/main/spec/bindings/forges.md): GitHub, GitLab, Azure DevOps, Forgejo and Gitea;
+- [version control](https://github.com/julienbrg/hug/blob/main/spec/bindings/vcs.md): Git, Jujutsu, Mercurial and Sapling;
+- [review tools](https://github.com/julienbrg/hug/blob/main/spec/bindings/review-tools.md): editors and Git interfaces that stage hunks.
+
 HuG Flow does not cover how to build an agent, how to deploy, or how to monitor in production. Section 12 explains how these relate to the Agent Development Lifecycle (ADLC).
 
 ## 3. Terminology
 
 - **Chunk.** One logical, reviewable unit of change, small enough to read in one sitting. The unit of approval in HuG Flow.
-- **Approval surface.** Where the reviewer approves a chunk. It has three properties: only the reviewer writes to it, it can hold a subset of the changes, and the author records exactly its contents. In [Git](https://git-scm.com/), the version control system this document assumes, the approval surface is the staging area (index).
+- **Approval surface.** Where the reviewer approves a chunk. It has three properties: only the reviewer writes to it, it can hold a subset of the changes, and the author records exactly its contents. In [Git](https://git-scm.com/), the version control system this document assumes, the approval surface is the staging area (index). Other systems place it elsewhere, such as an empty change in [Jujutsu](https://github.com/jj-vcs/jj) (see the [version control bindings](https://github.com/julienbrg/hug/blob/main/spec/bindings/vcs.md)).
 - **Check pipeline.** The local, deterministic checks that gate every commit: the format check and the linter only. Tests, typecheck and build are not part of it; they run in CI (P5).
 - **Fingerprint.** The identifier of the tree a checked chunk would commit as, recorded once the chunk is complete as unstaged changes and kept only if it passes the check pipeline. At commit time, a staged tree equal to the fingerprint was approved untouched and commits without a second pipeline run.
-- **Forge.** The service that hosts the repository and provides issues, pull requests and CI, driven from its command-line client. [GitHub](https://github.com/) and [`gh`](https://cli.github.com/) are the worked example throughout this document; every forge command stands for an abstract operation (create an issue, open a pull request, watch checks, squash-merge) that any forge's client can fill.
+- **Forge.** The service that hosts the repository and provides issues, pull requests and CI, driven from its command-line client. [GitHub](https://github.com/) and [`gh`](https://cli.github.com/) are the worked example throughout this document; every forge command stands for an abstract operation (create an issue, open a pull request, watch checks, squash-merge) that any forge's client can fill, as the [forge bindings](https://github.com/julienbrg/hug/blob/main/spec/bindings/forges.md) show.
 
 ## 4. Design principles
 
@@ -81,7 +88,7 @@ HuG Flow does not cover how to build an agent, how to deploy, or how to monitor 
 
 The authorship rule is symmetric. Whoever did not write a chunk approves it by staging it, and the author then commits exactly what was staged.
 
-Any coding agent can hold the Agent role if it can run shell commands, load persistent instructions, run a stored procedure only when the maintainer invokes it, watch the approval surface without losing its session, and be configured to leave its own attribution out of commits and pull requests.
+Any coding agent can hold the Agent role if it can run shell commands, load persistent instructions, run a stored procedure only when the maintainer invokes it, watch the approval surface without losing its session, and be configured to leave its own attribution out of commits and pull requests. The [agent bindings](https://github.com/julienbrg/hug/blob/main/spec/bindings/agents.md) say how each common agent meets these.
 
 ## 6. Artifacts
 
@@ -151,7 +158,7 @@ After confirmation, the agent MUST run P2 to P6 without further permission promp
 ### P3. Build (inner loop)
 
 - **Input:** the confirmed spec.
-- **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in any tool that shows unstaged changes and stages individual hunks — an IDE such as [VS Code](https://code.visualstudio.com/) or a [JetBrains](https://www.jetbrains.com/) one, [lazygit](https://github.com/jesseduffield/lazygit), [Magit](https://magit.vc/), or `git add -p` — and stages what they approve. As soon as a chunk is complete as unstaged changes, the agent records a fingerprint of it, the tree the chunk would commit as, and runs the local check pipeline (format and lint only) on it, so the check runs while the maintainer reads the diff rather than before. The fingerprint is kept only if the check passes. On a failure, the agent reports it and fixes the chunk as new unstaged changes. The watcher polls every second. Once something is staged, the agent commits exactly what is staged. It runs the pipeline again first only when the staged tree differs from the fingerprint, as with a partial stage or a chunk the maintainer wrote, and then on the staged content itself rather than the working tree.
+- **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in any tool that shows unstaged changes and stages individual hunks — an IDE such as [VS Code](https://code.visualstudio.com/) or a [JetBrains](https://www.jetbrains.com/) one, [lazygit](https://github.com/jesseduffield/lazygit), [Magit](https://magit.vc/), or `git add -p` (see the [review tools](https://github.com/julienbrg/hug/blob/main/spec/bindings/review-tools.md)) — and stages what they approve. As soon as a chunk is complete as unstaged changes, the agent records a fingerprint of it, the tree the chunk would commit as, and runs the local check pipeline (format and lint only) on it, so the check runs while the maintainer reads the diff rather than before. The fingerprint is kept only if the check passes. On a failure, the agent reports it and fixes the chunk as new unstaged changes. The watcher polls every second. Once something is staged, the agent commits exactly what is staged. It runs the pipeline again first only when the staged tree differs from the fingerprint, as with a partial stage or a chunk the maintainer wrote, and then on the staged content itself rather than the working tree.
 - **Pipelining:** while chunk *N* is under review, the agent writes chunk *N+1* in a [linked worktree](https://git-scm.com/docs/git-worktree) (`git worktree add`), on top of chunk *N*. Once *N* is staged, a single command commits it, with no check wait when it was staged whole, and applies the worktree's diff to the repository as unstaged changes, whether or not *N+1* is finished. The handoff costs the agent one round-trip, and the maintainer never waits for the next chunk to appear. The same command pushes *N* last, once *N+1* is on disk, so network latency never delays the handoff. If *N+1* is unfinished, the agent says it is still in progress and finishes it in place, in the repository, while the maintainer starts reading. Once it is complete, the agent fingerprints and checks it, announces it as ready for review, carries it into the worktree and starts *N+2* there. Git carries deletions and renames across, and the worktree installs its own dependencies rather than sharing them through a link.
 - **Output:** a series of small commits.
 - **Exit criterion:** the spec is fully implemented.
@@ -249,7 +256,7 @@ There are three conformance levels. Each level includes every requirement of the
 
 An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
 
-The reference implementation, a Claude Code plugin in [`reference`](https://github.com/julienbrg/hug/tree/main/reference), declares `implements: hug-flow@0.2.0` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](https://github.com/julienbrg/hug/tree/main/conformance), runs in CI.
+The reference implementation, a Claude Code plugin in [`reference`](https://github.com/julienbrg/hug/tree/main/reference), declares `implements: hug-flow@0.3.0` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](https://github.com/julienbrg/hug/tree/main/conformance), runs in CI.
 
 ### Invariant predicates
 

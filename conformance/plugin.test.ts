@@ -29,7 +29,7 @@ test("the session starts with the rules and the declared level", () => {
   const outcome = hook("session-start", { hook_event_name: "SessionStart" });
   const context = JSON.parse(outcome.stdout).hookSpecificOutput;
   assert.equal(context.hookEventName, "SessionStart");
-  assert.match(context.additionalContext, /implements: hug-flow@0\.2\.0/);
+  assert.match(context.additionalContext, /implements: hug-flow@0\.3\.0/);
   assert.match(context.additionalContext, /level: L2/);
 });
 

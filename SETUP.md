@@ -5,8 +5,9 @@ This page is written for a coding agent. A maintainer who types
 
 It targets [Claude Code](https://code.claude.com/docs). For another
 agent, stop and say so: the rules in
-[`examples/minimal/CLAUDE.md`](examples/minimal/CLAUDE.md) carry over,
-but this setup does not.
+[`examples/minimal/AGENTS.md`](examples/minimal/AGENTS.md) carry over,
+and [`spec/bindings/agents.md`](spec/bindings/agents.md) says how to
+set them up, but this setup does not.
 
 It installs [HuG Flow](spec/hug-flow.md) as instructions (level L1),
 reversibly. For hooks that enforce the flow (L2), point the maintainer
