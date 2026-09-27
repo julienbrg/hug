@@ -36,7 +36,7 @@ HuG Flow does not cover how to build an agent, how to deploy, or how to monitor 
 - **Chunk.** One logical, reviewable unit of change, small enough to read in one sitting. The unit of approval in HuG Flow.
 - **Approval surface.** Where the reviewer approves a chunk. It has three properties: only the reviewer writes to it, it can hold a subset of the changes, and the author records exactly its contents. In [Git](https://git-scm.com/), the version control system this document assumes, the approval surface is the staging area (index).
 - **Check pipeline.** The local, deterministic checks that gate every commit: the format check and the linter only. Tests, typecheck and build are not part of it; they run in CI (P5).
-- **Fingerprint.** The identifier of the tree a checked chunk would commit as, recorded when the chunk appears as unstaged changes and kept only if it passes the check pipeline. At commit time, a staged tree equal to the fingerprint was approved untouched and commits without a second pipeline run.
+- **Fingerprint.** The identifier of the tree a checked chunk would commit as, recorded once the chunk is complete as unstaged changes and kept only if it passes the check pipeline. At commit time, a staged tree equal to the fingerprint was approved untouched and commits without a second pipeline run.
 - **Forge.** The service that hosts the repository and provides issues, pull requests and CI, driven from its command-line client. [GitHub](https://github.com/) and [`gh`](https://cli.github.com/) are the worked example throughout this document; every forge command stands for an abstract operation (create an issue, open a pull request, watch checks, squash-merge) that any forge's client can fill.
 
 ## 4. Design principles
@@ -128,8 +128,8 @@ After confirmation, the agent MUST run P2 to P6 without further permission promp
 ### P3. Build (inner loop)
 
 - **Input:** the confirmed spec.
-- **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in any tool that shows unstaged changes and stages individual hunks — an IDE such as [VS Code](https://code.visualstudio.com/) or a [JetBrains](https://www.jetbrains.com/) one, [lazygit](https://github.com/jesseduffield/lazygit), [Magit](https://magit.vc/), or `git add -p` — and stages what they approve. As soon as a chunk appears as unstaged changes, the agent records a fingerprint of it, the tree the chunk would commit as, and runs the local check pipeline (format and lint only) on it, so the check runs while the maintainer reads the diff rather than before. The fingerprint is kept only if the check passes. On a failure, the agent reports it and fixes the chunk as new unstaged changes. The watcher polls every second. Once something is staged, the agent commits exactly what is staged. It runs the pipeline again first only when the staged tree differs from the fingerprint, as with a partial stage or a chunk the maintainer wrote, and then on the staged content itself rather than the working tree.
-- **Pipelining:** while chunk *N* is under review, the agent writes chunk *N+1* in a [linked worktree](https://git-scm.com/docs/git-worktree) (`git worktree add`), on top of chunk *N*. Once *N* is staged, a single command commits it, with no check wait when it was staged whole, applies the worktree's diff to the repository as unstaged changes, and fingerprints and checks *N+1*. The handoff costs the agent one round-trip. Git carries deletions and renames across, and the worktree installs its own dependencies rather than sharing them through a link.
+- **Activities:** the agent writes one logical chunk and leaves it unstaged. It announces the chunk in one line and starts a background watcher on the staging area. The maintainer reviews the diff in any tool that shows unstaged changes and stages individual hunks — an IDE such as [VS Code](https://code.visualstudio.com/) or a [JetBrains](https://www.jetbrains.com/) one, [lazygit](https://github.com/jesseduffield/lazygit), [Magit](https://magit.vc/), or `git add -p` — and stages what they approve. As soon as a chunk is complete as unstaged changes, the agent records a fingerprint of it, the tree the chunk would commit as, and runs the local check pipeline (format and lint only) on it, so the check runs while the maintainer reads the diff rather than before. The fingerprint is kept only if the check passes. On a failure, the agent reports it and fixes the chunk as new unstaged changes. The watcher polls every second. Once something is staged, the agent commits exactly what is staged. It runs the pipeline again first only when the staged tree differs from the fingerprint, as with a partial stage or a chunk the maintainer wrote, and then on the staged content itself rather than the working tree.
+- **Pipelining:** while chunk *N* is under review, the agent writes chunk *N+1* in a [linked worktree](https://git-scm.com/docs/git-worktree) (`git worktree add`), on top of chunk *N*. Once *N* is staged, a single command commits it, with no check wait when it was staged whole, and applies the worktree's diff to the repository as unstaged changes, whether or not *N+1* is finished. The handoff costs the agent one round-trip, and the maintainer never waits for the next chunk to appear. The same command pushes *N* last, once *N+1* is on disk, so network latency never delays the handoff. If *N+1* is unfinished, the agent says it is still in progress and finishes it in place, in the repository, while the maintainer starts reading. Once it is complete, the agent fingerprints and checks it, announces it as ready for review, carries it into the worktree and starts *N+2* there. Git carries deletions and renames across, and the worktree installs its own dependencies rather than sharing them through a link.
 - **Output:** a series of small commits.
 - **Exit criterion:** the spec is fully implemented.
 
@@ -137,6 +137,7 @@ Rules for this phase:
 
 - The agent MUST NOT stage its own work, including with `git add -A` or `git add .`.
 - A partial stage MUST be committed as-is. The remainder stays unstaged.
+- The maintainer MAY stage part of a chunk that is still in progress. It has no fingerprint yet, so the agent runs the check pipeline on the staged content before committing it.
 - The agent MUST NOT commit staged content that has not passed the check pipeline, either while it was under review or at commit time.
 - If a check fails, the agent unstages the affected files and reports the failure. It MUST NOT modify staged changes it did not write.
 - If the maintainer rejects a chunk, the agent proposes a fix and waits for confirmation before rewriting.
@@ -428,7 +429,7 @@ source, tests, scripts, docs, config, everything:
   a file you consider uncontroversial, and never `git add -A` or
   `git add .`.
 - I review the unstaged diff in my IDE and `git add` what I approve.
-- The moment the chunk is on disk, in the same command, record its
+- The moment the chunk is complete on disk, in the same command, record its
   fingerprint — the tree it would commit as, built in a throwaway
   index so mine is untouched,
   `GIT_INDEX_FILE=<tmp> sh -c 'git read-tree HEAD && git add -A && git write-tree'` —
@@ -475,11 +476,20 @@ source, tests, scripts, docs, config, everything:
   no more.
   - When I stage chunk N, do the whole handoff in one Bash command, so
     it costs a single round-trip: commit chunk N (re-checking only if
-    the fingerprint differs), apply chunk N+1 to the repo with
+    the fingerprint differs) and apply chunk N+1 to the repo with
     `git -C <path> diff HEAD | git apply` — Git carries deletions and
-    renames — record its fingerprint and check it, and WIP-commit it in
-    the worktree. Then start the watcher, say chunk N+1 is ready for
-    review, and start chunk N+2 in the worktree.
+    renames — right away, finished or not, so I never wait for it to
+    appear. Push chunk N last in that same command, once N+1 is on
+    disk. Then start the watcher.
+  - If chunk N+1 is finished, record its fingerprint and check it in
+    that same command, WIP-commit it in the worktree, say it's ready
+    for review, and start chunk N+2 in the worktree.
+  - If it isn't, say it's still in progress and finish it in place, in
+    the repo, while I start reading. Once it's complete, record its
+    fingerprint and check it, say it's ready for review, carry it into
+    the worktree as a WIP commit, and start chunk N+2 there. If I stage
+    part of it before then, there's no fingerprint yet: check the
+    staged content and commit it.
   - When I ask for a change to chunk N: apply it to chunk N in the
     repo, carry it into the worktree, and rework chunk N+1 so it
     still fits.

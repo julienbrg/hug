@@ -101,10 +101,13 @@ stage what you approve, and I commit.
 While I review chunk N, you may write chunk N+1 in a linked worktree
 outside the repository (`git worktree add --detach <path> HEAD`), on
 top of a local copy of chunk N. Install dependencies there rather than
-linking them. Once chunk N is staged, in a single command, commit it,
+linking them. Once chunk N is staged, in a single command, commit it and
 apply the worktree's diff to the repository
-(`git -C <path> diff HEAD | git apply`) as the next unstaged chunk, and
-record and check that chunk. Stay one chunk ahead, no more. Remove the worktree when
+(`git -C <path> diff HEAD | git apply`) as the next unstaged chunk,
+finished or not, and push chunk N last. If it is unfinished, say so
+and finish it in place.
+Once it is complete, record and check it, and say it is ready for
+review. Stay one chunk ahead, no more. Remove the worktree when
 the work is done.
 
 # Issues
