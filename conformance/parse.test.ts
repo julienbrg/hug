@@ -167,5 +167,6 @@ test("mentions of git or gh are detected", () => {
   assert.equal(mentionsGitOrGh("xargs git add"), true);
   assert.equal(mentionsGitOrGh("gh pr merge"), true);
   assert.equal(mentionsGitOrGh("/usr/bin/git.exe"), true);
+  assert.equal(mentionsGitOrGh("$GIT push"), true);
   assert.equal(mentionsGitOrGh("digit high .gitignore"), false);
 });

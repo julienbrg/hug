@@ -37,7 +37,7 @@ export type ParseResult =
 export class Unparseable extends Error {}
 
 const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
-const MENTION = /(^|[^\w.-])(git|gh)(\.exe)?([^\w.-]|$)/;
+const MENTION = /(^|[^\w.-])(git|gh)(\.exe)?([^\w.-]|$)/i;
 const KEYWORDS = new Set([
   "if",
   "then",
