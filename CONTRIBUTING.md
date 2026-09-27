@@ -7,8 +7,8 @@ Thanks for your interest in HuG Flow. This repository is maintained with the flo
 - [Node.js](https://nodejs.org/) 22, the version CI runs on;
 - [pnpm](https://pnpm.io/) 10, pinned in `package.json` (`corepack enable` picks it up);
 - [`git`](https://git-scm.com/), and [`gh`](https://cli.github.com/) logged in to GitHub;
-- [Claude Code](https://code.claude.com/docs), or another coding agent you can configure the same way;
-- an editor that shows the unstaged diff and lets you stage hunks, such as [VS Code](https://code.visualstudio.com/).
+- [Claude Code](https://code.claude.com/docs), or another coding agent that meets the [agent bindings](spec/bindings/agents.md);
+- an editor that shows the unstaged diff and lets you stage hunks, such as [VS Code](https://code.visualstudio.com/) or one of the other [review tools](spec/bindings/review-tools.md).
 
 Then install the dependencies:
 
@@ -43,7 +43,9 @@ The spec says what HuG Flow requires. The setups in [`examples/`](examples/) sho
 
 1. Create `examples/<your-handle>/`.
 2. Add a `README.md` that says what the setup is, which files go where, and how they map to the spec (phases P0 to P6, invariants I1 to I6).
-3. Add the files themselves: `CLAUDE.md`, skills, settings, rulesets, scripts, CI.
+3. Add the files themselves: `AGENTS.md` or your agent's instructions file, skills, settings, hooks, rulesets, scripts, CI.
 4. Add a row for it in the Contents table of the [README](README.md).
 
 [`examples/minimal/`](examples/minimal/README.md) is a good starting point, and [`examples/julien/`](examples/julien/README.md) shows a complete personal setup.
+
+If your agent, forge, version control system or review tool is missing from [`spec/bindings/`](spec/bindings/), add it there too.

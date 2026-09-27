@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-27
+
+### Added
+
+- `spec/bindings/`: informative bindings that map the spec's tool-neutral core onto real tools. `agents.md` lists the five capabilities an agent needs and, for Claude Code, Codex, GitHub Copilot, Cursor and Gemini CLI, where it reads `AGENTS.md`, its switch for invocation-only skills (P0), how it can wait for staging (P3), and its attribution setting (I5). `forges.md` gives the commands for creating an issue, branching, opening a pull request, watching checks, squash-merging and protecting `main` on GitHub, GitLab, Azure DevOps and Forgejo/Gitea, with the fallback where a forge has no command. `vcs.md` maps the approval surface onto Git, Jujutsu (an empty change below `@`) and, as a weaker fit, Mercurial and Sapling. `review-tools.md` lists editors and Git interfaces that stage hunks.
+- `examples/minimal/hooks/commit-msg`: a POSIX `sh` Git hook that rejects `Co-Authored-By` trailers and generated-by footers, with the reference guard's patterns, so I5 is enforced for every agent.
+
+### Changed
+
+- The spec is now version 0.3.0. Its scope says it is independent of the agent, the forge and the editor, and lists the bindings; §3, §5 and P3 link to the matching binding. The reference implementation, the plugin and marketplace manifests and `package.json` claim 0.3.0. The article mirrors the spec (§2, §3, §5, P3, §10).
+- `examples/minimal`: the instructions move to `AGENTS.md`, which most agents read, and `CLAUDE.md` only imports it, so `/hug` keeps working. The README lists the hook, points to the agent and forge bindings, and marks I5 as enforced by the hook.
+- README, CONTRIBUTING and SETUP point to the bindings and to `AGENTS.md`.
+
+## [0.2.0] - 2026-09-27
+
 ### Added
 
 - `/hug on | off | status`: a skill and `scripts/hug.sh`, in POSIX `sh`, that switch Claude Code to HuG Flow and back. `on` backs up the current setup with a manifest, lists instructions that may conflict so the maintainer can keep them, comment them out or leave both, then appends one import line to `~/.claude/CLAUDE.md` pointing to `examples/minimal/CLAUDE.md`, adds missing attribution settings and deny rules to `~/.claude/settings.json` (with `jq`, or `node` as the fallback), and installs the `/intake` skill if absent. `--repo <owner>/<repo>` also sets squash-only merges and applies the `hug-flow` ruleset, requiring the checks of the last merged pull request. `off` reverts only what `on` recorded, keeps symlinked dotfiles as symlinks, and leaves the backup on disk. Tested by a round trip in `conformance/toggle.test.ts`.
@@ -77,7 +92,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - `/update-post` skill, replaced by the `publish` workflow.
 
-[Unreleased]: https://github.com/julienbrg/hug/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/julienbrg/hug/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/julienbrg/hug/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/julienbrg/hug/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/julienbrg/hug/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/julienbrg/hug/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/julienbrg/hug/releases/tag/v0.1.0
