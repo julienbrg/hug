@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # Turn HuG Flow on or off for Claude Code. `off` reverts only what `on` added.
 # Usage: hug.sh scan | on [--comment <file>:<line>]... [--repo <owner>/<repo>] | off | status
-# Spec: notes/hug-toggle-spec.md
+# Driven by the /hug skill: skills/hug/SKILL.md
 set -eu
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
