@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Turn HuG Flow on or off for Claude Code. `off` reverts only what `on` added.
-# Usage: hug.sh scan | on [--comment <file>:<line>]... | status
+# Usage: hug.sh scan | on [--comment <file>:<line>]... | off | status
 # Spec: notes/hug-toggle-spec.md
 set -eu
 
@@ -17,6 +17,8 @@ CONFLICTS='git (add|commit|push)|stag(e|ed|es|ing)|force[- ]?push|co-authored|ge
 
 have() { command -v "$1" >/dev/null 2>&1; }
 die() { echo "hug: $*" >&2; exit 1; }
+# Write <file>.tmp over <file> in place, so a symlinked dotfile stays a symlink.
+replace() { cat "$1.tmp" > "$1"; rm -f "$1.tmp"; }
 
 get() { [ -f "$STATE" ] && sed -n "s/^$1=//p" "$STATE" || true; }
 set_state() {
@@ -70,7 +72,7 @@ backup() {
 
 comment_out() {
   awk -v n="$2" 'NR == n { $0 = "<!-- hug-off: " $0 " -->" } 1' "$1" > "$1.tmp"
-  mv "$1.tmp" "$1"
+  replace "$1"
   grep -qxF "$1" "$STATE_DIR/commented" 2>/dev/null || printf '%s\n' "$1" >> "$STATE_DIR/commented"
 }
 
@@ -105,7 +107,40 @@ settings_on() {
     echo "hug: neither jq nor node found; $SETTINGS left unchanged" >&2
     return 0
   fi
-  mv "$SETTINGS.tmp" "$SETTINGS"
+  replace "$SETTINGS"
+}
+
+# Remove exactly the keys and deny rules settings_on added.
+settings_off() {
+  added=$STATE_DIR/added-settings.json
+  [ -f "$added" ] && [ -f "$SETTINGS" ] || return 0
+  if have jq; then
+    jq --slurpfile a "$added" \
+      '$a[0] as $a | reduce $a.keys[] as $k (.; del(.[$k]))
+       | if .permissions.deny then .permissions.deny -= $a.deny else . end
+       | if .permissions.deny == [] then del(.permissions.deny) else . end
+       | if .permissions == {} then del(.permissions) else . end' \
+      "$SETTINGS" > "$SETTINGS.tmp"
+  elif have node; then
+    node -e '
+      const fs = require("fs");
+      const [file, added] = process.argv.slice(1);
+      const s = JSON.parse(fs.readFileSync(file, "utf8"));
+      const a = JSON.parse(fs.readFileSync(added, "utf8"));
+      for (const k of a.keys) delete s[k];
+      if (s.permissions && s.permissions.deny) {
+        s.permissions.deny = s.permissions.deny.filter((d) => !a.deny.includes(d));
+        if (!s.permissions.deny.length) delete s.permissions.deny;
+        if (!Object.keys(s.permissions).length) delete s.permissions;
+      }
+      fs.writeFileSync(file + ".tmp", JSON.stringify(s, null, 2) + "\n");
+    ' "$SETTINGS" "$added"
+  else
+    die "neither jq nor node found; remove the entries in $added from $SETTINGS by hand"
+  fi
+  replace "$SETTINGS"
+  if [ "$(get settings_existed)" = 0 ] && [ "$(tr -d ' \n' < "$SETTINGS")" = "{}" ]; then rm -f "$SETTINGS"; fi
+  rm -f "$added"
 }
 
 cmd_on() {
@@ -125,6 +160,11 @@ cmd_on() {
   set_state instructions_existed "$([ -e "$INSTRUCTIONS" ] && echo 1 || echo 0)"
   set_state settings_existed "$([ -e "$SETTINGS" ] && echo 1 || echo 0)"
   : > "$STATE_DIR/commented"
+  # Editing a file whose last line has no newline adds one; off takes it back out.
+  : > "$STATE_DIR/no-final-newline"
+  for f in "$INSTRUCTIONS" $files; do
+    if [ -s "$f" ] && [ -n "$(tail -c 1 "$f")" ]; then printf '%s\n' "$f" >> "$STATE_DIR/no-final-newline"; fi
+  done
   for c in $comments; do comment_out "${c%:*}" "${c##*:}"; done
 
   if hug_present; then
@@ -136,6 +176,7 @@ cmd_on() {
     set_state import 1
   fi
 
+  set_state skills_existed "$([ -e "$(dirname "$INTAKE")" ] && echo 1 || echo 0)"
   if [ -e "$INTAKE" ]; then
     set_state intake 0
   else
@@ -149,9 +190,39 @@ cmd_on() {
   echo "HuG Flow is on. Backup: $(get backup). Revert with: hug.sh off"
 }
 
+cmd_off() {
+  if [ "$(get state)" != on ]; then echo "HuG Flow is already off"; return 0; fi
+
+  if [ "$(get import)" = 1 ] && [ -f "$INSTRUCTIONS" ]; then
+    grep -vxF "$IMPORT" "$INSTRUCTIONS" > "$INSTRUCTIONS.tmp" || true
+    replace "$INSTRUCTIONS"
+    if [ "$(get instructions_existed)" = 0 ] && [ ! -s "$INSTRUCTIONS" ]; then rm -f "$INSTRUCTIONS"; fi
+  fi
+
+  while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    sed 's/^<!-- hug-off: \(.*\) -->$/\1/' "$f" > "$f.tmp"
+    replace "$f"
+  done < "$STATE_DIR/commented"
+  : > "$STATE_DIR/commented"
+
+  while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    printf '%s' "$(cat "$f")" > "$f.tmp"
+    replace "$f"
+  done < "$STATE_DIR/no-final-newline"
+  : > "$STATE_DIR/no-final-newline"
+
+  if [ "$(get intake)" = 1 ]; then rm -rf "$INTAKE"; fi
+  if [ "$(get skills_existed)" = 0 ]; then rmdir "$(dirname "$INTAKE")" 2>/dev/null || true; fi
+  settings_off
+  set_state state off
+  echo "HuG Flow is off. The backup stays in $(get backup)"
+}
+
 cmd_status() {
   echo "HuG Flow: $([ "$(get state)" = on ] && echo on || echo off)"
-  [ -f "$STATE" ] || return 0
+  [ "$(get state)" = on ] || return 0
   echo "backup: $(get backup)"
   if grep -qxF "$IMPORT" "$INSTRUCTIONS" 2>/dev/null; then
     echo "rules: imported in $INSTRUCTIONS"
@@ -169,6 +240,7 @@ cmd=${1:-status}
 case $cmd in
   scan) cmd_scan ;;
   on) cmd_on "$@" ;;
+  off) cmd_off ;;
   status) cmd_status ;;
-  *) die "usage: hug.sh scan | on [--comment <file>:<line>]... | status" ;;
+  *) die "usage: hug.sh scan | on [--comment <file>:<line>]... | off | status" ;;
 esac
