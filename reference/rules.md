@@ -48,7 +48,7 @@ When you write a chunk (code, tests, docs, config, anything):
 
 When the maintainer writes a chunk, they leave it unstaged and tell you. Review it, stage what you approve by naming the files, and let them commit.
 
-While chunk N is under review, you may write chunk N+1 in a linked worktree outside the repository (`git worktree add --detach <path> HEAD`), on top of a local copy of chunk N. Install dependencies there rather than linking them. Once chunk N is staged, in a single command, commit it and apply the worktree's diff to the repository (`git -C <path> diff HEAD | git apply`) as the next unstaged chunk, finished or not. If it is unfinished, say so and finish it in place. Once it is complete, record and check it, and say it is ready for review. If part of it is staged before then, check the staged content and commit it. Stay one chunk ahead, no more, and remove the worktree when the work is done.
+While chunk N is under review, you may write chunk N+1 in a linked worktree outside the repository (`git worktree add --detach <path> HEAD`), on top of a local copy of chunk N. Install dependencies there rather than linking them. Once chunk N is staged, in a single command, commit it and apply the worktree's diff to the repository (`git -C <path> diff HEAD | git apply`) as the next unstaged chunk, finished or not, and push chunk N last, so the network never delays the handoff. If it is unfinished, say so and finish it in place. Once it is complete, record and check it, and say it is ready for review. If part of it is staged before then, check the staged content and commit it. Stay one chunk ahead, no more, and remove the worktree when the work is done.
 
 ## Issues
 

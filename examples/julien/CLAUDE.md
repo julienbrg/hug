@@ -173,7 +173,8 @@ source, tests, scripts, docs, config, everything:
     the fingerprint differs) and apply chunk N+1 to the repo with
     `git -C <path> diff HEAD | git apply` — Git carries deletions and
     renames — right away, finished or not, so I never wait for it to
-    appear. Then start the watcher.
+    appear. Push chunk N last in that same command, once N+1 is on
+    disk. Then start the watcher.
   - If chunk N+1 is finished, record its fingerprint and check it in
     that same command, WIP-commit it in the worktree, say it's ready
     for review, and start chunk N+2 in the worktree.
