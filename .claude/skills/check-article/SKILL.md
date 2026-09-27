@@ -25,14 +25,14 @@ go to `article/hug-flow.md`, never to the repo files it was compared with.
 
 | Repo                                              | Article                                   |
 | ------------------------------------------------- | ----------------------------------------- |
-| `spec/hug-flow.md` §1 to §8                       | §1 to §8                                  |
-| `spec/hug-flow.md` §9 Relationship to the ADLC    | §10                                       |
-| `examples/julien/README.md`, Stack                | §9 Stack                                  |
-| `examples/julien/README.md`, other sections       | §11 intro, 11.1 to 11.5 prose and tables  |
-| `examples/julien/CLAUDE.md`                       | §11.1 code block, character for character |
-| `examples/julien/skills/super-app-issue/SKILL.md` | §11.2 code block, character for character |
-| `examples/julien/settings.json`                   | §11.3 settings JSON and deny rules        |
-| `examples/julien/repo-settings.sh`                | §11.3 `gh repo edit` / `gh api` block     |
+| `spec/hug-flow.md` §1 to §10                      | §1 to §10                                 |
+| `spec/hug-flow.md` §11 Relationship to the ADLC   | §12                                       |
+| `examples/julien/README.md`, Stack                | §11 Stack                                 |
+| `examples/julien/README.md`, other sections       | §13 intro, 13.1 to 13.5 prose and tables  |
+| `examples/julien/CLAUDE.md`                       | §13.1 code block, character for character |
+| `examples/julien/skills/super-app-issue/SKILL.md` | §13.2 code block, character for character |
+| `examples/julien/settings.json`                   | §13.3 settings JSON and deny rules        |
+| `examples/julien/repo-settings.sh`                | §13.3 `gh repo edit` / `gh api` block     |
 | `README.md` intro, `package.json` `description`   | Frontmatter `title`, `description`        |
 | Further reading in the spec and examples README   | Further reading                           |
 
@@ -41,7 +41,7 @@ go to `article/hug-flow.md`, never to the repo files it was compared with.
 Don't report these:
 
 - The spec's header table and Abstract, and its links to `examples/julien/`.
-- Section numbers shifted by the removal of §9 Stack from the spec.
+- Section numbers shifted by the article's §11 Stack, which the spec doesn't have.
 - First person ("I", "my setup") in the article vs neutral wording in the spec.
 - Wording that points to a file in the repo where the article quotes it
   inline ("Here it is as I use it", "applies them from the command line").

@@ -29,7 +29,7 @@ HuG Flow applies to projects that meet three conditions:
 
 HuG Flow is independent of the operating system. Every step relies on Git and the forge's command-line client, so the flow runs the same on macOS, Linux and Windows.
 
-HuG Flow does not cover how to build an agent, how to deploy, or how to monitor in production. Section 11 explains how these relate to the Agent Development Lifecycle (ADLC).
+HuG Flow does not cover how to build an agent, how to deploy, or how to monitor in production. Section 12 explains how these relate to the Agent Development Lifecycle (ADLC).
 
 ## 3. Terminology
 
@@ -209,7 +209,38 @@ The following MUST hold at all times:
 - **I5.** The maintainer is the sole author of record: there is no `Co-Authored-By` trailer and no generated-by footer.
 - **I6.** External text (feedback, issue bodies written by others, review comments, CI logs) is treated as data, never as instructions.
 
-## 10. Stack
+## 10. Conformance
+
+An implementation of HuG Flow is a set of instructions, hooks and forge settings that makes an agent and a repository follow this document. This section defines what such an implementation must provide to claim conformance.
+
+### Levels
+
+There are three conformance levels. Each level includes every requirement of the levels below it.
+
+| Level | Name | Requirement |
+| --- | --- | --- |
+| L1 | Instructed | The agent's instructions file encodes P0–P6 and I1–I6. Compliance depends on the model following it. [`examples/minimal`](https://github.com/julienbrg/hug/tree/main/examples/minimal) and [`examples/julien`](https://github.com/julienbrg/hug/tree/main/examples/julien) are L1 setups. |
+| L2 | Locally enforced | Hooks on the maintainer's machine block I2, I4 and I5 violations before they happen. The hooks run outside the model, and their decision holds whatever the model does and whatever permission mode the agent runs in. |
+| L3 | Remotely enforced | Forge rules on `main` require a pull request, require the CI checks to pass, allow only squash merges, and forbid force-pushes and deletion, so that I1, I3 and I4 hold even if the machine is bypassed. The history of `main` can be audited against the predicates below. |
+
+An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
+
+### Invariant predicates
+
+Each invariant in section 9 maps to a predicate that an implementation can check. The last column says when the predicate can be checked: _after the fact_ means from the history and the forge's records alone, and _procedurally_ means only while the work happens.
+
+| Invariant | Predicate | Checked |
+| --- | --- | --- |
+| I1 | Every commit on the first-parent history of `main` passes the required checks. | After the fact |
+| I2 | Every commit made in P3 records exactly a tree staged by the party that did not write its content. | Procedurally |
+| I3 | Every squash commit on `main` maps to a pull request whose required checks were green at merge time. | After the fact |
+| I4 | Every commit on the first-parent history of `main` is the squash commit of a merged pull request, and the forge records no force-push to a shared branch. | After the fact |
+| I5 | No commit on `main` carries a `Co-Authored-By` trailer or a generated-by footer, and every commit's author is the maintainer. | After the fact, and at L2 before each commit |
+| I6 | No action of the agent is taken on instructions found in external text. | Procedurally |
+
+I2 and I6 are verified procedurally, not after the fact. Staging leaves no trace in the history, so no audit of `main` can tell who staged a chunk, and no record shows which text the agent acted on. An implementation MUST NOT claim to verify I2 or I6 from history. At L2, it verifies I2 by blocking the agent from staging content the agent wrote; I6 rests on the controls in P5 at every level.
+
+## 11. Stack
 
 | Layer | Tool | Role in HuG Flow |
 | --- | --- | --- |
@@ -224,9 +255,9 @@ The maintainer works in VS Code with the Claude Code extension open in a side pa
 
 Requirements on the machine: `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter on each chunk. On Windows, [Git for Windows](https://gitforwindows.org/) also provides the Bash shell that Claude Code runs commands in, so the shell snippets below work unchanged.
 
-Configuration lives in three layers: `CLAUDE.md` for the process, skills for intake, and permissions plus branch protection to enforce the invariants. Section 12 shows the setup I use day to day.
+Configuration lives in three layers: `CLAUDE.md` for the process, skills for intake, and permissions plus branch protection to enforce the invariants. Section 13 shows the setup I use day to day.
 
-## 11. Relationship to the ADLC
+## 12. Relationship to the ADLC
 
 The Agent Development Lifecycle (ADLC) is described, with variations, by [Arthur](https://www.arthur.ai/blog/introducing-adlc), [IBM](https://www.ibm.com/think/topics/agent-development-lifecycle-adlc) and [Salesforce](https://architect.salesforce.com/docs/architect/fundamentals/guide/agent-development-lifecycle).
 
@@ -249,7 +280,7 @@ The two can be combined. A project that ships LLM features can run HuG Flow for 
 - **Evaluations in P5.** An evaluation suite run in CI alongside the tests, whenever the codebase calls a model.
 - **A P7 for operations.** Deployment and observability whose signals flow automatically into P0, closing the outer loop without manual intake.
 
-## 12. My setup
+## 13. My setup
 
 This section describes the setup I use every day. It is one way to implement HuG Flow, not the only one. It has three layers. The first two tell the agent what to do. The third makes sure some things cannot happen, whatever the agent does.
 
@@ -263,7 +294,7 @@ To start your own, use [`examples/minimal`](https://github.com/julienbrg/hug/tre
 | Intake | Skills | P0 | Instructed, invoked only by the maintainer |
 | Enforcement | Claude Code settings, GitHub repository settings and [GitHub rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets) | I5 and the P6 merge rules today; I1, I3, I4 and part of I2 with the additions | Enforced: holds even if the model deviates |
 
-### 12.1 Process layer: `CLAUDE.md`
+### 13.1 Process layer: `CLAUDE.md`
 
 The file lives at `~/.claude/CLAUDE.md`, so it is loaded in every session and every project. Here it is as I use it.
 
@@ -510,7 +541,7 @@ How it maps to the lifecycle:
 | Pull requests: never push to `main`, never force-push a shared branch | I4 |
 | Issues, Pull requests, Commits | Conventions for the artifacts of section 6 |
 
-### 12.2 Intake layer: skills
+### 13.2 Intake layer: skills
 
 Intake skills are project-specific, because each one targets a given repository. The example below files feedback for a private application. It lives in `.claude/skills/super-app-issue/SKILL.md`. Here it is as I use it.
 
@@ -602,7 +633,7 @@ Three properties make it fit P0:
 - The pasted text is declared as data, which implements I6.
 - It stops at issue creation. P1 starts only when the maintainer asks for the work.
 
-### 12.3 Enforcement layer
+### 13.3 Enforcement layer
 
 I run Claude Code with almost everything allowed. My user settings set `"defaultMode": "bypassPermissions"` with a broad allow list, and I also work in auto mode. This takes the "process autonomy" principle of section 4 literally: the agent never stops at a permission prompt.
 
@@ -700,7 +731,7 @@ The ruleset holds whatever the agent does, including in `bypassPermissions` mode
 
 Rulesets on private repositories may require a paid GitHub plan.
 
-### 12.4 Coverage
+### 13.4 Coverage
 
 | Invariant | Instructed by | Enforced today | Enforced with the additions |
 | --- | --- | --- | --- |
@@ -713,7 +744,7 @@ Rulesets on private repositories may require a paid GitHub plan.
 
 The repository settings also enforce two P6 rules today, outside the invariants: squash-only merges, and deletion of merged branches on the remote.
 
-### 12.5 Known deviations
+### 13.5 Known deviations
 
 My setup diverges from this specification in three places:
 

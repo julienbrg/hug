@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Spec §10 Conformance: three levels (L1 Instructed, L2 Locally enforced by hooks against I2, I4 and I5 violations, L3 Remotely enforced by forge rules plus an auditable history), a MUST rule that an implementation declares the spec version and level it implements, and a checkable predicate for each invariant. I2 and I6 are marked as verified procedurally, not after the fact, since staging leaves no trace in history. Both example setups are L1. The ADLC section moves to §11.
+- The article mirrors it as §10 Conformance; its Stack, ADLC and setup sections are now §11–§13, and cross-references follow. The `/check-article` section map is updated to match.
+
 ## [0.1.2] - 2026-09-27
 
 ### Changed
