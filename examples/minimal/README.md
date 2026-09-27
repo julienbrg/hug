@@ -22,6 +22,8 @@ The first two are instructions: they rely on the model following them. The rules
 
 ## Install
 
+To install it in one step, and remove it just as easily, use [`/hug`](../../skills/hug/SKILL.md) (see [Get started](../../README.md#get-started)). It does step 1 and, with `--repo`, steps 2 to 4 for you. By hand:
+
 1. Copy `CLAUDE.md` and the `skills/intake/` folder to one of the locations above.
 2. Edit `ruleset.json`: replace `test` in `required_status_checks` with the names of your CI jobs. A required check that never reports blocks every merge. Without CI, remove that rule.
 3. Apply the ruleset:

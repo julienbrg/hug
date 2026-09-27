@@ -34,6 +34,7 @@ go to `article/hug-flow.md`, never to the repo files it was compared with.
 | `examples/julien/settings.json`                   | §13.3 settings JSON and deny rules        |
 | `examples/julien/repo-settings.sh`                | §13.3 `gh repo edit` / `gh api` block     |
 | `README.md` intro, `package.json` `description`   | Frontmatter `title`, `description`        |
+| `README.md` Get started, `SETUP.md`               | Get started                               |
 | Further reading in the spec and examples README   | Further reading                           |
 
 ## Expected differences

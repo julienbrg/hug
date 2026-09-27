@@ -21,7 +21,7 @@ There are two ways to try HuG Flow with [Claude Code](https://code.claude.com/do
 Switch me to HuG Flow: github.com/julienbrg/hug
 ```
 
-The agent follows [`SETUP.md`](https://github.com/julienbrg/hug/blob/main/SETUP.md): it clones the repository to `~/.claude/hug/` and installs a `/hug` skill. The skill reviews your existing instructions with you for conflicts, then adds one import line to `~/.claude/CLAUDE.md`, plus attribution settings and deny rules where missing. `/hug status` shows what was added, and `/hug off` removes exactly that.
+An agent asked to switch someone to HuG Flow follows [`SETUP.md`](https://github.com/julienbrg/hug/blob/main/SETUP.md): it clones the repository to `~/.claude/hug/` and installs a `/hug` skill. The skill reviews your existing instructions with you for conflicts, then adds one import line to `~/.claude/CLAUDE.md`, plus attribution settings and deny rules where missing. `/hug status` shows what was added, and `/hug off` removes exactly that.
 
 **Plugin (L2, enforced).** In a Claude Code session, type:
 
