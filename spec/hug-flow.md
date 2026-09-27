@@ -10,7 +10,7 @@
 
 ## Abstract
 
-HuG Flow is an issue-driven development lifecycle in which a coding agent executes every process step and a human maintainer approves every chunk of content by staging it in the Git index. This document specifies the roles, artifacts, phases, approval points and invariants of the flow. It does not prescribe tools. Two example setups built on Claude Code and GitHub are provided: a generic one to adapt, in [`examples/minimal`](../examples/minimal/README.md), and a personal one, in [`examples/julien`](../examples/julien/README.md).
+HuG Flow is an issue-driven development lifecycle in which a coding agent executes every process step and a human maintainer approves every chunk of content by staging it in the Git index. This document specifies the roles, artifacts, phases, approval points and invariants of the flow. Its core is tool-neutral: each step is described by what it does, not by the command that runs it, with Git and GitHub as the worked example. Two example setups built on Claude Code and GitHub are provided: a generic one to adapt, in [`examples/minimal`](../examples/minimal/README.md), and a personal one, in [`examples/julien`](../examples/julien/README.md).
 
 ## 1. Purpose
 
@@ -25,7 +25,7 @@ This document is itself maintained under HuG Flow. Its version follows [semantic
 HuG Flow applies to projects that meet three conditions:
 
 - the deliverable is conventional software, whose behavior is validated by deterministic checks (format, lint, tests, build);
-- the code is hosted on [GitHub](https://github.com/) and changes reach the default branch only through pull requests;
+- the code is hosted on a forge and changes reach the default branch only through pull requests;
 - a coding agent writes most of the code, and a human is accountable for everything that is merged.
 
 HuG Flow is independent of the operating system. Every step relies on Git and the forge's command-line client, so the flow runs the same on macOS, Linux and Windows.
@@ -35,41 +35,45 @@ HuG Flow does not cover how to build an agent, how to deploy, or how to monitor 
 ## 3. Terminology
 
 - **Chunk.** One logical, reviewable unit of change, small enough to read in one sitting. The unit of approval in HuG Flow.
+- **Approval surface.** Where the reviewer approves a chunk. It has three properties: only the reviewer writes to it, it can hold a subset of the changes, and the author records exactly its contents. In [Git](https://git-scm.com/), the version control system this document assumes, the approval surface is the staging area (index).
 - **Check pipeline.** The local, deterministic checks that gate every commit: the format check and the linter only. Tests, typecheck and build are not part of it; they run in CI (P5).
 - **Fingerprint.** The identifier of the tree a checked chunk would commit as, recorded when the chunk is announced. At commit time, a staged tree equal to the fingerprint was approved untouched and commits without a second pipeline run.
+- **Forge.** The service that hosts the repository and provides issues, pull requests and CI, driven from its command-line client. [GitHub](https://github.com/) and [`gh`](https://cli.github.com/) are the worked example throughout this document; every forge command stands for an abstract operation (create an issue, open a pull request, watch checks, squash-merge) that any forge's client can fill.
 
 ## 4. Design principles
 
 1. **Process autonomy, content control.** The agent runs the whole workflow (issue, branch, push, pull request, merge) without asking permission. It never decides alone what enters the history.
-2. **Approval by staging.** In [Git](https://git-scm.com/), the staging area is the approval surface: staging a change means approving it.
+2. **Approval by staging.** The reviewer approves a chunk by writing it to the approval surface — in Git, by staging it. Staging a change means approving it.
 3. **Cheap failure.** A branch costs nothing, so experiments are encouraged. A failed attempt is closed and deleted with no effect on `main`.
 4. **End-to-end traceability.** Every change links back to an issue (the _why_). The commits record the _how_, and the pull request records the _discussion_.
 5. **Validation before integration.** Checks run before code reaches `main`, never after.
 
 ## 5. Roles
 
-| Role           | Held by                                              | Responsibilities                                                                                                                           |
-| -------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Maintainer** | Human                                                | Confirms task specs, reviews and stages every chunk written by the agent, answers review questions, is the sole author of record           |
-| **Agent**      | [Claude Code](https://code.claude.com/docs)          | Restates tasks as specs, writes code in reviewable chunks, runs the local check pipeline, commits what was staged, runs every process step |
-| **CI**         | [GitHub Actions](https://docs.github.com/en/actions) | Runs the full test suite, typecheck and build on every push to a pull request                                                              |
-| **Reporter**   | Users, staff                                         | Supply feedback that becomes issues                                                                                                        |
+| Role           | Held by                                                                      | Responsibilities                                                                                                                           |
+| -------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Maintainer** | Human                                                                        | Confirms task specs, reviews and stages every chunk written by the agent, answers review questions, is the sole author of record           |
+| **Agent**      | A coding agent, such as [Claude Code](https://code.claude.com/docs)          | Restates tasks as specs, writes code in reviewable chunks, runs the local check pipeline, commits what was staged, runs every process step |
+| **CI**         | The forge's CI, such as [GitHub Actions](https://docs.github.com/en/actions) | Runs the full test suite, typecheck and build on every push to a pull request                                                              |
+| **Reporter**   | Users, staff                                                                 | Supply feedback that becomes issues                                                                                                        |
 
 The authorship rule is symmetric. Whoever did not write a chunk approves it by staging it, and the author then commits exactly what was staged.
 
+Any coding agent can hold the Agent role if it can run shell commands, load persistent instructions, run a stored procedure only when the maintainer invokes it, watch the approval surface without losing its session, and be configured to leave its own attribution out of commits and pull requests.
+
 ## 6. Artifacts
 
-| Artifact                | Created in phase | Purpose                                                                                                 |
-| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
-| Issue                   | P1               | States what, why, and what "done" looks like                                                            |
-| Branch `<n>-<slug>`     | P2               | Isolates the work, linked to issue `#n`                                                                 |
-| Chunk                   | P3               | One logical, reviewable unit of change, left unstaged                                                   |
-| Commit                  | P3               | One approved chunk, lowercase imperative title                                                          |
-| Pull request            | P4               | Discussion space, CI trigger, closes the issue on merge                                                 |
-| `CHANGELOG.md` entry    | P4               | One summary per pull request, in [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format        |
-| Squash commit on `main` | P6               | One line of history per feature                                                                         |
-| `CLAUDE.md`             | Setup            | Persistent instructions that encode this specification ([docs](https://code.claude.com/docs/en/memory)) |
-| Skills                  | Setup            | Reusable procedures such as feedback intake ([docs](https://code.claude.com/docs/en/skills))            |
+| Artifact                | Created in phase | Purpose                                                                                                                                                                                                          |
+| ----------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Issue                   | P1               | States what, why, and what "done" looks like                                                                                                                                                                     |
+| Branch `<n>-<slug>`     | P2               | Isolates the work, linked to issue `#n`                                                                                                                                                                          |
+| Chunk                   | P3               | One logical, reviewable unit of change, left unstaged                                                                                                                                                            |
+| Commit                  | P3               | One approved chunk, lowercase imperative title                                                                                                                                                                   |
+| Pull request            | P4               | Discussion space, CI trigger, closes the issue on merge                                                                                                                                                          |
+| `CHANGELOG.md` entry    | P4               | One summary per pull request, in [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format                                                                                                                 |
+| Squash commit on `main` | P6               | One line of history per feature                                                                                                                                                                                  |
+| Instructions file       | Setup            | Persistent instructions that encode this specification: [`AGENTS.md`](https://agents.md/), which most agents read, or the agent's own file, such as `CLAUDE.md` ([docs](https://code.claude.com/docs/en/memory)) |
+| Skills                  | Setup            | Reusable procedures such as feedback intake, in the agent's skill format ([docs](https://code.claude.com/docs/en/skills))                                                                                        |
 
 ## 7. Lifecycle
 
