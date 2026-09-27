@@ -25,13 +25,18 @@ export interface Command {
   cwd: string | null;
   // Text on stdin when it is known (heredoc, here-string, piped echo).
   stdin: string | null;
+  // Variables set for the command by `NAME=value`, `env` or `export`.
+  env: Env;
 }
+
+export type Env = Record<string, Word>;
 
 export type ParseResult =
   { ok: true; commands: Command[] } | { ok: false; reason: string };
 
 export class Unparseable extends Error {}
 
+const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
 const MENTION = /(^|[^\w.-])(git|gh)(\.exe)?([^\w.-]|$)/;
 const KEYWORDS = new Set([
   "if",
@@ -100,9 +105,11 @@ class Level {
   output: string | null = null;
   piped = false;
   cwd: string | null;
+  env: Env;
 
-  constructor(cwd: string | null) {
+  constructor(cwd: string | null, env: Env) {
     this.cwd = cwd;
+    this.env = env;
   }
 }
 
@@ -116,6 +123,11 @@ function chdir(cwd: string | null, dir: Word | undefined): string | null {
   return isAbsolute(dir.value) ? dir.value : join(cwd, dir.value);
 }
 
+function assign(env: Env, word: Word) {
+  const eq = word.value.indexOf("=");
+  env[word.value.slice(0, eq)] = { ...word, value: word.value.slice(eq + 1) };
+}
+
 function isGitOrGh(word: Word): boolean {
   return MENTION.test(word.value);
 }
@@ -125,18 +137,20 @@ class Parser {
   private readonly inner: Command[] = [];
   private readonly src: string;
   private readonly cwd: string | null;
+  private readonly env: Env;
 
-  constructor(src: string, cwd: string | null) {
+  constructor(src: string, cwd: string | null, env: Env = {}) {
     this.src = src;
     this.cwd = cwd;
+    this.env = env;
   }
 
   run(): Command[] {
-    return [...this.list(false, this.cwd).commands, ...this.inner];
+    return [...this.list(false, this.cwd, this.env).commands, ...this.inner];
   }
 
-  private list(sub: boolean, cwd: string | null): Level {
-    const level = new Level(cwd);
+  private list(sub: boolean, cwd: string | null, env: Env): Level {
+    const level = new Level(cwd, { ...env });
     let current = draft();
     let depth = 0;
     const end = (pipe: boolean) => {
@@ -283,18 +297,30 @@ class Parser {
 
   private build(input: Word[], stdin: string | null, level: Level) {
     const words = [...input];
-    while (words.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(words[0].value)) {
-      words.shift();
-    }
     while (words.length && KEYWORDS.has(words[0].value)) words.shift();
+    const env = { ...level.env };
+    while (words.length && ASSIGNMENT.test(words[0].value)) {
+      assign(env, words.shift()!);
+    }
     if (!words.length) return [];
     const head = words[0].value;
     if (head === "for" || head === "select" || head === "function") return [];
     if (head === "case") throw new Unparseable("case statements");
-    return this.unwrap(words, stdin, level);
+    if (head === "export") {
+      for (const word of words.slice(1)) {
+        if (ASSIGNMENT.test(word.value)) assign(level.env, word);
+      }
+      return [];
+    }
+    return this.unwrap(words, stdin, level, env);
   }
 
-  private unwrap(words: Word[], stdin: string | null, level: Level): Command[] {
+  private unwrap(
+    words: Word[],
+    stdin: string | null,
+    level: Level,
+    env: Env,
+  ): Command[] {
     const [head, ...rest] = words;
     if (head.dynamic) throw new Unparseable("the command name is not static");
     const program = head.value
@@ -310,6 +336,7 @@ class Parser {
         config: [],
         cwd: level.cwd,
         stdin,
+        env,
       },
     ];
     const skip = (withValue: string[], from = 0) => {
@@ -321,13 +348,13 @@ class Parser {
       return i;
     };
     const then = (i: number) =>
-      i < rest.length ? this.unwrap(rest.slice(i), stdin, level) : other();
+      i < rest.length ? this.unwrap(rest.slice(i), stdin, level, env) : other();
 
     switch (program) {
       case "git":
-        return this.git(rest, stdin, level);
+        return this.git(rest, stdin, level, env);
       case "gh":
-        return this.gh(rest, stdin, level);
+        return this.gh(rest, stdin, level, env);
       case "env": {
         let i = 0;
         while (i < rest.length) {
@@ -335,9 +362,20 @@ class Parser {
           if (["-C", "--chdir", "-S", "--split-string"].includes(v)) {
             throw new Unparseable(`env ${v}`);
           }
-          if (v === "-u" || v === "--unset") i += 2;
-          else if (v.startsWith("-") || /^[A-Za-z_][A-Za-z0-9_]*=/.test(v)) i++;
-          else break;
+          if (v === "-i" || v === "--ignore-environment") {
+            for (const name of Object.keys(env)) delete env[name];
+            i++;
+          } else if (v === "-u" || v === "--unset") {
+            delete env[rest[i + 1]?.value ?? ""];
+            i += 2;
+          } else if (ASSIGNMENT.test(v)) {
+            assign(env, rest[i]);
+            i++;
+          } else if (v.startsWith("-")) {
+            i++;
+          } else {
+            break;
+          }
         }
         return then(i);
       }
@@ -366,7 +404,7 @@ class Parser {
         if (rest.some((w) => w.dynamic)) {
           throw new Unparseable("eval of a dynamic string");
         }
-        return this.nested(rest.map((w) => w.value).join(" "), level.cwd);
+        return this.nested(rest.map((w) => w.value).join(" "), level.cwd, env);
       case "cd":
         level.cwd = chdir(
           level.cwd,
@@ -414,13 +452,13 @@ class Parser {
         if (!text) throw new Unparseable(`${program} -c without a script`);
         if (text.dynamic)
           throw new Unparseable(`${program} -c of a dynamic script`);
-        return this.nested(text.value, level.cwd);
+        return this.nested(text.value, level.cwd, env);
       }
       if (i < rest.length) return other();
       if (stdin === null) {
         throw new Unparseable(`${program} reading an unknown script on stdin`);
       }
-      return this.nested(stdin, level.cwd);
+      return this.nested(stdin, level.cwd, env);
     }
 
     if (RUNNERS.has(program) && rest.some(isGitOrGh)) {
@@ -429,7 +467,12 @@ class Parser {
     return other();
   }
 
-  private git(rest: Word[], stdin: string | null, level: Level): Command[] {
+  private git(
+    rest: Word[],
+    stdin: string | null,
+    level: Level,
+    env: Env,
+  ): Command[] {
     let cwd = level.cwd;
     const config: string[] = [];
     let i = 0;
@@ -470,11 +513,17 @@ class Parser {
         config,
         cwd,
         stdin,
+        env,
       },
     ];
   }
 
-  private gh(rest: Word[], stdin: string | null, level: Level): Command[] {
+  private gh(
+    rest: Word[],
+    stdin: string | null,
+    level: Level,
+    env: Env,
+  ): Command[] {
     let i = 0;
     while (i < rest.length && rest[i].value.startsWith("-")) {
       i += ["-R", "--repo"].includes(rest[i].value) ? 2 : 1;
@@ -490,12 +539,13 @@ class Parser {
         config: [],
         cwd: level.cwd,
         stdin,
+        env,
       },
     ];
   }
 
-  private nested(script: string, cwd: string | null): Command[] {
-    return new Parser(script, cwd).run();
+  private nested(script: string, cwd: string | null, env: Env): Command[] {
+    return new Parser(script, cwd, env).run();
   }
 
   // Reads one word from this.pos, resolving quotes and marking expansions.
@@ -511,7 +561,7 @@ class Parser {
       src[this.pos + 1] === "("
     ) {
       this.pos += 2;
-      this.inner.push(...this.list(true, level.cwd).commands);
+      this.inner.push(...this.list(true, level.cwd, level.env).commands);
       return { value: "", dynamic: true, glob: false };
     }
 
@@ -596,8 +646,8 @@ class Parser {
       }
       if (i >= src.length) throw new Unparseable("unbalanced backtick");
       this.pos = i + 1;
-      const parser = new Parser(body, level.cwd);
-      const sub = parser.list(false, level.cwd);
+      const parser = new Parser(body, level.cwd, level.env);
+      const sub = parser.list(false, level.cwd, level.env);
       this.inner.push(...sub.commands, ...parser.inner);
       return this.substituted(sub);
     }
@@ -617,7 +667,7 @@ class Parser {
     }
     if (next === "(") {
       this.pos += 2;
-      const sub = this.list(true, level.cwd);
+      const sub = this.list(true, level.cwd, level.env);
       this.inner.push(...sub.commands);
       return this.substituted(sub);
     }
