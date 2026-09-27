@@ -77,7 +77,7 @@ test(
   },
 );
 
-test("off restores the setup on returns to", { skip }, () => {
+test("off restores the setup as on found it", { skip }, () => {
   const dir = home({
     "CLAUDE.md": mine,
     "settings.json": JSON.stringify(settings),
