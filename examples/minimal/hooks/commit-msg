@@ -1,0 +1,12 @@
+#!/bin/sh
+# HuG Flow I5: the maintainer is the sole author of record.
+# Rejects co-author trailers and generated-by footers, whichever agent wrote the message.
+# Same patterns as the reference implementation's guard.
+
+pattern='^[[:space:]]*co-authored-by[[:space:]]*:|generated (with|by) \[?(claude|codex|copilot|cursor|gemini|chatgpt|an? ai)'
+
+if grep -qiE "$pattern" "$1"; then
+  echo "commit-msg: HuG Flow I5 allows no co-author trailer or generated-by footer:" >&2
+  grep -niE "$pattern" "$1" >&2
+  exit 1
+fi

@@ -1,18 +1,22 @@
 # Minimal setup
 
-A generic starting point for running [HuG Flow](../../spec/hug-flow.md) with [Claude Code](https://code.claude.com/docs) on [GitHub](https://github.com/). It has no personal conventions. Copy it, then adapt it to your own needs and habits (see [Adapting it](#adapting-it)).
+A generic starting point for running [HuG Flow](../../spec/hug-flow.md) with a coding agent on [GitHub](https://github.com/). Its instructions are in [`AGENTS.md`](https://agents.md/), which most agents read, and Claude Code loads them through `CLAUDE.md`. It has no personal conventions. Copy it, then adapt it to your own needs and habits (see [Adapting it](#adapting-it)).
 
 For an example of a setup adapted by one maintainer, see [`examples/julien`](../julien/README.md).
 
 ## Files
 
-| File                                               | Install to                                                                     | Covers         |
-| -------------------------------------------------- | ------------------------------------------------------------------------------ | -------------- |
-| [`CLAUDE.md`](CLAUDE.md)                           | `~/.claude/CLAUDE.md` for every project, or `<repo>/CLAUDE.md` for one project | P1–P6, I2–I5   |
-| [`skills/intake/SKILL.md`](skills/intake/SKILL.md) | `~/.claude/skills/intake/` or `<repo>/.claude/skills/intake/`                  | P0, I6         |
-| [`ruleset.json`](ruleset.json)                     | Applied once per repository, see below                                         | I1, I3, I4, P6 |
+| File                                               | Install to                                                             | Covers         |
+| -------------------------------------------------- | ---------------------------------------------------------------------- | -------------- |
+| [`AGENTS.md`](AGENTS.md)                           | `<repo>/AGENTS.md`, or your agent's global instructions file           | P1–P6, I2–I5   |
+| [`CLAUDE.md`](CLAUDE.md)                           | Next to `AGENTS.md`, for Claude Code: it only imports it               | —              |
+| [`skills/intake/SKILL.md`](skills/intake/SKILL.md) | `~/.claude/skills/intake/` or `<repo>/.claude/skills/intake/`          | P0, I6         |
+| [`hooks/commit-msg`](hooks/commit-msg)             | `<repo>/.git/hooks/commit-msg`, or a directory set as `core.hooksPath` | I5             |
+| [`ruleset.json`](ruleset.json)                     | Applied once per repository, see below                                 | I1, I3, I4, P6 |
 
-The first two are instructions: they rely on the model following them. The ruleset is enforced by GitHub, so it holds whatever the agent does.
+`AGENTS.md` and the intake skill are instructions: they rely on the model following them. The hook is enforced by Git and the ruleset by GitHub, so they hold whatever the agent does.
+
+With another agent, see the [agent bindings](../../spec/bindings/agents.md) for where it reads instructions and skills, and for its switch that keeps the intake skill from running unless invoked. With another forge, replace the `gh` commands in `AGENTS.md` using the [forge bindings](../../spec/bindings/forges.md).
 
 ## Requirements
 
@@ -24,7 +28,8 @@ The first two are instructions: they rely on the model following them. The rules
 
 To install it in one step, and remove it just as easily, use [`/hug`](../../skills/hug/SKILL.md) (see [Get started](../../README.md#get-started)). It does step 1 and, with `--repo`, steps 2 to 4 for you. By hand:
 
-1. Copy `CLAUDE.md` and the `skills/intake/` folder to one of the locations above.
+1. Copy `AGENTS.md`, `CLAUDE.md` and the `skills/intake/` folder to one of the locations above.
+   Copy `hooks/commit-msg` to `.git/hooks/` and keep it executable.
 2. Edit `ruleset.json`: replace `test` in `required_status_checks` with the names of your CI jobs. A required check that never reports blocks every merge. Without CI, remove that rule.
 3. Apply the ruleset:
 
@@ -75,11 +80,11 @@ Keep your changes in the file itself rather than in scattered session instructio
 
 | Invariant                              | Instructed by | Enforced by                          |
 | -------------------------------------- | ------------- | ------------------------------------ |
-| I1. `main` is deployable               | `CLAUDE.md`   | Ruleset: required status checks      |
-| I2. No unreviewed line                 | `CLAUDE.md`   | No                                   |
-| I3. No merge without green CI          | `CLAUDE.md`   | Ruleset: required status checks      |
-| I4. No direct or forced push to `main` | `CLAUDE.md`   | Ruleset: pull request, no force push |
-| I5. Maintainer is sole author          | `CLAUDE.md`   | No                                   |
+| I1. `main` is deployable               | `AGENTS.md`   | Ruleset: required status checks      |
+| I2. No unreviewed line                 | `AGENTS.md`   | No                                   |
+| I3. No merge without green CI          | `AGENTS.md`   | Ruleset: required status checks      |
+| I4. No direct or forced push to `main` | `AGENTS.md`   | Ruleset: pull request, no force push |
+| I5. Maintainer is sole author          | `AGENTS.md`   | `commit-msg` hook                    |
 | I6. External text is data              | Intake skill  | No                                   |
 
-To enforce I5 too, set `"includeCoAuthoredBy": false` in your Claude Code settings, as in the other example's [`settings.json`](../julien/settings.json).
+The hook guards commits, not pull request bodies or comments. Turn off your agent's own attribution too, so it stops adding the lines in the first place: the [agent bindings](../../spec/bindings/agents.md#attribution) list each setting.
