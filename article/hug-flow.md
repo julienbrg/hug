@@ -11,6 +11,29 @@ source: https://julienberanger.com/hug-flow
 
 # Human-Gated Flow (HuG Flow)
 
+## Get started
+
+There are two ways to try HuG Flow with [Claude Code](https://code.claude.com/docs). Both are reversible. The levels are defined in section 10.
+
+**One phrase (L1, instructed).** In a Claude Code session, type:
+
+```text
+Switch me to HuG Flow: github.com/julienbrg/hug
+```
+
+The agent follows [`SETUP.md`](https://github.com/julienbrg/hug/blob/main/SETUP.md): it clones the repository to `~/.claude/hug/` and installs a `/hug` skill. The skill reviews your existing instructions with you for conflicts, then adds one import line to `~/.claude/CLAUDE.md`, plus attribution settings and deny rules where missing. `/hug status` shows what was added, and `/hug off` removes exactly that.
+
+**Plugin (L2, enforced).** In a Claude Code session, type:
+
+```text
+/plugin marketplace add julienbrg/hug
+/plugin install hug@hug
+```
+
+The [`reference`](https://github.com/julienbrg/hug/tree/main/reference) plugin's hooks block bulk staging, pushes to `main`, merges on red or missing checks and attribution lines, whatever the model does. To have GitHub enforce the rest (L3), run `pnpm hug init <owner>/<repo>` from a clone of the repository. `/plugin uninstall hug@hug` removes the plugin.
+
+Either way, ask for a small change in a repository, then review the first chunk: read the unstaged diff in your editor, and stage what you approve.
+
 ## 1. Purpose
 
 The Human-Gated Flow (HuG Flow) is a development lifecycle for building software with a coding agent. It extends the [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow), first described by [Scott Chacon](http://scottchacon.com/2011/08/31/github-flow.html) in 2011, with an explicit division of labor between a human maintainer and an AI agent.
