@@ -39,7 +39,7 @@ The check pipeline is the project's format check and linter only. Tests, typeche
 When you write a chunk (code, tests, docs, config, anything):
 
 - Write one logical chunk, small enough to read in one sitting. Leave it unstaged, say in one line what it is, and stop.
-- The moment it is on disk, in one command, record the tree it would commit as, built in a throwaway index (`GIT_INDEX_FILE=<literal tmp path> sh -c 'git read-tree HEAD && git add -A && git write-tree'`), and run the check pipeline on it. Keep the recorded tree only if the check passes. If it fails, say so, fix it as new unstaged changes, and check again.
+- The moment it is complete on disk, in one command, record the tree it would commit as, built in a throwaway index (`GIT_INDEX_FILE=<literal tmp path> sh -c 'git read-tree HEAD && git add -A && git write-tree'`), and run the check pipeline on it. Keep the recorded tree only if the check passes. If it fails, say so, fix it as new unstaged changes, and check again.
 - Never run `git add` on your own work.
 - Right after leaving a chunk unstaged, start a background watcher, such as `until [ -n "$(git diff --cached --name-only)" ]; do sleep 1; done`. When something is staged, compare `git write-tree` with the recorded tree in the same command as the commit. If they match, commit right away; otherwise run the check pipeline on the staged content first. Then push, and start a fresh watcher after every commit.
 - If only part of a chunk is staged, commit that part and leave the rest unstaged.
@@ -48,7 +48,7 @@ When you write a chunk (code, tests, docs, config, anything):
 
 When the maintainer writes a chunk, they leave it unstaged and tell you. Review it, stage what you approve by naming the files, and let them commit.
 
-While chunk N is under review, you may write chunk N+1 in a linked worktree outside the repository (`git worktree add --detach <path> HEAD`), on top of a local copy of chunk N. Install dependencies there rather than linking them. Once chunk N is staged, in a single command, commit it, apply the worktree's diff to the repository (`git -C <path> diff HEAD | git apply`) as the next unstaged chunk, and record and check that chunk. Stay one chunk ahead, no more, and remove the worktree when the work is done.
+While chunk N is under review, you may write chunk N+1 in a linked worktree outside the repository (`git worktree add --detach <path> HEAD`), on top of a local copy of chunk N. Install dependencies there rather than linking them. Once chunk N is staged, in a single command, commit it and apply the worktree's diff to the repository (`git -C <path> diff HEAD | git apply`) as the next unstaged chunk, finished or not. If it is unfinished, say so and finish it in place. Once it is complete, record and check it, and say it is ready for review. If part of it is staged before then, check the staged content and commit it. Stay one chunk ahead, no more, and remove the worktree when the work is done.
 
 ## Issues
 
