@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Stage-then-commit loop: the agent format-checks and lints each chunk before announcing it and records the checked tree as a fingerprint. A chunk staged whole commits with no check wait, so the next chunk lands at once. Partial or edited stages and the maintainer's own chunks are still checked at commit time, on the staged content rather than the working tree. Updated in the spec (P3, with a new MUST rule), both example setups and the article (§5, §9, §11.1).
 - The article's description says a human "approves every chunk of content" instead of "gates every line", matching the README.
 - The spec abstract points to both example setups instead of calling `examples/julien` the reference implementation.
 - Pipelining in P3 now uses a linked `git worktree` instead of a scratch copy under `/private/tmp`, in the spec, the reference `CLAUDE.md` and the article. The agent prepares at most one chunk ahead.

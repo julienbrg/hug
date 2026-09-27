@@ -17,7 +17,7 @@ The first two are instructions: they rely on the model following them. The rules
 ## Requirements
 
 - [`git`](https://git-scm.com/), and [`gh`](https://cli.github.com/) logged in with access to the repository;
-- the project's own format check and linter, which the agent runs at commit time;
+- the project's own format check and linter, which the agent runs on each chunk before announcing it;
 - CI that runs tests on pull requests. Without it, the agent runs the full local pipeline before merging.
 
 ## Install
