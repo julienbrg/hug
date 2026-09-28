@@ -23,33 +23,35 @@ go to `article/hug-flow.md`, never to the repo files it was compared with.
 
 ## Map
 
-| Repo                                              | Article                                   |
-| ------------------------------------------------- | ----------------------------------------- |
-| `spec/hug-flow.md` §1 to §10                      | §1 to §10                                 |
-| `spec/hug-flow.md` §11 Relationship to the ADLC   | §12                                       |
-| `examples/julien/README.md`, Stack                | §11 Stack                                 |
-| `examples/julien/README.md`, other sections       | §13 intro, 13.1 to 13.5 prose and tables  |
-| `examples/julien/CLAUDE.md`                       | §13.1 code block, character for character |
-| `examples/julien/skills/super-app-issue/SKILL.md` | §13.2 code block, character for character |
-| `examples/julien/settings.json`                   | §13.3 settings JSON and deny rules        |
-| `examples/julien/repo-settings.sh`                | §13.3 `gh repo edit` / `gh api` block     |
-| `README.md` intro, `package.json` `description`   | Frontmatter `title`, `description`        |
-| `README.md` Get started, `SETUP.md`               | Get started                               |
-| Further reading in the spec and examples README   | Further reading                           |
+| Repo                                              | Article                                                        |
+| ------------------------------------------------- | -------------------------------------------------------------- |
+| `README.md` intro, `package.json` `description`   | Frontmatter `title`, `description`                             |
+| `README.md` intro                                 | Intro, between the title and Motivation                        |
+| `README.md` Motivation                            | Motivation                                                     |
+| `README.md` Get started, `SETUP.md`               | Get started                                                    |
+| `spec/hug-flow.md`, header table to §11           | Official spec, character for character                         |
+| `examples/julien/README.md` intro and Files       | My own setup intro                                             |
+| `examples/julien/CLAUDE.md`                       | My own setup, `CLAUDE.md` code block, character for character  |
+| `examples/julien/skills/super-app-issue/SKILL.md` | My own setup, intake skill code block, character for character |
+| Further reading in the spec and examples README   | Further reading                                                |
 
 ## Expected differences
 
 Don't report these:
 
-- The spec's header table and Abstract, and its links to `examples/julien/`.
-- Section numbers shifted by the article's §11 Stack, which the spec doesn't have.
-- First person ("I", "my setup") in the article vs neutral wording in the spec.
+- In Official spec: headings one level lower, relative links turned into
+  absolute `https://github.com/julienbrg/hug/...` URLs, and the spec's title
+  and Further reading left out.
+- In the intro: the README's "Human-Gated Flow" subtitle and its line
+  pointing to the article left out.
+- In Get started: links to repo files written as plain text or absolute URLs.
+- The rest of `examples/julien/README.md` (Stack, lifecycle mapping,
+  enforcement layer, coverage, known deviations) and
+  `examples/julien/settings.json` and `repo-settings.sh`: the article links
+  to `examples/julien` instead of quoting them.
+- First person ("I", "my setup") in the article vs neutral wording in the repo.
 - Wording that points to a file in the repo where the article quotes it
-  inline ("Here it is as I use it", "applies them from the command line").
-- `examples/julien/settings.json` merging today's settings with the deny
-  rules the article presents as additions.
-- `repo-settings.sh` taking `<owner>/<repo>` where the article uses `{owner}/{repo}`.
-- The article's line pointing to this repository.
+  inline ("Here it is as I use it").
 - Markdown formatting that prettier applies to the repo but not to `article/`
   (table padding, list markers, emphasis style) when the text is the same.
 
