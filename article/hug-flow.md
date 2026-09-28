@@ -6,6 +6,7 @@ lang: en-US
 author: Julien Béranger
 model: Claude Opus 5.5
 conversation: https://github.com/julienbrg/hug
+source: https://julienberanger.com/hug-flow
 ---
 
 # Human-Gated Flow (HuG Flow)
