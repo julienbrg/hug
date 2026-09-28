@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - A Motivation section in the README and the article.
-- A published-text rule in `examples/julien/CLAUDE.md` and `examples/minimal/AGENTS.md`: the task spec carries the suggested issue title and description, which the confirmation approves and the pull request reuses, and every other text the agent publishes on the forge, such as a pull request comment on a choice, a finding or a minor issue met along the way, is drafted and posted only once the maintainer approves it.
+- A published-text rule in `examples/julien/CLAUDE.md` and `examples/minimal/AGENTS.md`: the agent shows the maintainer every text before publishing it on the forge, posts exactly what they approve, and drafts a pull request comment on a choice, a finding or a minor issue met along the way. A draft waiting for approval never blocks a commit or a push.
 
 ### Changed
 
