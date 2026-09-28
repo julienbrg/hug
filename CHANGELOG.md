@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - A Motivation section in the README and the article.
+- A published-text rule in `examples/julien/CLAUDE.md` and `examples/minimal/AGENTS.md`: the task spec carries the suggested issue title and description, which the confirmation approves and the pull request reuses, and every other text the agent publishes on the forge, such as a pull request comment on a choice, a finding or a minor issue met along the way, is drafted and posted only once the maintainer approves it.
 
 ### Changed
 
@@ -18,6 +19,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - The `jq` code path in `hug.sh`: `on` and `off` use `node`, and stop up front without it.
 - The dead `notes/hug-toggle-spec.md` reference in `hug.sh`.
+
+### Fixed
+
+- The `examples/julien/README.md` mapping table pointed the artifact conventions to section 5 instead of 6.
 
 ## [0.3.0] - 2026-09-27
 
