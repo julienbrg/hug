@@ -132,22 +132,11 @@ the work is done.
 
 # Published text
 
-I approve every text you publish on GitHub: issue and pull request
-titles and bodies, and comments. Post exactly what I approved, or my
-edited version.
-
-- The issue title and description are approved with the task spec, and
-  the pull request reuses them, so opening either needs no extra
-  approval.
-- As the work goes on, draft a pull request comment when you make a
-  choice I didn't specify (naming, approach, a tradeoff), find something
-  new about the codebase or the task, or hit a minor issue out of scope
-  (a bug, stale docs, a flaky check). Show me the draft and post it only
-  once I approve it.
-- Any other text, such as an edited title or body or another comment,
-  follows the same draft-then-approve rule.
-- Keep working while a draft waits: it never blocks a commit or a push.
-  Commit messages are not covered; staging a chunk is enough for them.
+Show me every text before you publish it on the forge (titles, bodies,
+comments) and post exactly what I approve. Draft a pull request
+comment when you make a choice I didn't specify, find something new, or
+hit a minor issue out of scope. A draft waiting for me never blocks a
+commit or a push.
 
 # Commits
 
