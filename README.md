@@ -18,9 +18,9 @@ Some devs brag about how they let LLMs code entire apps and services overnight w
 
 ## Get started
 
-There are two ways to try HuG Flow with [Claude Code](https://code.claude.com/docs). Both are reversible. The levels are defined in [§10 of the spec](spec/hug-flow.md).
+There are two ways to try HuG Flow with [Claude Code](https://code.claude.com/docs). Both are reversible. Not sure which? Start with the first: it takes one phrase, and you can add the plugin later.
 
-**One phrase (L1, instructed).** In a Claude Code session, type:
+**Instructions only.** In a Claude Code session, type:
 
 ```text
 Switch me to HuG Flow: github.com/julienbrg/hug
@@ -28,16 +28,37 @@ Switch me to HuG Flow: github.com/julienbrg/hug
 
 An agent asked to switch someone to HuG Flow follows [`SETUP.md`](SETUP.md): it clones this repository to `~/.claude/hug/` and installs the [`/hug`](skills/hug/SKILL.md) skill. The skill reviews your existing instructions with you for conflicts, then adds one import line to `~/.claude/CLAUDE.md`, plus attribution settings and deny rules where missing. `/hug status` shows what was added, and `/hug off` removes exactly that.
 
-**Plugin (L2, enforced).** In a Claude Code session, type:
+**Plugin, with enforcement.** In a Claude Code session, type:
 
 ```text
 /plugin marketplace add julienbrg/hug
 /plugin install hug@hug
 ```
 
-The [`reference`](reference/README.md) plugin's hooks block bulk staging, pushes to `main`, merges on red or missing checks and attribution lines, whatever the model does. To have GitHub enforce the rest (L3), run `pnpm hug init <owner>/<repo>` from a clone. `/plugin uninstall hug@hug` removes the plugin.
+The [`reference`](reference/README.md) plugin's hooks block bulk staging, pushes to `main`, merges on red or missing checks and attribution lines, whatever the model does. To have GitHub enforce the rest, run `pnpm hug init <owner>/<repo>` from a clone. `/plugin uninstall hug@hug` removes the plugin.
 
 Either way, ask for a small change in a repository, then review the first chunk: read the unstaged diff in your editor, and stage what you approve.
+
+The spec calls these setups levels L1, L2 and L3 (see [Conformance](spec/hug-flow.md#10-conformance)).
+
+## What it looks like
+
+You ask for a change in a repository:
+
+```text
+Add a --dry-run flag to the deploy script
+```
+
+The agent restates it as a short spec: what it understood, the files it expects to touch, and the issue it will open. You answer "go". From there:
+
+1. It opens an issue, creates a branch from `main` linked to it, and checks it out.
+2. It writes the first chunk, leaves it unstaged, says in one line what it is, and stops.
+3. You read the diff in your editor and stage what you approve. If something is off, you say so instead, and it proposes a fix.
+4. It sees the staged change, runs the format check and the linter, commits exactly what you staged, pushes, and opens the pull request.
+5. It writes the next chunk and stops again. You repeat step 3 until the work is done.
+6. It writes the changelog as a last chunk, waits for CI to go green, squash-merges, and reports the issue, pull request and merge.
+
+Apart from staging, you never touch Git, and nothing enters the history without you reading it.
 
 ## Contents
 
@@ -55,10 +76,6 @@ Either way, ask for a small change in a repository, then review the first chunk:
 | [`conformance/`](conformance/)                                           | Scenario tests proving the reference implementation's L2 level, run by `pnpm test`                           |
 | [`examples/minimal/`](examples/minimal/README.md)                        | A generic setup to start from and adapt: `AGENTS.md`, an intake skill, a `commit-msg` hook, a GitHub ruleset |
 | [`examples/julien/`](examples/julien/README.md)                          | A personal setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI              |
-
-## The flow in one paragraph
-
-A request becomes an issue. The agent branches from `main`, then writes one small chunk at a time and leaves it unstaged. The maintainer reads the diff in the editor and stages what they approve. The agent runs the format check and the linter, commits exactly what was staged, pushes, and starts the next chunk. A pull request is open from the first push. When the work is done and CI is green, the agent squash-merges, cleans up, and reports.
 
 ## Contributing
 
