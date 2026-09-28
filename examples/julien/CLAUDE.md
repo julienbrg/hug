@@ -2,13 +2,16 @@
 
 Before starting any non-trivial task, rephrase my request in your own
 words as a short spec (what you understood, what you're about to do,
-and the list of files you expect to create, modify or delete) and
-wait for my confirmation. Accept "go", "yes", "y", "yep", "sure",
-or anything equivalent as confirmation — don't demand exact wording.
+the list of files you expect to create, modify or delete, and the
+suggested issue title and description) and wait for my
+confirmation. Accept "go", "yes", "y", "yep", "sure", or anything
+equivalent as confirmation — don't demand exact wording.
+My confirmation approves the issue title and description too.
 
 Once confirmed, run the task end-to-end with zero further
 interruptions — no permission prompts, no intermediate check-ins —
-except the stage-then-commit loop defined below.
+except the stage-then-commit loop and the
+[published text](#published-text) approvals defined below.
 Skip this confirmation step for trivial asks (reading a file,
 answering a question, a one-line lookup).
 
@@ -63,7 +66,9 @@ Run the whole sequence end-to-end without pausing to ask permission at
 each step — this applies across all projects. The one exception is
 step 5 (commit), which does not work like a normal commit.
 
-Every other step, including push, runs without approval. Still show
+Every other step, including push, runs without approval — only the
+text it publishes needs mine (see [Published text](#published-text)).
+Still show
 what was done (issue #, branch, PR #, merge result) so I can see and
 intervene.
 
@@ -195,19 +200,39 @@ Repeat until the step's work is done.
 
 - Title starts with a capitalized verb, usually Add / Fix / Improve /
   Remove. e.g. `Add passkey recovery flow`, `Fix stale nonce on retry`.
-- If an issue has no main description, write one as the first comment:
-  what the task is, why, and what done looks like.
+- If an issue has no main description, draft one as the first comment
+  (what the task is, why, and what done looks like) and post it once I
+  approve it.
 - Assign it to me (`@me`).
 - Label it `enhancement` or `bug`, whichever fits.
 
 ## Pull requests
 
 - PR title is identical to the issue title — same verb, same casing.
-- Link the issue in the body so merging closes it (`closes #12`).
+- PR body is the approved issue description, then `closes #12` so
+  merging closes the issue.
 - Always assign it to me: `--assignee @me`.
 - Never push to main directly. Never force-push a shared branch.
 - If main moves under a long-lived branch, rebase the branch onto main
   and force-push — it's your own unshared branch, so that's safe.
+
+## Published text
+
+I approve every text you publish on GitHub: issue and PR titles and
+bodies, and comments. Post exactly what I approved, or my edited
+version.
+
+- The issue title and description are approved with the task spec, and
+  the PR reuses them, so opening either needs no extra approval.
+- As the work goes on, draft a PR comment when you make a choice I
+  didn't specify (naming, approach, a tradeoff), find something new
+  about the codebase or the task, or hit a minor issue out of scope (a
+  bug, stale docs, a flaky check). Show me the draft and post it only
+  once I approve it.
+- Any other text — an edited title or body, any other comment — follows
+  the same draft-then-approve rule.
+- Keep working while a draft waits: it never blocks a commit or a push.
+  Commit messages are not covered; staging a chunk is enough for them.
 
 ## Commits
 

@@ -1,13 +1,15 @@
 # Task confirmation
 
 Before starting any non-trivial task, restate my request as a short
-spec: what you understood, what you're about to do, and the files you
-expect to create, modify or delete. Wait for my confirmation. Accept
-"go", "yes" or anything equivalent.
+spec: what you understood, what you're about to do, the files you
+expect to create, modify or delete, and the suggested issue title and
+description. Wait for my confirmation. Accept "go", "yes" or anything
+equivalent. My confirmation approves the issue title and description
+too.
 
 Once confirmed, run the task end-to-end without further permission
-prompts or check-ins. The one exception is the stage-then-commit loop
-below. Skip the confirmation for trivial asks (reading a file,
+prompts or check-ins. The exceptions are the stage-then-commit loop
+and the published text approvals below. Skip the confirmation for trivial asks (reading a file,
 answering a question).
 
 # Attribution
@@ -114,16 +116,38 @@ the work is done.
 
 - Title starts with a capitalized imperative verb: `Add`, `Fix`,
   `Improve` or `Remove`. e.g. `Add passkey recovery flow`.
-- The body says what the task is, why, and what done looks like.
+- The body says what the task is, why, and what done looks like. If an
+  existing issue has none, draft one as its first comment and post it
+  once I approve it.
 - Assign it to me (`--assignee @me`) and label it `enhancement` or
   `bug`.
 
 # Pull requests
 
 - Title identical to the issue title.
-- Body contains `Closes #<number>`, so merging closes the issue.
+- Body is the approved issue description, then `Closes #<number>`, so
+  merging closes the issue.
 - Assign it to me (`--assignee @me`).
 - Never push to `main`. Never force-push a shared branch.
+
+# Published text
+
+I approve every text you publish on GitHub: issue and pull request
+titles and bodies, and comments. Post exactly what I approved, or my
+edited version.
+
+- The issue title and description are approved with the task spec, and
+  the pull request reuses them, so opening either needs no extra
+  approval.
+- As the work goes on, draft a pull request comment when you make a
+  choice I didn't specify (naming, approach, a tradeoff), find something
+  new about the codebase or the task, or hit a minor issue out of scope
+  (a bug, stale docs, a flaky check). Show me the draft and post it only
+  once I approve it.
+- Any other text, such as an edited title or body or another comment,
+  follows the same draft-then-approve rule.
+- Keep working while a draft waits: it never blocks a commit or a push.
+  Commit messages are not covered; staging a chunk is enough for them.
 
 # Commits
 
