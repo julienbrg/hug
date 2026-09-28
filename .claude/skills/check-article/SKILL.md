@@ -23,18 +23,18 @@ go to `article/hug-flow.md`, never to the repo files it was compared with.
 
 ## Map
 
-| Repo                                              | Article                                                        |
-| ------------------------------------------------- | -------------------------------------------------------------- |
-| `README.md` intro, `package.json` `description`   | Frontmatter `title`, `description`                             |
-| `README.md` intro                                 | Intro, between the title and Motivation                        |
-| `README.md` Motivation                            | Motivation                                                     |
-| `README.md` Get started, `SETUP.md`               | Get started                                                    |
-| `README.md` What it looks like                    | What it looks like                                             |
-| `spec/hug-flow.md`, header table to §11           | Official spec, character for character                         |
-| `examples/julien/README.md` intro and Files       | My own setup intro                                             |
-| `examples/julien/CLAUDE.md`                       | My own setup, `CLAUDE.md` code block, character for character  |
-| `examples/julien/skills/super-app-issue/SKILL.md` | My own setup, intake skill code block, character for character |
-| Further reading in the spec and examples README   | Further reading                                                |
+| Repo                                              | Article                                                       |
+| ------------------------------------------------- | ------------------------------------------------------------- |
+| `README.md` intro, `package.json` `description`   | Frontmatter `title`, `description`                            |
+| `README.md` intro                                 | Intro, between the title and Motivation                       |
+| `README.md` Motivation                            | Motivation                                                    |
+| `README.md` Get started, `SETUP.md`               | Get started                                                   |
+| `README.md` What it looks like                    | What it looks like                                            |
+| `spec/hug-flow.md`, header table to §11           | Official spec, character for character                        |
+| `examples/julien/README.md` intro and Files       | My own setup intro                                            |
+| `examples/julien/CLAUDE.md`                       | My own setup, `CLAUDE.md` code block, character for character |
+| `examples/julien/skills/super-app-issue/SKILL.md` | My own setup, intake skill summary and link                   |
+| Further reading in the spec and examples README   | Further reading                                               |
 
 ## Expected differences
 
