@@ -621,7 +621,9 @@ Intake skills are project-specific, because each one targets a given repository.
 - [Agent development lifecycle](https://docs.glean.com/agents/agent-development-lifecycle/adlc), Glean documentation
 - [ADLC vs SDLC](https://atlan.com/know/ai-agent/adlc-vs-sdlc/), Atlan
 - [GitHub CLI manual](https://cli.github.com/manual/)
+- [Claude Code memory](https://code.claude.com/docs/en/memory) and [skills](https://code.claude.com/docs/en/skills), Claude Code documentation
 - [Configure permissions](https://code.claude.com/docs/en/permissions), Claude Code documentation
+- [Claude Code for VS Code](https://code.claude.com/docs/en/vscode-extension)
 - [Available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets), GitHub documentation
 
 Questions or feedback? [Get in touch](http://julienberanger.com/contact).
