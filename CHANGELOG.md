@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- The article follows the repo: an intro and Motivation and Get started from the README, the specification verbatim under Official spec, and My own setup quoting `examples/julien/CLAUDE.md` and the `super-app-issue` skill. The Stack section and the setup's layers, enforcement, coverage and known deviations are no longer in the article; it links to `examples/julien` for them.
+- `/check-article` maps each article section to its source in the repo.
 - `hug.sh on --repo` delegates to `hug init` instead of re-implementing it, so both apply the same ruleset and require only the checks that passed on the last merged pull request. It runs before any local change, and stops with nothing changed when `hug init` refuses. It no longer calls `examples/julien/repo-settings.sh`.
 
 ### Removed
