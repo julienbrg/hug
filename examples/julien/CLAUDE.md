@@ -3,8 +3,9 @@
 Before starting any non-trivial task, rephrase my request in your own
 words as a short spec (what you understood, what you're about to do,
 the list of files you expect to create, modify or delete, and the
-suggested issue title and description) and wait for my confirmation. Accept "go", "yes", "y", "yep", "sure",
-or anything equivalent as confirmation — don't demand exact wording.
+suggested issue title and description) and wait for my
+confirmation. Accept "go", "yes", "y", "yep", "sure", or anything
+equivalent as confirmation — don't demand exact wording.
 My confirmation approves the issue title and description too.
 
 Once confirmed, run the task end-to-end with zero further
