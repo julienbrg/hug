@@ -9,12 +9,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - A Motivation section in the README and the article.
+- A "What it looks like" walkthrough of a first task, after Get started in the README and the article. It replaces the README's "The flow in one paragraph".
 - A published-text rule in `examples/julien/CLAUDE.md` and `examples/minimal/AGENTS.md`: the agent shows the maintainer every text before publishing it on the forge, posts exactly what they approve, and drafts a pull request comment on a choice, a finding or a minor issue met along the way. A draft waiting for approval never blocks a commit or a push.
 
 ### Changed
 
-- The article follows the repo: an intro and Motivation and Get started from the README, the specification verbatim under Official spec, and My own setup quoting `examples/julien/CLAUDE.md` and the `super-app-issue` skill. The Stack section and the setup's layers, enforcement, coverage and known deviations are no longer in the article; it links to `examples/julien` for them.
+- The article follows the repo: an intro and Motivation and Get started from the README, the specification verbatim under Official spec, and My own setup quoting `examples/julien/CLAUDE.md` and linking to the `super-app-issue` skill. The Stack section and the setup's layers, enforcement, coverage and known deviations are no longer in the article; it links to `examples/julien` for them.
 - `/check-article` maps each article section to its source in the repo.
+- Get started names its two options "Instructions only" and "Plugin, with enforcement", recommends the first, and mentions the L1 to L3 levels once, at the end.
+- The article's Further reading lists every link from the examples README.
 - `hug.sh on --repo` delegates to `hug init` instead of re-implementing it, so both apply the same ruleset and require only the checks that passed on the last merged pull request. It runs before any local change, and stops with nothing changed when `hug init` refuses. It no longer calls `examples/julien/repo-settings.sh`.
 
 ### Removed
