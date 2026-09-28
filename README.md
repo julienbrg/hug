@@ -18,9 +18,9 @@ Some devs brag about how they let LLMs code entire apps and services overnight w
 
 ## Get started
 
-There are two ways to try HuG Flow with [Claude Code](https://code.claude.com/docs). Both are reversible. The levels are defined in [§10 of the spec](spec/hug-flow.md).
+There are two ways to try HuG Flow with [Claude Code](https://code.claude.com/docs). Both are reversible. Not sure which? Start with the first: it takes one phrase, and you can add the plugin later.
 
-**One phrase (L1, instructed).** In a Claude Code session, type:
+**Instructions only.** In a Claude Code session, type:
 
 ```text
 Switch me to HuG Flow: github.com/julienbrg/hug
@@ -28,16 +28,18 @@ Switch me to HuG Flow: github.com/julienbrg/hug
 
 An agent asked to switch someone to HuG Flow follows [`SETUP.md`](SETUP.md): it clones this repository to `~/.claude/hug/` and installs the [`/hug`](skills/hug/SKILL.md) skill. The skill reviews your existing instructions with you for conflicts, then adds one import line to `~/.claude/CLAUDE.md`, plus attribution settings and deny rules where missing. `/hug status` shows what was added, and `/hug off` removes exactly that.
 
-**Plugin (L2, enforced).** In a Claude Code session, type:
+**Plugin, with enforcement.** In a Claude Code session, type:
 
 ```text
 /plugin marketplace add julienbrg/hug
 /plugin install hug@hug
 ```
 
-The [`reference`](reference/README.md) plugin's hooks block bulk staging, pushes to `main`, merges on red or missing checks and attribution lines, whatever the model does. To have GitHub enforce the rest (L3), run `pnpm hug init <owner>/<repo>` from a clone. `/plugin uninstall hug@hug` removes the plugin.
+The [`reference`](reference/README.md) plugin's hooks block bulk staging, pushes to `main`, merges on red or missing checks and attribution lines, whatever the model does. To have GitHub enforce the rest, run `pnpm hug init <owner>/<repo>` from a clone. `/plugin uninstall hug@hug` removes the plugin.
 
 Either way, ask for a small change in a repository, then review the first chunk: read the unstaged diff in your editor, and stage what you approve.
+
+The spec calls these setups levels L1, L2 and L3 (see [Conformance](spec/hug-flow.md#10-conformance)).
 
 ## Contents
 
