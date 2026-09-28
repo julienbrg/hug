@@ -47,6 +47,25 @@ Either way, ask for a small change in a repository, then review the first chunk:
 
 The spec below calls these setups levels L1, L2 and L3 (see Conformance).
 
+## What it looks like
+
+You ask for a change in a repository:
+
+```text
+Add a --dry-run flag to the deploy script
+```
+
+The agent restates it as a short spec: what it understood, the files it expects to touch, and the issue it will open. You answer "go". From there:
+
+1. It opens an issue, creates a branch from `main` linked to it, and checks it out.
+2. It writes the first chunk, leaves it unstaged, says in one line what it is, and stops.
+3. You read the diff in your editor and stage what you approve. If something is off, you say so instead, and it proposes a fix.
+4. It sees the staged change, runs the format check and the linter, commits exactly what you staged, pushes, and opens the pull request.
+5. It writes the next chunk and stops again. You repeat step 3 until the work is done.
+6. It writes the changelog as a last chunk, waits for CI to go green, squash-merges, and reports the issue, pull request and merge.
+
+Apart from staging, you never touch Git, and nothing enters the history without you reading it.
+
 ## Official spec
 
 | Field   | Value           |
