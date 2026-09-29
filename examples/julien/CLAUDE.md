@@ -40,8 +40,11 @@ Always follow this order. Never skip a step.
    then immediately move on to step 2 without waiting for the answer.
    Resolve the answer by step 3: keep needs no action (the new branch
    carries them forward automatically), discard means stashing first.
-   Anything kept goes through the stage-then-commit loop (step 5)
-   alongside the new work.
+   Anything kept is mine, so right after step 4, before any new work,
+   you stage it by naming the files (never `git add -A` or `git add .`),
+   run the check pipeline on the staged content, commit it as its own
+   commit, and push. If the check fails, `git restore --staged` it and
+   tell me what failed — I fix it as a new unstaged chunk.
 2. Create an issue
 3. Create a branch from that issue, off main
 4. Fetch the branch locally
