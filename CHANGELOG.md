@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Get started names its two options "Instructions only" and "Plugin, with enforcement", recommends the first, and mentions the L1 to L3 levels once, at the end.
 - The article's Further reading lists every link from the examples README.
 - `hug.sh on --repo` delegates to `hug init` instead of re-implementing it, so both apply the same ruleset and require only the checks that passed on the last merged pull request. It runs before any local change, and stops with nothing changed when `hug init` refuses. It no longer calls `examples/julien/repo-settings.sh`.
+- In `examples/julien/CLAUDE.md` and the article, leftover changes the maintainer keeps at step 1 are committed first on the new branch: the agent stages them by name, runs the check pipeline on the staged content, commits them as their own commit and pushes, before any new work.
 
 ### Removed
 
