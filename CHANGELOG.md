@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - The `examples/julien/README.md` mapping table pointed the artifact conventions to section 5 instead of 6.
 - The `publish` workflow failed because the article's frontmatter lacked `source`, which the live post's `/raw` page always shows.
+- The ready sound in `examples/julien/CLAUDE.md` and the article starts detached, with `nohup` and its output redirected, so a harness that cleans up the tool call's processes when it returns can't cut it off.
 
 ## [0.3.0] - 2026-09-27
 
