@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - A Motivation section in the README and the article.
 - A "What it looks like" walkthrough of a first task, after Get started in the README and the article. It replaces the README's "The flow in one paragraph".
 - A published-text rule in `examples/julien/CLAUDE.md` and `examples/minimal/AGENTS.md`: the agent shows the maintainer every text before publishing it on the forge, posts exactly what they approve, and drafts a pull request comment on a choice, a finding or a minor issue met along the way. A draft waiting for approval never blocks a commit or a push.
+- A ready sound in `examples/julien`: the agent plays `sounds/myst-weird.mp3` with `afplay` in the same command that records a chunk's fingerprint, so the maintainer hears when a chunk is ready for review. The README gives its install path, `~/.claude/sounds/`, and notes that `afplay` is macOS only. The article quotes the new lines.
 
 ### Changed
 
