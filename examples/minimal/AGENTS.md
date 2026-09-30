@@ -75,7 +75,7 @@ When you write a chunk (code, tests, docs, config, anything):
   it unstaged, say in one line what it is, and stop.
 - The moment it's on disk, in one command, record the tree it would
   commit as, built in a throwaway index
-  (`GIT_INDEX_FILE=<tmp> sh -c 'git read-tree HEAD && git add -A && git write-tree'`),
+  (`GIT_INDEX_FILE=<literal tmp path> sh -c 'git read-tree HEAD && git add -A && git write-tree'`),
   and run the check pipeline on it. Keep the recorded tree only if the
   check passes. If it fails, tell me, fix it as new unstaged changes,
   and check again.

@@ -6,17 +6,22 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import {
+  branched,
   currentBranch,
   defaultBranch,
   git,
   reviewed,
   run,
+  scratch,
 } from "../lib/git.ts";
 import * as ledger from "../lib/ledger.ts";
 import { mentionsGitOrGh, parse } from "../lib/parse.ts";
 import type { Command, Word } from "../lib/parse.ts";
 
 type Verdict = string | null;
+
+const LITERAL =
+  "GIT_INDEX_FILE must be a literal path for the guard to tell a private index from the real one";
 
 const ATTRIBUTION = [
   /^\s*co-authored-by\s*:/im,
@@ -181,7 +186,11 @@ function checkGit(
       ? "git apply --cached stages the patch; apply it to the working tree and leave it unstaged"
       : null;
   }
-  if (sub === "read-tree" && index(command, dir) === "private") return null;
+  if (sub === "read-tree") {
+    const where = index(command, dir);
+    if (where === "private") return null;
+    if (where === "unknown") return LITERAL;
+  }
   if (sub in WRITERS) return `git ${sub} ${WRITERS[sub]}`;
   if (
     ["merge", "rebase", "cherry-pick", "reset", "checkout", "restore"].includes(
@@ -214,11 +223,11 @@ function index(
 function stage(command: Command, dir: string | null): Verdict {
   const where = index(command, dir);
   if (where === "private") return null;
-  if (where === "unknown") {
-    return "GIT_INDEX_FILE must be a literal path for the guard to tell a private index from the real one";
-  }
+  if (where === "unknown") return LITERAL;
   if (dir === null)
     return "the guard cannot tell which directory git add runs in";
+  // WIP commits there never leave it: push() refuses commits on no branch.
+  if (scratch(dir)) return null;
   const { operands, has } = options(command.args, [
     "--chmod",
     "--pathspec-from-file",
@@ -362,6 +371,11 @@ function push(command: Command, dir: string | null): Verdict {
   for (const spec of operands.slice(1).map((o) => o.value)) {
     if (spec.startsWith("+")) plus = true;
     const [src, dst] = spec.replace(/^\+/, "").split(":");
+    const commit =
+      src && git(["rev-parse", "--verify", "--quiet", `${src}^{commit}`], dir);
+    if (commit && !branched(commit, dir)) {
+      return `${src} is on no branch, like a worktree's WIP commit, so pushing it would publish content nobody staged (I2)`;
+    }
     let target = dst ?? src;
     if (target === "HEAD" || target === "@") target = current ?? "HEAD";
     targets.push(target.replace(/^refs\/heads\//, ""));

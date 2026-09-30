@@ -134,14 +134,14 @@ source, tests, scripts, docs, config, everything:
 - The moment the chunk is complete on disk, in the same command, record its
   fingerprint — the tree it would commit as, built in a throwaway
   index so mine is untouched,
-  `GIT_INDEX_FILE=<tmp> sh -c 'git read-tree HEAD && git add -A && git write-tree'` —
+  `GIT_INDEX_FILE=<literal tmp path> sh -c 'git read-tree HEAD && git add -A && git write-tree'` —
   and run the check pipeline on it. I'm already reading the diff, so
   the check costs me no wait. Keep the fingerprint only if the check
   passes. If it fails, tell me what failed, fix it as new unstaged
   changes, and check again.
   That same command also plays the ready sound, detached so it
   outlives the tool call,
-  `nohup afplay ~/.claude/sounds/myst-weird.mp3 >/dev/null 2>&1 &`,
+  `nohup afplay ~/.claude/sounds/icq.mp3 >/dev/null 2>&1 &`,
   so I hear that the chunk is ready for review without watching the
   panel.
 - You watch for my staging by polling `git status` — no nudges, no

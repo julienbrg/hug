@@ -102,6 +102,13 @@ describe("I2: the agent never stages its own work", () => {
       "GIT_INDEX_FILE=/tmp/hug-idx sh -c 'git read-tree HEAD && git add -A && git write-tree'",
     );
     blocked(cwd, 'GIT_INDEX_FILE="$T" git add -A');
+    assert.match(
+      blocked(
+        cwd,
+        "T=$(mktemp); GIT_INDEX_FILE=$T sh -c 'git read-tree HEAD && git add -A && git write-tree'",
+      ),
+      /literal path/,
+    );
     blocked(cwd, "GIT_INDEX_FILE=/tmp/hug-idx git commit -m x");
   });
 
@@ -120,6 +127,37 @@ describe("I2: the agent never stages its own work", () => {
     allowed(cwd, "git rebase origin/main");
     allowed(cwd, "git reset --soft HEAD");
     allowed(cwd, "git checkout main");
+  });
+
+  test("the agent's WIP commits in a scratch worktree never leave it", () => {
+    const scratch = join(cwd, "..", "scratch");
+    git(cwd, "worktree", "add", "--quiet", "--detach", scratch);
+    writeFileSync(join(scratch, "f.ts"), "next\n");
+    wrote(scratch, "f.ts");
+    allowed(scratch, "git add f.ts");
+    allowed(scratch, "git add -A");
+    allowed(scratch, "git commit -m wip");
+    git(scratch, "add", "f.ts");
+    git(scratch, "commit", "--quiet", "-m", "wip");
+    const commit = git(scratch, "rev-parse", "HEAD");
+    assert.match(
+      blocked(scratch, "git push origin HEAD:1-feature"),
+      /on no branch/,
+    );
+    blocked(scratch, "git push");
+    assert.match(
+      blocked(cwd, `git push origin ${commit}:1-feature`),
+      /on no branch/,
+    );
+  });
+
+  test("a linked worktree on a branch keeps the ledger", () => {
+    const linked = join(cwd, "..", "linked");
+    git(cwd, "worktree", "add", "--quiet", "-b", "2-other", linked);
+    writeFileSync(join(linked, "g.ts"), "agent\n");
+    wrote(linked, "g.ts");
+    blocked(linked, "git add g.ts");
+    blocked(linked, "git add -A");
   });
 
   test("aliases are resolved", () => {

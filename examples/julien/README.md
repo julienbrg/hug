@@ -18,7 +18,7 @@ This setup is L1 (spec §10): it instructs the agent. To have the invariants enf
 | [`skills/super-app-issue/SKILL.md`](skills/super-app-issue/SKILL.md) | `<repo>/.claude/skills/super-app-issue/SKILL.md` | Intake      |
 | [`settings.json`](settings.json)                                     | `~/.claude/settings.json`                        | Enforcement |
 | [`repo-settings.sh`](repo-settings.sh)                               | Run once per repository                          | Enforcement |
-| [`sounds/myst-weird.mp3`](sounds/myst-weird.mp3)                     | `~/.claude/sounds/myst-weird.mp3`                | Process     |
+| [`sounds/icq.mp3`](sounds/icq.mp3)                                   | `~/.claude/sounds/icq.mp3`                       | Process     |
 
 The sound plays each time the agent leaves a chunk ready for review, so I don't have to watch the panel. `CLAUDE.md` plays it with `afplay`, which ships with macOS only. On Linux, use `paplay` or `mpg123` instead.
 
