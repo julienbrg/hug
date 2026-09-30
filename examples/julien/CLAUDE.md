@@ -141,7 +141,7 @@ source, tests, scripts, docs, config, everything:
   changes, and check again.
   That same command also plays the ready sound, detached so it
   outlives the tool call,
-  `nohup afplay ~/.claude/sounds/myst-weird.mp3 >/dev/null 2>&1 &`,
+  `nohup afplay ~/.claude/sounds/icq.mp3 >/dev/null 2>&1 &`,
   so I hear that the chunk is ready for review without watching the
   panel.
 - You watch for my staging by polling `git status` — no nudges, no
