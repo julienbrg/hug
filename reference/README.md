@@ -48,14 +48,14 @@ pnpm hug init <owner>/<repo> --dry-run  # print the plan without applying it
 
 [`parse.ts`](src/lib/parse.ts) first turns the command line into the simple commands it runs: it splits `&&`, `;`, `|` and newlines, unwraps `sh -c`, `bash -lc`, `eval`, `env`, `sudo` and command substitutions, strips git's global options such as `-C`, resolves heredoc messages and git aliases, and tracks `cd`. The guard then blocks:
 
-- `git add` of a path the agent wrote, and bulk staging: `-A`, `-u`, `.`, a directory, a glob or pathspec magic;
+- `git add` of a path the agent wrote, and bulk staging: `-A`, `-u`, `.`, a directory, a glob or pathspec magic, except in a linked worktree on a detached `HEAD`, where the agent commits its WIP;
 - commits that bypass the index or its hooks: `-a`, `--only`, paths, `--no-verify`, `core.hooksPath`;
 - other writers of the index or of history (`rm`, `mv`, `apply --cached`, `update-index`, `revert`, `commit-tree`), and moves that would bring in a commit that is neither on the branch nor on a remote, such as a worktree's WIP commit;
-- pushes to the default branch in any refspec form, and force-pushes, except `--force-with-lease` on the current issue branch;
+- pushes to the default branch in any refspec form, force-pushes, except `--force-with-lease` on the current issue branch, and pushes of a commit that is on no local branch and no remote, such as a worktree's WIP commit;
 - `gh pr merge` without `--squash`, with `--admin` or `--auto`, or while `gh pr checks` reports a failing, pending or cancelled check, or none at all;
 - `Co-Authored-By` trailers and generated-by footers in commit messages, pull requests and issue comments, and `--author`.
 
-A staging command with a private `GIT_INDEX_FILE`, as used to fingerprint a chunk, is allowed. A git or `gh` command the parser cannot read with confidence is blocked, with a request to rewrite it in plain form. Other commands are left alone.
+A staging command with a private `GIT_INDEX_FILE`, as used to fingerprint a chunk, is allowed. The path must be literal: a variable such as `$T` leaves the guard unable to tell the private index from the real one, so it blocks. A git or `gh` command the parser cannot read with confidence is blocked, with a request to rewrite it in plain form. Other commands are left alone.
 
 ### The ledger
 

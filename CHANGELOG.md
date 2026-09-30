@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - A Motivation section in the README and the article.
 - A "What it looks like" walkthrough of a first task, after Get started in the README and the article. It replaces the README's "The flow in one paragraph".
 - A published-text rule in `examples/julien/CLAUDE.md` and `examples/minimal/AGENTS.md`: the agent shows the maintainer every text before publishing it on the forge, posts exactly what they approve, and drafts a pull request comment on a choice, a finding or a minor issue met along the way. A draft waiting for approval never blocks a commit or a push.
-- A ready sound in `examples/julien`: the agent plays `sounds/myst-weird.mp3` with `afplay` in the same command that records a chunk's fingerprint, so the maintainer hears when a chunk is ready for review. The README gives its install path, `~/.claude/sounds/`, and notes that `afplay` is macOS only. The article quotes the new lines.
+- A ready sound in `examples/julien`: the agent plays `sounds/icq.mp3` with `afplay` in the same command that records a chunk's fingerprint, so the maintainer hears when a chunk is ready for review. The README gives its install path, `~/.claude/sounds/`, and notes that `afplay` is macOS only. The article quotes the new lines.
 
 ### Changed
 
@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The article's Further reading lists every link from the examples README.
 - `hug.sh on --repo` delegates to `hug init` instead of re-implementing it, so both apply the same ruleset and require only the checks that passed on the last merged pull request. It runs before any local change, and stops with nothing changed when `hug init` refuses. It no longer calls `examples/julien/repo-settings.sh`.
 - In `examples/julien/CLAUDE.md` and the article, leftover changes the maintainer keeps at step 1 are committed first on the new branch: the agent stages them by name, runs the check pipeline on the staged content, commits them as their own commit and pushes, before any new work.
+- The ready sound in `examples/julien` is renamed `sounds/icq.mp3`, in the README, `CLAUDE.md` and the article.
+- The fingerprint's throwaway index is a `<literal tmp path>` in `examples/julien/CLAUDE.md`, `examples/minimal/AGENTS.md` and the article, as in the plugin's rules, since the guard blocks a variable one.
 
 ### Removed
 
@@ -32,6 +34,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The `examples/julien/README.md` mapping table pointed the artifact conventions to section 5 instead of 6.
 - The `publish` workflow failed because the article's frontmatter lacked `source`, which the live post's `/raw` page always shows.
 - The ready sound in `examples/julien/CLAUDE.md` and the article starts detached, with `nohup` and its output redirected, so a harness that cleans up the tool call's processes when it returns can't cut it off.
+- The guard blocked the agent from staging its own files in a linked worktree, so the WIP commit that pipelining needs was impossible. It now allows staging and committing in a linked worktree on a detached `HEAD`, and blocks pushing any commit that is on no local branch and no remote, from the worktree or the repository.
+- The guard reported a variable `GIT_INDEX_FILE` in `read-tree` as "writes the index", which read as a ban on fingerprints. It now asks for a literal path.
 
 ## [0.3.0] - 2026-09-27
 
