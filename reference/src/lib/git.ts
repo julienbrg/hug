@@ -33,6 +33,26 @@ export function gitDir(cwd: string): string | null {
   return git(["rev-parse", "--absolute-git-dir"], cwd);
 }
 
+// The agent's scratch worktree: a linked worktree on a detached HEAD, so the
+// WIP commits made there sit on no branch.
+export function scratch(cwd: string): boolean {
+  const own = gitDir(cwd);
+  const common = git(
+    ["rev-parse", "--path-format=absolute", "--git-common-dir"],
+    cwd,
+  );
+  return !!own && !!common && own !== common && !currentBranch(cwd);
+}
+
+// Whether a commit is on a local branch or a remote, rather than only in a
+// scratch worktree.
+export function branched(rev: string, cwd: string): boolean {
+  return !!git(
+    ["for-each-ref", "--contains", rev, "refs/heads", "refs/remotes"],
+    cwd,
+  );
+}
+
 export function currentBranch(cwd: string): string | null {
   return git(["symbolic-ref", "--quiet", "--short", "HEAD"], cwd);
 }
