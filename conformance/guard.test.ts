@@ -94,6 +94,10 @@ describe("I2: the agent never stages its own work", () => {
       blocked(cwd, command);
     }
     allowed(cwd, "git update-index --refresh");
+    assert.match(blocked(cwd, "git mv b.ts d.ts"), /plain mv/);
+    assert.match(blocked(cwd, "git rm b.ts"), /plain rm/);
+    allowed(cwd, "mv b.ts d.ts");
+    allowed(cwd, "rm b.ts");
   });
 
   test("a private index, as for a fingerprint, is allowed", () => {

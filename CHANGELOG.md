@@ -23,6 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - In `examples/julien/CLAUDE.md` and the article, leftover changes the maintainer keeps at step 1 are committed first on the new branch: the agent stages them by name, runs the check pipeline on the staged content, commits them as their own commit and pushes, before any new work.
 - The ready sound in `examples/julien` is renamed `sounds/icq.mp3`, in the README, `CLAUDE.md` and the article.
 - The fingerprint's throwaway index is a `<literal tmp path>` in `examples/julien/CLAUDE.md`, `examples/minimal/AGENTS.md` and the article, as in the plugin's rules, since the guard blocks a variable one.
+- The pipelining handoff diffs fingerprints instead of the worktree's `HEAD`, in the spec, the plugin's rules, both examples and the article: the worktree is seeded with `git diff --binary HEAD <TN>`, and chunk N+1 reaches the repository through `git diff --binary <TN> <TN1> | git apply`. It needs no WIP commit.
+- The guard's hints for `git mv` and `git rm` name plain `mv` and `rm`, and the rules and both examples say to use them, leaving both paths unstaged.
 
 ### Removed
 
@@ -36,6 +38,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The ready sound in `examples/julien/CLAUDE.md` and the article starts detached, with `nohup` and its output redirected, so a harness that cleans up the tool call's processes when it returns can't cut it off.
 - The guard blocked the agent from staging its own files in a linked worktree, so the WIP commit that pipelining needs was impossible. It now allows staging and committing in a linked worktree on a detached `HEAD`, and blocks pushing any commit that is on no local branch and no remote, from the worktree or the repository.
 - The guard reported a variable `GIT_INDEX_FILE` in `read-tree` as "writes the index", which read as a ban on fingerprints. It now asks for a literal path.
+- The plugin's version stayed `0.1.0` after the worktree fix, so installs kept the old guard. It is now `0.1.1`.
+- The worktree handoff (`git -C <path> diff HEAD | git apply`) dropped new files, which are untracked in the worktree, and failed to apply once chunk N was committed, since the diff contained chunk N again.
 
 ## [0.3.0] - 2026-09-27
 
