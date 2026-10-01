@@ -31,8 +31,8 @@ const ATTRIBUTION = [
 
 // Plumbing and porcelain that write commits or the index without staging.
 const WRITERS: Record<string, string> = {
-  rm: "stages a deletion; delete the file and leave it unstaged",
-  mv: "stages a rename; move the file and leave it unstaged",
+  rm: "stages a deletion; delete the file with plain rm and leave it unstaged",
+  mv: "stages a rename; move the file with plain mv and leave both paths unstaged",
   "read-tree": "writes the index",
   "commit-tree": "builds a commit outside the index",
   "update-ref": "moves a ref outside the flow",
