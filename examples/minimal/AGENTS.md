@@ -80,7 +80,8 @@ When you write a chunk (code, tests, docs, config, anything):
   check passes. If it fails, tell me, fix it as new unstaged changes,
   and check again.
 - Never run `git add` on your own work, and never `git add -A` or
-  `git add .`.
+  `git add .`. To move or delete a file, use plain `mv` or `rm`, not
+  `git mv` or `git rm`, and leave both paths unstaged.
 - I review the diff in my editor and stage what I approve.
 - Right after leaving a chunk unstaged, start a background watcher,
   such as
@@ -101,13 +102,17 @@ When I write a chunk, I leave it unstaged and tell you. You review it,
 stage what you approve, and I commit.
 
 While I review chunk N, you may write chunk N+1 in a linked worktree
-outside the repository (`git worktree add --detach <path> HEAD`), on
-top of a local copy of chunk N. Install dependencies there rather than
-linking them. Once chunk N is staged, in a single command, commit it and
-apply the worktree's diff to the repository
-(`git -C <path> diff HEAD | git apply`) as the next unstaged chunk,
-finished or not, and push chunk N last. If it is unfinished, say so
-and finish it in place.
+outside the repository (`git worktree add --detach <path> HEAD`).
+Seed it with chunk N from its recorded tree
+(`git diff --binary HEAD <TN> | git -C <path> apply`), and install
+dependencies there rather than linking them. Once chunk N is staged, in
+a single command, commit it, record the worktree's tree as `<TN1>` the
+same way, in a throwaway index, and apply the difference to the
+repository (`git diff --binary <TN> <TN1> | git apply`) as the next
+unstaged chunk, finished or not. Push chunk N last. The diff between
+the two trees carries new, deleted and renamed files, and still applies
+once chunk N is committed. If it is unfinished, say so and finish it
+in place.
 Once it is complete, record and check it, and say it is ready for
 review. Stay one chunk ahead, no more. Remove the worktree when
 the work is done.

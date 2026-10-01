@@ -129,7 +129,8 @@ source, tests, scripts, docs, config, everything:
   what it is and that it's ready for review, and stop. Never run
   `git add` on your own work. Not for a doc, not for a script, not for
   a file you consider uncontroversial, and never `git add -A` or
-  `git add .`.
+  `git add .`. To move or delete a file, use plain `mv` or `rm`, never
+  `git mv` or `git rm`, and leave both paths unstaged.
 - I review the unstaged diff in my IDE and `git add` what I approve.
 - The moment the chunk is complete on disk, in the same command, record its
   fingerprint — the tree it would commit as, built in a throwaway
@@ -176,30 +177,32 @@ source, tests, scripts, docs, config, everything:
   top of chunk N. Chunk 1 is written straight in the repo — nothing is
   under review yet, so no worktree until chunk 2. Create it outside the
   repo with `git worktree add --detach <path> HEAD` (the branch is
-  already checked out in the repo), copy chunk N into it and commit it
-  there as a local WIP commit, so chunk N+1 diffs cleanly against it.
-  WIP commits never leave the worktree. Run the install (`pnpm install`)
-  in the worktree — never symlink dependencies. Stay one chunk ahead,
-  no more.
+  already checked out in the repo), and seed it with chunk N from its
+  fingerprint `<TN>`: `git diff --binary HEAD <TN> | git -C <path> apply`.
+  No WIP commit: the handoff diffs fingerprints, not the worktree's
+  `HEAD`. Run the install (`pnpm install`) in the worktree — never
+  symlink dependencies. Stay one chunk ahead, no more.
   - When I stage chunk N, do the whole handoff in one Bash command, so
     it costs a single round-trip: commit chunk N (re-checking only if
-    the fingerprint differs) and apply chunk N+1 to the repo with
-    `git -C <path> diff HEAD | git apply` — Git carries deletions and
-    renames — right away, finished or not, so I never wait for it to
-    appear. Push chunk N last in that same command, once N+1 is on
-    disk. Then start the watcher.
-  - If chunk N+1 is finished, record its fingerprint and check it in
-    that same command, WIP-commit it in the worktree, say it's ready
-    for review, and start chunk N+2 in the worktree.
+    the fingerprint differs), record the worktree's tree as `<TN1>` in
+    a throwaway index, and apply chunk N+1 to the repo with
+    `git diff --binary <TN> <TN1> | git apply` right away, finished or
+    not, so I never wait for it to appear. The diff between trees
+    carries new, deleted and renamed files, and still applies once
+    chunk N is committed. Push chunk N last in that same command, once
+    N+1 is on disk. Then start the watcher.
+  - If chunk N+1 is finished, `<TN1>` is its fingerprint: check it in
+    that same command, say it's ready for review, and start chunk N+2
+    in the worktree.
   - If it isn't, say it's still in progress and finish it in place, in
     the repo, while I start reading. Once it's complete, record its
-    fingerprint and check it, say it's ready for review, carry it into
-    the worktree as a WIP commit, and start chunk N+2 there. If I stage
-    part of it before then, there's no fingerprint yet: check the
-    staged content and commit it.
+    fingerprint and check it, say it's ready for review, carry the
+    difference into the worktree with `git diff --binary`, and start
+    chunk N+2 there. If I stage part of it before then, there's no
+    fingerprint yet: check the staged content and commit it.
   - When I ask for a change to chunk N: apply it to chunk N in the
-    repo, carry it into the worktree, and rework chunk N+1 so it
-    still fits.
+    repo, record its new fingerprint, carry the difference into the
+    worktree, and rework chunk N+1 so it still fits.
   - When the step's work is done: `git worktree remove --force <path>`.
 
 Repeat until the step's work is done.
