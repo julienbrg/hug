@@ -9,7 +9,7 @@ too.
 
 Once confirmed, run the task end-to-end without further permission
 prompts or check-ins. The exceptions are the stage-then-commit loop
-and the published text approvals below. Skip the confirmation for trivial asks (reading a file,
+and the comment approvals below. Skip the confirmation for trivial asks (reading a file,
 answering a question).
 
 # Attribution
@@ -146,10 +146,13 @@ the work is done.
 - Assign it to me (`--assignee @me`).
 - Never push to `main`. Never force-push a shared branch.
 
-# Published text
+# Comments
 
-Show me every text before you publish it on the forge (titles, bodies,
-comments) and post exactly what I approve. Draft a pull request
+Show me every comment before you post it on the forge (issue or pull
+request) and post exactly what I approve. Issue and pull request
+titles and bodies need no approval: publish them as soon as the
+workflow reaches that step, and never hold a step back waiting on one.
+Draft a pull request
 comment when you make a choice I didn't specify, find something new, or
 hit a minor issue out of scope. A draft waiting for me never blocks a
 commit or a push.
