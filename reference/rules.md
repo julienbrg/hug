@@ -53,13 +53,17 @@ While chunk N is under review, you may write chunk N+1 in a linked worktree outs
 ## Issues
 
 - Title starts with a capitalized imperative verb: `Add`, `Fix`, `Improve` or `Remove`.
-- The body says what the task is, why, and what done looks like.
-- Assign it to the maintainer (`--assignee @me`) and label it `enhancement` or `bug`.
+- The body follows the template for its kind. Use the repository's `.github/ISSUE_TEMPLATE/` sections when it has them, since `gh` skips them when given a body. Otherwise:
+  - Bug (`bug`): Description, Steps to reproduce, Expected behavior, Actual behavior, Environment.
+  - Feature (`enhancement`): Problem, Proposed solution, Alternatives considered, Acceptance criteria as a checklist.
+  - Other, such as docs, chore, refactor or CI (`documentation` for docs only, else `enhancement`): Summary, Why, Done when as a checklist.
+  - Leave out sections that do not apply rather than leaving them empty.
+- Assign it to the maintainer (`--assignee @me`) and label it by kind, as above.
 
 ## Pull requests
 
 - Title identical to the issue title.
-- Body contains `Closes #<number>`, so merging closes the issue.
+- Body follows the repository's `.github/pull_request_template.md` if it has one. Otherwise: Summary (what and why), Changes, How to test, optional Notes, then `Closes #<number>`, so merging closes the issue.
 - Assign it to the maintainer (`--assignee @me`).
 - Never push to `main`. Never force-push a shared branch.
 

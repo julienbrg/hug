@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Issue forms for bugs, features and other work, and a pull request template, in `.github/`. Blank issues are off.
+- Issue and pull request body templates in the spec (P1 and P4), the plugin's rules, both examples and the article: a bug has Description, Steps to reproduce, Expected behavior, Actual behavior and Environment; a feature has Problem, Proposed solution, Alternatives considered and Acceptance criteria; other work has Summary, Why and Done when. A pull request has Summary, Changes, How to test, optional Notes, then `Closes #<n>`. A repository's own templates take precedence, since a forge CLI given a body skips them.
 - A Motivation section in the README and the article.
 - A "What it looks like" walkthrough of a first task, after Get started in the README and the article. It replaces the README's "The flow in one paragraph".
 - A published-text rule in `examples/julien/CLAUDE.md` and `examples/minimal/AGENTS.md`: the agent shows the maintainer every text before publishing it on the forge, posts exactly what they approve, and drafts a pull request comment on a choice, a finding or a minor issue met along the way. A draft waiting for approval never blocks a commit or a push.
@@ -15,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Issues are labelled by kind: `bug`, `enhancement`, or `documentation` for docs-only work. The forge bindings' Open PR commands take the templated body, and CONTRIBUTING points to the forms and the pull request template.
 - The article follows the repo: an intro and Motivation and Get started from the README, the specification verbatim under Official spec, and My own setup quoting `examples/julien/CLAUDE.md` and linking to the `super-app-issue` skill. The Stack section and the setup's layers, enforcement, coverage and known deviations are no longer in the article; it links to `examples/julien` for them.
 - `/check-article` maps each article section to its source in the repo.
 - Get started names its two options "Instructions only" and "Plugin, with enforcement", recommends the first, and mentions the L1 to L3 levels once, at the end.

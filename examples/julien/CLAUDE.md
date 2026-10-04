@@ -211,17 +211,29 @@ Repeat until the step's work is done.
 
 - Title starts with a capitalized verb, usually Add / Fix / Improve /
   Remove. e.g. `Add passkey recovery flow`, `Fix stale nonce on retry`.
+- The body follows the template for its kind. Use the repository's
+  `.github/ISSUE_TEMPLATE/` sections when it has them, since `gh` skips
+  them when given a body. Otherwise:
+  - Bug (`bug`): Description, Steps to reproduce, Expected behavior,
+    Actual behavior, Environment.
+  - Feature (`enhancement`): Problem, Proposed solution, Alternatives
+    considered, Acceptance criteria as a checklist.
+  - Other, such as docs, chore, refactor or CI (`documentation` for
+    docs only, else `enhancement`): Summary, Why, Done when as a
+    checklist.
+  - Leave out sections that do not apply rather than leaving them
+    empty.
 - If an issue has no main description, draft one as the first comment
-  (what the task is, why, and what done looks like) and post it once I
-  approve it.
+  and post it once I approve it.
 - Assign it to me (`@me`).
-- Label it `enhancement` or `bug`, whichever fits.
+- Label it by kind, as above.
 
 ## Pull requests
 
 - PR title is identical to the issue title — same verb, same casing.
-- PR body is the approved issue description, then `closes #12` so
-  merging closes the issue.
+- PR body follows the repository's `.github/pull_request_template.md` if
+  it has one. Otherwise: Summary (what and why), Changes, How to test,
+  optional Notes, then `Closes #<number>`, so merging closes the issue.
 - Always assign it to me: `--assignee @me`.
 - Never push to main directly. Never force-push a shared branch.
 - If main moves under a long-lived branch, rebase the branch onto main

@@ -6,14 +6,14 @@ A forge qualifies if it provides issues, pull requests (merge requests on GitLab
 
 ## Operations
 
-| Operation      | Phase | Must achieve                                                                                      |
-| -------------- | ----- | ------------------------------------------------------------------------------------------------- |
-| Create issue   | P1    | An issue with a verb-first title and a description, assigned to the maintainer and labelled       |
-| Branch         | P2    | A branch off `main`, linked to the issue, checked out locally                                     |
-| Open PR        | P4    | A pull request with the issue's title, assigned to the maintainer, that closes the issue on merge |
-| Watch checks   | P5    | Block until every check has finished, and report red or green                                     |
-| Squash-merge   | P6    | One squash commit on `main`, the merged branch deleted                                            |
-| Protect `main` | L3    | Pull request required, checks required, squash only, no force-push, no deletion                   |
+| Operation      | Phase | Must achieve                                                                                                           |
+| -------------- | ----- | ---------------------------------------------------------------------------------------------------------------------- |
+| Create issue   | P1    | An issue with a verb-first title and a body from its kind's template, assigned to the maintainer and labelled          |
+| Branch         | P2    | A branch off `main`, linked to the issue, checked out locally                                                          |
+| Open PR        | P4    | A pull request with the issue's title and a templated body, assigned to the maintainer, that closes the issue on merge |
+| Watch checks   | P5    | Block until every check has finished, and report red or green                                                          |
+| Squash-merge   | P6    | One squash commit on `main`, the merged branch deleted                                                                 |
+| Protect `main` | L3    | Pull request required, checks required, squash only, no force-push, no deletion                                        |
 
 Where a forge has no command for an operation, the binding says so and gives the fallback. When checks cannot be watched, the agent polls them. It MUST NOT treat "no result yet" as green.
 
@@ -25,7 +25,7 @@ Client: [`gh`](https://cli.github.com/).
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Create issue   | `gh issue create --title "…" --body "…" --assignee @me --label enhancement`                                                                                                                                              |
 | Branch         | `gh issue develop <n> --checkout`                                                                                                                                                                                        |
-| Open PR        | `gh pr create --title "…" --body "Closes #<n>" --assignee @me`                                                                                                                                                           |
+| Open PR        | `gh pr create --title "…" --body "… Closes #<n>" --assignee @me`                                                                                                                                                         |
 | Watch checks   | `gh pr checks <n> --watch`, which exits non-zero on a failed check                                                                                                                                                       |
 | Squash-merge   | `gh pr merge <n> --squash --delete-branch`                                                                                                                                                                               |
 | Protect `main` | A [ruleset](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets), such as [`examples/minimal/ruleset.json`](../../examples/minimal/ruleset.json) |
@@ -38,7 +38,7 @@ Client: [`glab`](https://gitlab.com/gitlab-org/cli). Pull requests are merge req
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Create issue   | `glab issue create --title "…" --description "…" --assignee <user> --label enhancement --yes`                                                                                                          |
 | Branch         | No single command. `git switch -c <n>-<slug> main`: a branch name that starts with the issue number links it to the issue                                                                              |
-| Open PR        | `glab mr create --title "…" --description "Closes #<n>" --assignee <user> --target-branch main --yes`                                                                                                  |
+| Open PR        | `glab mr create --title "…" --description "… Closes #<n>" --assignee <user> --target-branch main --yes`                                                                                                |
 | Watch checks   | `glab ci status --live`, which follows the branch's pipeline until it ends                                                                                                                             |
 | Squash-merge   | `glab mr merge <n> --squash --remove-source-branch --yes`                                                                                                                                              |
 | Protect `main` | [Protected branch](https://docs.gitlab.com/user/project/repository/branches/protected/) with no one allowed to push and force-push off; merge requests set to require squash and a successful pipeline |
@@ -68,7 +68,7 @@ Client: [`tea`](https://gitea.com/gitea/tea), which works with both. [Forgejo](h
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Create issue   | `tea issues create --title "…" --description "…" --assignees <user> --labels enhancement`                                                                                                |
 | Branch         | No single command. `git switch -c <n>-<slug> main`                                                                                                                                       |
-| Open PR        | `tea pulls create --title "…" --description "Closes #<n>" --assignees <user> --base main --head <branch>`                                                                                |
+| Open PR        | `tea pulls create --title "…" --description "… Closes #<n>" --assignees <user> --base main --head <branch>`                                                                              |
 | Watch checks   | No watch command. Poll `tea actions runs list` until the branch's runs have finished                                                                                                     |
 | Squash-merge   | `tea pulls merge <n> --style squash`. The branch is deleted by the repository's "delete pull request branch after merge" setting, or afterwards with `git push origin --delete <branch>` |
 | Protect `main` | [Branch protection](https://forgejo.org/docs/latest/user/protection/): push disabled, force-push off, required status checks; squash as the only merge style in the repository settings  |

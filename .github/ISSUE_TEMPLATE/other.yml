@@ -1,0 +1,22 @@
+name: Other
+description: Documentation, chore, refactor or CI
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: Summary
+      description: What the task is.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Why
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Done when
+      value: |
+        - [ ]
+    validations:
+      required: true
