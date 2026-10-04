@@ -20,10 +20,10 @@ pnpm install
 
 Every change follows [HuG Flow](spec/hug-flow.md), from issue to merge:
 
-1. Open an issue first. Its title starts with a capitalized verb: `Add …`, `Fix …`, `Improve …`, `Remove …`.
+1. Open an issue first, from the bug, feature or other form. Its title starts with a capitalized verb: `Add …`, `Fix …`, `Improve …`, `Remove …`.
 2. Work on a branch linked to that issue, off `main`.
 3. Commit in small chunks, each one reviewed and staged by a human before it is committed. Commit titles are short, lowercase and imperative, with no trailing period.
-4. Open a pull request early, with the same title as the issue, and `closes #<number>` in its body.
+4. Open a pull request early, with the same title as the issue. Fill in the [pull request template](.github/pull_request_template.md), which ends with `Closes #<number>`.
 5. Update [`CHANGELOG.md`](CHANGELOG.md) once, in the last commit of the pull request.
 6. Wait for CI to pass. Nothing is merged on a red or running check.
 
