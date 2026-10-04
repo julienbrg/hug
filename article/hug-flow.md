@@ -377,7 +377,7 @@ My confirmation approves the issue title and description too.
 Once confirmed, run the task end-to-end with zero further
 interruptions — no permission prompts, no intermediate check-ins —
 except the stage-then-commit loop and the
-[published text](#published-text) approvals defined below.
+[comment](#comments) approvals defined below.
 Skip this confirmation step for trivial asks (reading a file,
 answering a question, a one-line lookup).
 
@@ -435,8 +435,8 @@ Run the whole sequence end-to-end without pausing to ask permission at
 each step — this applies across all projects. The one exception is
 step 5 (commit), which does not work like a normal commit.
 
-Every other step, including push, runs without approval — only the
-text it publishes needs mine (see [Published text](#published-text)).
+Every other step, including push, runs without approval — only
+comments need mine (see [Comments](#comments)).
 Still show
 what was done (issue #, branch, PR #, merge result) so I can see and
 intervene.
@@ -605,10 +605,12 @@ Repeat until the step's work is done.
 - If main moves under a long-lived branch, rebase the branch onto main
   and force-push — it's your own unshared branch, so that's safe.
 
-## Published text
+## Comments
 
-Show me every text before you publish it on the forge (titles, bodies,
-comments) and post exactly what I approve. Draft a PR comment when you
+Show me every comment before you post it on the forge (issue or PR)
+and post exactly what I approve. Issue and PR titles and bodies need
+no approval: publish them as soon as the workflow reaches that step,
+and never hold a step back waiting on one. Draft a PR comment when you
 make a choice I didn't specify, find something new, or hit a minor
 issue out of scope. A draft waiting for me never blocks a commit or a
 push.
