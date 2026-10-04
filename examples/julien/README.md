@@ -51,7 +51,7 @@ Requirements on the machine: `git`, `gh` logged in with access to the repositori
 | Workflow, steps 11 and 12                                             | P6                                         |
 | Attribution                                                           | I5                                         |
 | Pull requests: never push to `main`, never force-push a shared branch | I4                                         |
-| Published text                                                        | P1 (issue text), P3 (PR comments)          |
+| Comments                                                              | P1 (issue comments), P3 (PR comments)      |
 | Issues, Pull requests, Commits                                        | Conventions for the artifacts of section 6 |
 
 ## Intake layer: skills
