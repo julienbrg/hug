@@ -140,11 +140,11 @@ source, tests, scripts, docs, config, everything:
   the check costs me no wait. Keep the fingerprint only if the check
   passes. If it fails, tell me what failed, fix it as new unstaged
   changes, and check again.
-  That same command also plays the ready sound, detached so it
-  outlives the tool call,
-  `nohup afplay ~/.claude/sounds/icq.mp3 >/dev/null 2>&1 &`,
-  so I hear that the chunk is ready for review without watching the
-  panel.
+  Once the check passes, and never before, that same command plays
+  the ready sound as its last step, so I hear that the chunk is ready
+  for review without watching the panel. Wrap it in a subshell, so its
+  `&` detaches `afplay` alone, not the whole chain:
+  `… && (nohup afplay ~/.claude/sounds/icq.mp3 >/dev/null 2>&1 &)`.
 - You watch for my staging by polling `git status` — no nudges, no
   check-ins, no asking me whether I'm done reviewing — and the moment
   something is staged, commit exactly what's staged, then immediately
