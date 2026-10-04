@@ -1,0 +1,35 @@
+name: Bug report
+description: Something does not work as documented
+title: "Fix "
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: What is broken, in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Actual behavior
+      description: Include error messages or logs.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Environment
+      description: OS, agent and version, plugin version, forge.
