@@ -121,10 +121,20 @@ P0 is optional. Work MAY start directly at P1.
 
 - **Input:** a request from the maintainer, or an existing issue.
 - **Activities:** for any non-trivial task, the agent restates the request as a short spec (what it understood, what it will do, and the files it expects to create, modify or delete) and waits for confirmation. If no issue exists yet, the agent creates one.
-- **Output:** a confirmed spec, including its expected file list, and an issue whose title starts with a capitalized imperative verb (`Add`, `Fix`, `Improve`, `Remove`).
+- **Output:** a confirmed spec, including its expected file list, and an issue whose title starts with a capitalized imperative verb (`Add`, `Fix`, `Improve`, `Remove`) and whose body follows the template for its kind (see below).
 - **Exit criterion:** the maintainer has confirmed ("go", "yes", or equivalent).
 
 After confirmation, the agent MUST run P2 to P6 without further permission prompts. The only exception is the approval gate in P3.
+
+Issue bodies follow the usual GitHub templates, one per kind of work:
+
+| Kind                                      | Label                                             | Sections                                                                                  |
+| ----------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Bug                                       | `bug`                                             | Description, Steps to reproduce, Expected behavior, Actual behavior, Environment          |
+| Feature                                   | `enhancement`                                     | Problem, Proposed solution, Alternatives considered, Acceptance criteria (as a checklist) |
+| Other: documentation, chore, refactor, CI | `documentation` for docs only, else `enhancement` | Summary, Why, Done when (as a checklist)                                                  |
+
+When the repository has its own [issue templates](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository) or [pull request template](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository), the agent MUST use their sections instead: a forge CLI that is given a body skips them. Sections that do not apply are left out, not left empty.
 
 ### P2. Branch
 
@@ -157,7 +167,7 @@ The inner loop is symmetric, as section 5 requires. When the maintainer writes a
 ### P4. Integrate
 
 - **Input:** the commits from P3.
-- **Activities:** the agent pushes after each commit. After the first push, it opens a pull request whose title is identical to the issue title and whose body contains `Closes #<n>`. After the last code commit, a final chunk updates `CHANGELOG.md`, along with any documentation and `README.md` changes, and goes through P3 like any other chunk.
+- **Activities:** the agent pushes after each commit. After the first push, it opens a pull request whose title is identical to the issue title. Its body has a Summary (what and why), a list of Changes, How to test, optional Notes, and ends with `Closes #<n>`. After the last code commit, a final chunk updates `CHANGELOG.md`, along with any documentation and `README.md` changes, and goes through P3 like any other chunk.
 - **Output:** a pull request that is [linked to the issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 - **Exit criterion:** all commits are pushed, including the changelog.
 
