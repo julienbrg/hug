@@ -43,6 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The guard reported a variable `GIT_INDEX_FILE` in `read-tree` as "writes the index", which read as a ban on fingerprints. It now asks for a literal path.
 - The plugin's version stayed `0.1.0` after the worktree fix, so installs kept the old guard. It is now `0.1.1`.
 - The worktree handoff (`git -C <path> diff HEAD | git apply`) dropped new files, which are untracked in the worktree, and failed to apply once chunk N was committed, since the diff contained chunk N again.
+- The ready sound in `examples/julien/CLAUDE.md` and the article plays only once the check passes, as the last step of the fingerprint command, wrapped in a subshell. At the end of an `&&` chain, its bare `&` backgrounded the whole chain, so the tool call returned at once and the sound was cut off, and nothing kept it from playing for a chunk that failed the check.
 
 ## [0.3.0] - 2026-09-27
 
