@@ -7,7 +7,7 @@ implements: hug-flow@0.3.0
 level: L2 (L3 once `hug init` has applied the ruleset)
 ```
 
-The example setups in [`examples/`](../examples/) are L1: they rely on the model following its instructions. This plugin adds hooks that run outside the model, so their decisions hold whatever the model does and in every permission mode, `bypassPermissions` included.
+The [`minimal`](../examples/minimal/README.md) example setup is L1: it relies on the model following its instructions. This plugin adds hooks that run outside the model, so their decisions hold whatever the model does and in every permission mode, `bypassPermissions` included.
 
 ## Requirements
 

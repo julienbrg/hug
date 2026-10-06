@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- `examples/julien` builds on the `hug` plugin and is L2: its `CLAUDE.md` is a slim personal layer that only adds to or overrides the plugin's rules, with `instructions/PLAN_ISSUES.md` imported and a `hooks/forge-context.sh` SessionStart hook that loads a second forge's commands. `settings.json` enables the plugin, and the README maps each section to what it adds and drops the deviations the plugin's rules fixed. The minimal README explains how to keep only your differences on top of the plugin. The spec, the README, the plugin's README and the article list `examples/julien` as L2.
 - Issues are labelled by kind: `bug`, `enhancement`, or `documentation` for docs-only work. The forge bindings' Open PR commands take the templated body, and CONTRIBUTING points to the forms and the pull request template.
 - The article follows the repo: an intro and Motivation and Get started from the README, the specification verbatim under Official spec, and My own setup quoting `examples/julien/CLAUDE.md` and linking to the `super-app-issue` skill. The Stack section and the setup's layers, enforcement, coverage and known deviations are no longer in the article; it links to `examples/julien` for them.
 - `/check-article` maps each article section to its source in the repo.

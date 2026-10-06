@@ -1,58 +1,63 @@
 # Julien's setup
 
-This is the setup I use every day to run [HuG Flow](../../spec/hug-flow.md). It is one way to implement the specification, not the only one. It has three layers. The first two tell the agent what to do. The third makes sure some things cannot happen, whatever the agent does.
+This is the setup I use every day to run [HuG Flow](../../spec/hug-flow.md). It is one way to implement the specification, not the only one. It builds on the [`hug` plugin](../../reference/README.md), which loads HuG Flow's rules into every session and enforces part of them with hooks. My own `CLAUDE.md` only adds to those rules or overrides them: where the two conflict, the plugin's rules say mine win.
 
-| Layer       | Artifact                                                                                                                                                                                                          | Covers                                                                        | Strength                                     |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------- |
-| Process     | Global `CLAUDE.md`                                                                                                                                                                                                | P1 to P6, conventions, invariants                                             | Instructed: relies on the model following it |
-| Intake      | Skills                                                                                                                                                                                                            | P0                                                                            | Instructed, invoked only by the maintainer   |
-| Enforcement | Claude Code settings, GitHub repository settings and [GitHub rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets) | I5 and the P6 merge rules today; I1, I3, I4 and part of I2 with the additions | Enforced: holds even if the model deviates   |
+| Layer       | Artifact                                                                | Covers                                       | Strength                                     |
+| ----------- | ----------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
+| Rules       | The plugin's [`rules.md`](../../reference/rules.md)                     | P0 to P6, invariants                         | Instructed: relies on the model following it |
+| Personal    | Global `CLAUDE.md`                                                      | My conventions, additions and overrides      | Instructed, and wins over the rules          |
+| Intake      | Skills                                                                  | P0                                           | Instructed, invoked only by the maintainer   |
+| Enforcement | The plugin's hooks, Claude Code settings and GitHub repository settings | I2 to I5, the P3 commit wait, P6 merge rules | Enforced: holds even if the model deviates   |
 
-This setup is L1 (spec §10): it instructs the agent. To have the invariants enforced as well, add the [`reference`](../../reference/README.md) plugin, whose hooks and ruleset cover what the enforcement layer below lists as additions.
+This setup is L2 (spec §10): the plugin's hooks enforce the invariants on the machine. `hug init` takes it to L3 by applying the ruleset on GitHub.
 
 ## Files
 
 | File                                                                 | Install to                                       | Layer       |
 | -------------------------------------------------------------------- | ------------------------------------------------ | ----------- |
-| [`CLAUDE.md`](CLAUDE.md)                                             | `~/.claude/CLAUDE.md`                            | Process     |
+| [`CLAUDE.md`](CLAUDE.md)                                             | `~/.claude/CLAUDE.md`                            | Personal    |
+| [`instructions/PLAN_ISSUES.md`](instructions/PLAN_ISSUES.md)         | `~/.claude/instructions/PLAN_ISSUES.md`          | Personal    |
+| [`hooks/forge-context.sh`](hooks/forge-context.sh)                   | `~/.claude/hooks/forge-context.sh`               | Personal    |
 | [`skills/super-app-issue/SKILL.md`](skills/super-app-issue/SKILL.md) | `<repo>/.claude/skills/super-app-issue/SKILL.md` | Intake      |
 | [`settings.json`](settings.json)                                     | `~/.claude/settings.json`                        | Enforcement |
 | [`repo-settings.sh`](repo-settings.sh)                               | Run once per repository                          | Enforcement |
-| [`sounds/icq.mp3`](sounds/icq.mp3)                                   | `~/.claude/sounds/icq.mp3`                       | Process     |
+| [`sounds/icq.mp3`](sounds/icq.mp3)                                   | `~/.claude/sounds/icq.mp3`                       | Personal    |
+
+`settings.json` installs the plugin from this repository's marketplace. To install it by hand instead, run `/plugin marketplace add julienbrg/hug`, then `/plugin install hug@hug`.
 
 The sound plays each time the agent leaves a chunk ready for review, so I don't have to watch the panel. `CLAUDE.md` plays it with `afplay`, which ships with macOS only. On Linux, use `paplay` or `mpg123` instead.
 
 ## Stack
 
-| Layer           | Tool                                                                                | Role in HuG Flow                                                |
-| --------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Editor          | [VS Code](https://code.visualstudio.com/)                                           | Diff review and staging: the maintainer's approval surface      |
-| Agent           | [Claude Code](https://code.claude.com/docs/en/vscode-extension) (VS Code extension) | Executes every phase; configured through `CLAUDE.md` and skills |
-| Version control | [Git](https://git-scm.com/)                                                         | Local history; the staging area acts as the approval gate       |
-| Forge           | [GitHub](https://github.com/) + [`gh`](https://cli.github.com/)                     | Issues, branches, pull requests, review, merge                  |
-| CI              | [GitHub Actions](https://docs.github.com/en/actions)                                | Tests, typecheck and build on every pull request                |
-| Tooling         | [pnpm](https://pnpm.io/) or [Foundry](https://getfoundry.sh/)                       | Detected per project; provides the format and lint commands     |
+| Layer           | Tool                                                                                | Role in HuG Flow                                                                  |
+| --------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Editor          | [VS Code](https://code.visualstudio.com/)                                           | Diff review and staging: the maintainer's approval surface                        |
+| Agent           | [Claude Code](https://code.claude.com/docs/en/vscode-extension) (VS Code extension) | Executes every phase; configured through the `hug` plugin, `CLAUDE.md` and skills |
+| Version control | [Git](https://git-scm.com/)                                                         | Local history; the staging area acts as the approval gate                         |
+| Forge           | [GitHub](https://github.com/) + [`gh`](https://cli.github.com/)                     | Issues, branches, pull requests, review, merge                                    |
+| CI              | [GitHub Actions](https://docs.github.com/en/actions)                                | Tests, typecheck and build on every pull request                                  |
+| Tooling         | [pnpm](https://pnpm.io/) or [Foundry](https://getfoundry.sh/)                       | Detected per project; provides the format and lint commands                       |
 
 The maintainer works in VS Code with the Claude Code extension open in a side panel. The agent writes into the working tree. The maintainer reads the diff in the _Source Control_ view and stages hunks or files from there. Nothing else is needed on the editor side.
 
-Requirements on the machine: `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter on each chunk. On Windows, [Git for Windows](https://gitforwindows.org/) also provides the Bash shell that Claude Code runs commands in, so the shell snippets below work unchanged.
+Requirements on the machine: [Node.js](https://nodejs.org/) 22.18 or later for the plugin's hooks, `git`, `gh` logged in with access to the repositories, and the project's package manager (`pnpm` or `forge`) so the agent can run the format check and the linter on each chunk. On Windows, [Git for Windows](https://gitforwindows.org/) also provides the Bash shell that Claude Code runs commands in, so the shell snippets below work unchanged.
 
-## Process layer: `CLAUDE.md`
+## Personal layer: `CLAUDE.md`
 
-[`CLAUDE.md`](CLAUDE.md) lives at `~/.claude/CLAUDE.md`, so it is loaded in every session and every project. How it maps to the lifecycle:
+[`CLAUDE.md`](CLAUDE.md) lives at `~/.claude/CLAUDE.md`, so it is loaded in every session and every project, next to the plugin's rules. It does not restate them. Each section either adds a convention or overrides a rule:
 
-| `CLAUDE.md`                                                           | HuG Flow                                   |
-| --------------------------------------------------------------------- | ------------------------------------------ |
-| Task confirmation                                                     | P1                                         |
-| Workflow, steps 1 to 4                                                | P2                                         |
-| Workflow, steps 5 and 8, and the stage-then-commit loop               | P3                                         |
-| Workflow, steps 6, 7 and 9                                            | P4                                         |
-| Workflow, step 10                                                     | P5                                         |
-| Workflow, steps 11 and 12                                             | P6                                         |
-| Attribution                                                           | I5                                         |
-| Pull requests: never push to `main`, never force-push a shared branch | I4                                         |
-| Comments                                                              | P1 (issue comments), P3 (PR comments)      |
-| Issues, Pull requests, Commits                                        | Conventions for the artifacts of section 6 |
+| `CLAUDE.md`            | Adds or overrides                                                                                          | HuG Flow   |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- | ---------- |
+| Task confirmation      | The spec also lists the issue and pull request text, so my confirmation approves them                      | P1         |
+| Forges                 | A second forge, picked from the `origin` remote                                                            | P2 to P6   |
+| Workflow               | Kept changes committed first as their own commit; rebase and force-push of my own branch when `main` moves | P2, P3, P6 |
+| Stage-then-commit loop | A fixed phrase for my chunks, and the ready sound once a chunk passes its check                            | P3         |
+| Issues, planning       | A first comment for an issue with no description; plans kept in a tracking issue                           | P0, P1     |
+| Comments               | Every comment on the forge is shown to me before it is posted                                              | P1, P3     |
+| Commits                | As small as possible, lowercase, no emoji                                                                  | P3         |
+| Tooling, Style         | pnpm only, `forge fmt --check` for Foundry, terse replies                                                  | P3         |
+
+[`instructions/PLAN_ISSUES.md`](instructions/PLAN_ISSUES.md) is imported by `CLAUDE.md`. [`hooks/forge-context.sh`](hooks/forge-context.sh) is a SessionStart hook that loads the commands of my second forge, from `~/.claude/instructions/RICKUB.md`, only in repositories hosted on it. That file is private and not part of this example: without it, the hook prints nothing.
 
 ## Intake layer: skills
 
@@ -68,26 +73,21 @@ Three properties make it fit P0:
 
 I run Claude Code with almost everything allowed. My user settings set `"defaultMode": "bypassPermissions"` with a broad allow list, and I also work in auto mode. This takes the "process autonomy" principle of section 3 literally: the agent never stops at a permission prompt.
 
-The consequence is that the process layer is mostly unbacked today. My Claude Code settings and my GitHub repository settings do enforce part of HuG Flow, and the rest of this section is what I would add.
+Permission rules hold little in that mode, so the enforcement comes from hooks, which run outside the model and in every permission mode, and from GitHub.
+
+### The plugin's hooks
+
+The [`hug` plugin](../../reference/README.md) adds a `PreToolUse` guard that parses every Bash command, including compound commands, `sh -c`, `eval` and `git -C`, and blocks with exit code 2, which takes precedence over allow rules. It blocks staging the agent's own work, bulk staging, pushes to `main`, force-pushes, merges on a red, pending or missing check, and attribution lines. Its Stop hook refuses to end a turn while I have staged the agent's work and it is uncommitted. The [plugin's README](../../reference/README.md#the-guard) has the full list and its limits.
 
 ### Claude Code settings
 
-[`settings.json`](settings.json) goes to `~/.claude/settings.json`. It merges what my settings enforce today with the deny rules I would add.
+[`settings.json`](settings.json) goes to `~/.claude/settings.json`. Besides installing the plugin and the SessionStart hook:
 
-What is enforced today:
-
-- **Attribution is off in the configuration.** I5 no longer depends only on the `CLAUDE.md` instruction: Claude Code itself does not add the co-author trailer.
+- **Attribution is off in the configuration.** Claude Code itself does not add the co-author trailer, so I5 does not depend on the guard catching it.
 - **Secrets are unreadable.** This is not a HuG Flow invariant, but it is the one hard boundary in the setup.
+- **Deny rules** block bulk staging, commits that bypass the staging area, direct pushes to `main`, and admin merges. They match the command as written, so the guard is what actually holds; they stay as a second line.
 
-`bypassPermissions` also skips prompts for writes to `.git` and `.claude`, so the agent can technically edit its own `CLAUDE.md` or the repository's Git hooks. Auto mode is safer in that respect, because a classifier reviews each action instead of approving everything.
-
-What the deny rules add: [Claude Code permissions](https://code.claude.com/docs/en/permissions) are evaluated deny first, and no allow rule can override a deny. A deny rule does not add a prompt, it only blocks. It therefore fits an "allow almost everything" setup: nothing changes for the maintainer until the agent tries something forbidden.
-
-The rules block bulk staging, commits that bypass the staging area, direct pushes to `main`, and admin merges that skip required checks.
-
-`git add` is not denied outright, because the loop is symmetric: when the maintainer writes a chunk, the agent is the reviewer and stages it. A maintainer who never writes chunks MAY deny `Bash(git add *)` entirely. The agent side of I2 then becomes a hard guarantee.
-
-The Claude Code documentation is explicit that a Bash rule is not a security boundary. It matches the command as written, so `git -C . add -A` or `sh -c 'git add .'` slip past the rules above. My own allow list contains `git -C <path> add` and `git -C <path> commit` entries, so the agent does use that form. The [`reference`](../../reference/README.md) plugin closes that gap with a `PreToolUse` hook that parses the full command, including compound commands, `sh -c`, `eval` and `git -C`, and blocks it with exit code 2, which takes precedence over allow rules. Verify the active rules with `/permissions`.
+`bypassPermissions` also skips prompts for writes to `.git` and `.claude`, so the agent can technically edit its own `CLAUDE.md` or the repository's Git hooks. Auto mode is safer in that respect, because a classifier reviews each action instead of approving everything. Verify the active rules with `/permissions`.
 
 ### GitHub repository settings
 
@@ -102,7 +102,7 @@ In each repository's settings, under _Pull Requests_:
 
 - **Squash only.** The "one squash commit per feature" artifact of section 5 no longer depends on the agent passing `--squash`. GitHub refuses any other merge method.
 - **The default message joins the two casing conventions.** The squash commit's title is the pull request title, which is also the issue title (`Add passkey recovery flow (#13)`). Its body lists the lowercase commits (`add recovery route`, `handle expired challenge`). On `main`, history reads as features, with their steps underneath.
-- **Automatic branch deletion.** The P6 exit criterion holds on the remote whatever the agent does. The local branch is still removed by `--delete-branch` or step 12.
+- **Automatic branch deletion.** The P6 exit criterion holds on the remote whatever the agent does. The local branch is still removed by `--delete-branch` or step 9 of the plugin's workflow.
 
 These settings are per repository, not per account, and a new repository starts with GitHub's defaults: all three merge methods allowed, no automatic deletion. [`repo-settings.sh`](repo-settings.sh) applies them from the command line:
 
@@ -110,7 +110,9 @@ These settings are per repository, not per account, and a new repository starts 
 ./repo-settings.sh <owner>/<repo>
 ```
 
-### What I would add: a GitHub ruleset on `main`
+### A GitHub ruleset on `main`
+
+`hug init <owner>/<repo>` applies these repository settings and the plugin's [`hug-flow` ruleset](../../reference/github/ruleset.json), which takes the setup to L3:
 
 | Rule                                  | Setting                           | Enforces                          |
 | ------------------------------------- | --------------------------------- | --------------------------------- |
@@ -124,34 +126,28 @@ Required approvals MUST be set to zero. GitHub does not let authors approve thei
 
 An empty bypass list has a cost: a flaky CI blocks the merge until it is fixed. That is intended.
 
-The ruleset holds whatever the agent does, including in `bypassPermissions` mode, because it lives on GitHub rather than on the machine. That makes it the most valuable addition for this setup.
-
-Rulesets on private repositories may require a paid GitHub plan.
+The ruleset holds whatever the agent does, on any machine, because it lives on GitHub. Rulesets on private repositories may require a paid GitHub plan.
 
 ## Coverage
 
-| Invariant                              | Instructed by        | Enforced today            | Enforced with the additions                       |
-| -------------------------------------- | -------------------- | ------------------------- | ------------------------------------------------- |
-| I1. `main` is deployable               | `CLAUDE.md`          | No                        | Required status checks, as far as the tests reach |
-| I2. No unreviewed line                 | `CLAUDE.md`          | No                        | Partially: deny rules against bulk staging        |
-| I3. No merge without green CI          | `CLAUDE.md`, step 10 | No                        | Required status checks                            |
-| I4. No direct or forced push to `main` | `CLAUDE.md`          | No                        | Ruleset, plus deny rules                          |
-| I5. Maintainer is sole author          | `CLAUDE.md`          | Yes: attribution settings | Same                                              |
-| I6. External text is data              | Intake skill         | No                        | No                                                |
+| Invariant                              | Instructed by | Enforced on the machine         | Enforced on GitHub (L3)                           |
+| -------------------------------------- | ------------- | ------------------------------- | ------------------------------------------------- |
+| I1. `main` is deployable               | Plugin rules  | No                              | Required status checks, as far as the tests reach |
+| I2. No unreviewed line                 | Plugin rules  | Partially: guard and ledger     | No                                                |
+| I3. No merge without green CI          | Plugin rules  | Guard: merges on red or pending | Required status checks                            |
+| I4. No direct or forced push to `main` | Plugin rules  | Guard, plus deny rules          | Ruleset                                           |
+| I5. Maintainer is sole author          | Plugin rules  | Guard and attribution settings  | No                                                |
+| I6. External text is data              | Intake skill  | No                              | No                                                |
 
-The repository settings also enforce two P6 rules today, outside the invariants: squash-only merges, and deletion of merged branches on the remote.
+The repository settings also enforce two P6 rules, outside the invariants: squash-only merges, and deletion of merged branches on the remote.
 
 ## Known deviations
 
-This setup diverges from the specification in three places:
-
-- **Existing issues.** Step 2 of `CLAUDE.md` always creates an issue. When the work starts from an existing issue, for example one filed in P0, a literal reading creates a duplicate. P1 requires reusing the existing issue.
-- **Repositories without CI.** The file applies to every project, including those with no checks. There, step 10 has nothing to wait for and I3 is vacuous. A setup that follows the spec MUST either configure CI or run the full local pipeline (tests, typecheck, build) before P6.
-- **Label mismatch.** The intake skill labels issues `help wanted`, while `CLAUDE.md` uses `enhancement` or `bug`. An issue filed in P0 keeps its intake label unless relabelled in P1.
+- **Label mismatch.** The intake skill labels issues `help wanted`, while the plugin's rules use `enhancement`, `bug` or `documentation`. An issue filed in P0 keeps its intake label unless relabelled in P1.
 
 ## Further reading
 
-- [Claude Code memory](https://code.claude.com/docs/en/memory) and [skills](https://code.claude.com/docs/en/skills), Claude Code documentation
+- [Claude Code memory](https://code.claude.com/docs/en/memory), [skills](https://code.claude.com/docs/en/skills) and [plugins](https://code.claude.com/docs/en/plugins), Claude Code documentation
 - [Configure permissions](https://code.claude.com/docs/en/permissions), Claude Code documentation
 - [Claude Code for VS Code](https://code.claude.com/docs/en/vscode-extension)
 - [GitHub CLI manual](https://cli.github.com/manual/)

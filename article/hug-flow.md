@@ -309,8 +309,8 @@ There are three conformance levels. Each level includes every requirement of the
 
 | Level | Name              | Requirement                                                                                                                                                                                                                                                                 |
 | ----- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| L1    | Instructed        | The agent's instructions file encodes P0–P6 and I1–I6. Compliance depends on the model following it. [`examples/minimal`](https://github.com/julienbrg/hug/tree/main/examples/minimal) and [`examples/julien`](https://github.com/julienbrg/hug/tree/main/examples/julien) are L1 setups.                                               |
-| L2    | Locally enforced  | Hooks on the maintainer's machine block I2, I4 and I5 violations before they happen. The hooks run outside the model, and their decision holds whatever the model does and whatever permission mode the agent runs in.                                                      |
+| L1    | Instructed        | The agent's instructions file encodes P0–P6 and I1–I6. Compliance depends on the model following it. [`examples/minimal`](https://github.com/julienbrg/hug/tree/main/examples/minimal) is an L1 setup.                                                                                                         |
+| L2    | Locally enforced  | Hooks on the maintainer's machine block I2, I4 and I5 violations before they happen. The hooks run outside the model, and their decision holds whatever the model does and whatever permission mode the agent runs in. [`examples/julien`](https://github.com/julienbrg/hug/tree/main/examples/julien) is an L2 setup, built on the [`reference`](https://github.com/julienbrg/hug/tree/main/reference) plugin. |
 | L3    | Remotely enforced | Forge rules on `main` require a pull request, require the CI checks to pass, allow only squash merges, and forbid force-pushes and deletion, so that I1, I3 and I4 hold even if the machine is bypassed. The history of `main` can be audited against the predicates below. |
 
 An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
@@ -357,285 +357,81 @@ The two can be combined. A project that ships LLM features can run HuG Flow for 
 
 ## My own setup
 
-This is the setup I use every day. It is one way to implement HuG Flow, not the only one. It is L1: it instructs the agent. Its stack, settings, enforcement, coverage and known deviations, and where to install each file, are in [`examples/julien`](https://github.com/julienbrg/hug/tree/main/examples/julien).
+This is the setup I use every day. It is one way to implement HuG Flow, not the only one. It is L2: the [`hug` plugin](https://github.com/julienbrg/hug/tree/main/reference) loads HuG Flow's rules into every session and enforces part of them with hooks, and my own `CLAUDE.md` adds to them or overrides them. Its stack, settings, enforcement, coverage and known deviations, and where to install each file, are in [`examples/julien`](https://github.com/julienbrg/hug/tree/main/examples/julien).
 
 To start your own, use [`examples/minimal`](https://github.com/julienbrg/hug/tree/main/examples/minimal) instead: the same flow without my personal conventions, meant to be adapted to your own needs and habits. Once it works for you, feel free to add it to `examples/` with a pull request (see [CONTRIBUTING.md](https://github.com/julienbrg/hug/blob/main/CONTRIBUTING.md)).
 
 ### `CLAUDE.md`
 
-The file lives at `~/.claude/CLAUDE.md`, so it is loaded in every session and every project. Here it is as I use it.
+The file lives at `~/.claude/CLAUDE.md`, so it is loaded in every session and every project, next to the plugin's rules. It doesn't restate them: each section adds a convention or overrides a rule, and where the two conflict, mine win. It imports [`PLAN_ISSUES.md`](https://github.com/julienbrg/hug/blob/main/examples/julien/instructions/PLAN_ISSUES.md), my rules for planning open issues. Here it is as I use it.
 
 ```markdown
+# Base
+
+The hug plugin loads HuG Flow's rules into every session. They are the
+base; this file only adds to them, and where the two conflict, this file
+wins.
+
 # Task confirmation
 
-Before starting any non-trivial task, rephrase my request in your own
-words as a short spec (what you understood, what you're about to do,
-the list of files you expect to create, modify or delete, and the
-suggested issue title and description) and wait for my
-confirmation. Accept "go", "yes", "y", "yep", "sure", or anything
-equivalent as confirmation — don't demand exact wording.
-My confirmation approves the issue title and description too.
+The spec also lists the issue title and body (or the existing issue) and
+the pull request title and body. My confirmation approves them, so they
+are published as soon as the workflow reaches them. The only other
+approvals are the stage-then-commit loop and [comments](#comments).
 
-Once confirmed, run the task end-to-end with zero further
-interruptions — no permission prompts, no intermediate check-ins —
-except the stage-then-commit loop and the
-[comment](#comments) approvals defined below.
-Skip this confirmation step for trivial asks (reading a file,
-answering a question, a one-line lookup).
+# Forges
 
-# Git & forges
+Run `git remote get-url origin` before anything else:
 
-## Attribution
+- `github.com` → `gh`, as HuG Flow says
+- `git.rickub.com` → `rickub`; a SessionStart hook loads its commands
+  from `~/.claude/instructions/RICKUB.md`
 
-Never add `Co-Authored-By: Claude` or `Generated with Claude Code` to
-commits, PR bodies, or issue comments. I am the sole author.
+# Workflow
 
-## Forge detection
+- Uncommitted changes I keep at step 1 are mine: right after the branch
+  is checked out, before any new work, stage them by naming the files,
+  check the staged content, commit them as their own commit, and push.
+  If the check fails, `git restore --staged` them and tell me what
+  failed; I fix it as a new unstaged chunk.
+- Create `CHANGELOG.md` if it doesn't exist.
+- If `main` moves under a long-lived branch, rebase it onto `main` and
+  force-push: it is your own unshared branch.
 
-Run `git remote get-url origin` before anything else. The host picks
-the command set for the workflow below:
+# Stage-then-commit loop
 
-- `github.com` → `gh` (the commands as written)
-- no remote → commit locally only; ask before adding one
-
-## Workflow
-
-Always follow this order. Never skip a step.
-
-1. Check for uncommitted or untracked changes on the current branch.
-   If there are any, show a short recap of what they do and ask
-   whether to keep them or discard them (via `git stash` — reversible),
-   then immediately move on to step 2 without waiting for the answer.
-   Resolve the answer by step 3: keep needs no action (the new branch
-   carries them forward automatically), discard means stashing first.
-   Anything kept is mine, so right after step 4, before any new work,
-   you stage it by naming the files (never `git add -A` or `git add .`),
-   run the check pipeline on the staged content, commit it as its own
-   commit, and push. If the check fails, `git restore --staged` it and
-   tell me what failed — I fix it as a new unstaged chunk.
-2. Create an issue
-3. Create a branch from that issue, off main
-4. Fetch the branch locally
-5. Commit — via the [stage-then-commit loop](#stage-then-commit-loop)
-6. Push
-7. Open a pull request
-8. Repeat 5–6 for further commits as the work continues
-9. Update CHANGELOG.md (create it if it doesn't exist), once, summarizing
-   the whole PR — not on every commit. Runs after the last code commit,
-   through the stage-then-commit loop like any other commit, then push.
-   The PR's docs and README.md changes go in that same last chunk, together
-   with the changelog.
-10. Wait for PR checks to finish and pass
-11. Merge
-12. Checkout main, sync it, and delete the merged branch
-
-Steps 3–4 collapse into `gh issue develop <number> --checkout`. Open the
-PR right after the first commit is pushed (step 7) — don't wait until
-the work is finished. Later commits just push to the same branch.
-
-Run the whole sequence end-to-end without pausing to ask permission at
-each step — this applies across all projects. The one exception is
-step 5 (commit), which does not work like a normal commit.
-
-Every other step, including push, runs without approval — only
-comments need mine (see [Comments](#comments)).
-Still show
-what was done (issue #, branch, PR #, merge result) so I can see and
-intervene.
-
-Step 10: `gh pr checks <number> --watch`. If a check fails, fix the
-underlying issue, commit, and push before merging — never merge on a
-red or still-running check, and never skip this step because the diff
-looks safe.
-
-Step 11: merge with `gh pr merge <number> --squash --delete-branch`, which
-removes the remote and local branch in one go.
-
-Step 12: after merge, `git checkout main && git pull`. If the branch
-survived the merge (e.g. `--delete-branch` was not used), delete it:
-`git push origin --delete <branch>` and `git branch -d <branch>`. Never
-leave a merged branch behind.
-
-## Stage-then-commit loop
-
-The rule in one line: **whoever did not write a chunk approves it by
-staging it, and the author then commits exactly what was staged.**
-Nobody stages their own work, and nothing gets committed unreviewed.
-
-The project's check pipeline consists of the format check and the
-linter only, using the tool that matches the project (see Tooling
-below). Tests, typecheck and build are not part of it; the full test
-suite runs in the PR checks (step 10). Nothing is committed unless
-exactly what is staged passed it. You check your own chunks as soon
-as they appear as unstaged changes, while I review them, so a fully
-staged chunk of yours commits with no check wait. Anything else
-staged, including my chunks and partial or
-edited stages of yours, is checked at commit time, on the staged
-content itself (`git show :<file>` piped to the tool's stdin mode),
-not the working tree. If the pipeline passes, commit exactly what is
-staged. If anything fails, `git restore --staged`
-the affected files, tell the other party what failed and why, and leave
-it there — whoever staged it fixes it as a new unstaged chunk. Never
-fix or touch staged changes you didn't write, and never commit on a
-failing check.
-
-When I write the chunk:
-
-- I write one logical chunk of changes, leave it unstaged, say exactly
-  "Please check my changes as I keep on working on the next steps.", and stop — I
-  never run `git add` or `git commit` myself before you've staged.
-- You review the unstaged diff in your IDE and `git add` what you
-  approve.
-- I watch for that, run the check pipeline, and commit exactly what's
-  staged if it passes, then immediately start writing the next chunk as
-  new unstaged changes.
-
-When you write the chunk — you implementing a task, and this covers
-source, tests, scripts, docs, config, everything:
-
-- You write one logical chunk, leave it **unstaged**, say in one line
-  what it is and that it's ready for review, and stop. Never run
-  `git add` on your own work. Not for a doc, not for a script, not for
-  a file you consider uncontroversial, and never `git add -A` or
-  `git add .`. To move or delete a file, use plain `mv` or `rm`, never
-  `git mv` or `git rm`, and leave both paths unstaged.
-- I review the unstaged diff in my IDE and `git add` what I approve.
-- The moment the chunk is complete on disk, in the same command, record its
-  fingerprint — the tree it would commit as, built in a throwaway
-  index so mine is untouched,
-  `GIT_INDEX_FILE=<literal tmp path> sh -c 'git read-tree HEAD && git add -A && git write-tree'` —
-  and run the check pipeline on it. I'm already reading the diff, so
-  the check costs me no wait. Keep the fingerprint only if the check
-  passes. If it fails, tell me what failed, fix it as new unstaged
-  changes, and check again.
-  Once the check passes, and never before, that same command plays
-  the ready sound as its last step, so I hear that the chunk is ready
-  for review without watching the panel. Wrap it in a subshell, so its
-  `&` detaches `afplay` alone, not the whole chain:
+- When I write a chunk, I say exactly "Please check my changes as I keep
+  on working on the next steps."
+- The command that records your chunk's tree and passes the check ends
+  with the ready sound, and only then:
   `… && (nohup afplay ~/.claude/sounds/icq.mp3 >/dev/null 2>&1 &)`.
-- You watch for my staging by polling `git status` — no nudges, no
-  check-ins, no asking me whether I'm done reviewing — and the moment
-  something is staged, commit exactly what's staged, then immediately
-  start the next chunk as new unstaged changes. Compare `git write-tree`
-  with the fingerprint in the same command as the commit: equal means I
-  staged the checked chunk untouched, so commit without re-running the
-  pipeline; different means run it on the staged content first.
-- Polling means a background watcher, never ending the turn: you only
-  run while a turn is active, so a turn that ends unwatched misses my
-  staging. Right after leaving a chunk unstaged, start a Bash
-  `run_in_background` loop such as
-  `until [ -n "$(git diff --cached --name-only)" ]; do sleep 1; done`
-  — it re-invokes you when something is staged. Start a fresh one after
-  every commit.
-- While I'm reviewing I'll often ask questions about the code — why a
-  format, why an approach, why that name. A question is not a pause in
-  the loop. Answer it, then **check `git status` in that same turn**,
-  because I usually stage while or right after I ask. If something is
-  staged, commit it before you end the turn. Never end a turn with
-  staged changes sitting uncommitted, whatever else the turn was about.
-- If I stage only part of what you wrote, commit that part and leave
-  the rest unstaged. I'll either stage the rest or tell you to change
-  it.
-- Don't pile the whole task up into one review. Keep each chunk small
-  enough to read in one sitting, and stop after each one.
-- Rejection: if I don't like a chunk, I say what's wrong instead of
-  staging it. Propose a fix and wait for my "go" (per Task confirmation)
-  before rewriting it — don't silently redo it unprompted.
-- Don't idle while I review: write chunk N+1 in a linked worktree, on
-  top of chunk N. Chunk 1 is written straight in the repo — nothing is
-  under review yet, so no worktree until chunk 2. Create it outside the
-  repo with `git worktree add --detach <path> HEAD` (the branch is
-  already checked out in the repo), and seed it with chunk N from its
-  fingerprint `<TN>`: `git diff --binary HEAD <TN> | git -C <path> apply`.
-  No WIP commit: the handoff diffs fingerprints, not the worktree's
-  `HEAD`. Run the install (`pnpm install`) in the worktree — never
-  symlink dependencies. Stay one chunk ahead, no more.
-  - When I stage chunk N, do the whole handoff in one Bash command, so
-    it costs a single round-trip: commit chunk N (re-checking only if
-    the fingerprint differs), record the worktree's tree as `<TN1>` in
-    a throwaway index, and apply chunk N+1 to the repo with
-    `git diff --binary <TN> <TN1> | git apply` right away, finished or
-    not, so I never wait for it to appear. The diff between trees
-    carries new, deleted and renamed files, and still applies once
-    chunk N is committed. Push chunk N last in that same command, once
-    N+1 is on disk. Then start the watcher.
-  - If chunk N+1 is finished, `<TN1>` is its fingerprint: check it in
-    that same command, say it's ready for review, and start chunk N+2
-    in the worktree.
-  - If it isn't, say it's still in progress and finish it in place, in
-    the repo, while I start reading. Once it's complete, record its
-    fingerprint and check it, say it's ready for review, carry the
-    difference into the worktree with `git diff --binary`, and start
-    chunk N+2 there. If I stage part of it before then, there's no
-    fingerprint yet: check the staged content and commit it.
-  - When I ask for a change to chunk N: apply it to chunk N in the
-    repo, record its new fingerprint, carry the difference into the
-    worktree, and rework chunk N+1 so it still fits.
-  - When the step's work is done: `git worktree remove --force <path>`.
+  The subshell keeps `&` from detaching the whole chain.
 
-Repeat until the step's work is done.
+# Issues
 
-## Issues
+- Issue body templates by kind and labels as in HuG Flow. If an issue
+  has no main description, draft one as its first comment and post it
+  once I approve it.
 
-- Title starts with a capitalized verb, usually Add / Fix / Improve /
-  Remove. e.g. `Add passkey recovery flow`, `Fix stale nonce on retry`.
-- The body follows the template for its kind. Use the repository's
-  `.github/ISSUE_TEMPLATE/` sections when it has them, since `gh` skips
-  them when given a body. Otherwise:
-  - Bug (`bug`): Description, Steps to reproduce, Expected behavior,
-    Actual behavior, Environment.
-  - Feature (`enhancement`): Problem, Proposed solution, Alternatives
-    considered, Acceptance criteria as a checklist.
-  - Other, such as docs, chore, refactor or CI (`documentation` for
-    docs only, else `enhancement`): Summary, Why, Done when as a
-    checklist.
-  - Leave out sections that do not apply rather than leaving them
-    empty.
-- If an issue has no main description, draft one as the first comment
-  and post it once I approve it.
-- Assign it to me (`@me`).
-- Label it by kind, as above.
+@instructions/PLAN_ISSUES.md
 
-## Pull requests
-
-- PR title is identical to the issue title — same verb, same casing.
-- PR body follows the repository's `.github/pull_request_template.md` if
-  it has one. Otherwise: Summary (what and why), Changes, How to test,
-  optional Notes, then `Closes #<number>`, so merging closes the issue.
-- Always assign it to me: `--assignee @me`.
-- Never push to main directly. Never force-push a shared branch.
-- If main moves under a long-lived branch, rebase the branch onto main
-  and force-push — it's your own unshared branch, so that's safe.
-
-## Comments
+# Comments
 
 Show me every comment before you post it on the forge (issue or PR)
-and post exactly what I approve. Issue and PR titles and bodies need
-no approval: publish them as soon as the workflow reaches that step,
-and never hold a step back waiting on one. Draft a PR comment when you
-make a choice I didn't specify, find something new, or hit a minor
-issue out of scope. A draft waiting for me never blocks a commit or a
-push.
+and post exactly what I approve. Draft a PR comment when you make a
+choice I didn't specify, find something new, or hit a minor issue out
+of scope. A draft waiting for me never blocks a commit or a push.
 
-## Commits
+# Commits
 
-Commits do NOT follow the issue/PR casing. They are lowercase.
-
-- As small as possible — one logical change per commit.
-- Very short titles. Lowercase, always — including the first word.
-- Imperative mood. No trailing period. No emoji.
-- No body unless the change genuinely needs explaining.
-
+As small as possible, lowercase including the first word, no emoji.
 e.g. issue `Add passkey recovery flow` → commits `add recovery route`,
 `handle expired challenge`.
 
 # Tooling
 
 - pnpm, never npm or yarn.
-- Detect the project type before running checks: `package.json` → pnpm
-  project (format check and lint via pnpm scripts); `foundry.toml` →
-  Foundry/Solidity project (`forge fmt --check`). Adapt to whatever the
-  project actually uses.
+- `foundry.toml` → `forge fmt --check` as the format check.
 
 # Style
 
@@ -659,7 +455,7 @@ Intake skills are project-specific, because each one targets a given repository.
 - [Agent development lifecycle](https://docs.glean.com/agents/agent-development-lifecycle/adlc), Glean documentation
 - [ADLC vs SDLC](https://atlan.com/know/ai-agent/adlc-vs-sdlc/), Atlan
 - [GitHub CLI manual](https://cli.github.com/manual/)
-- [Claude Code memory](https://code.claude.com/docs/en/memory) and [skills](https://code.claude.com/docs/en/skills), Claude Code documentation
+- [Claude Code memory](https://code.claude.com/docs/en/memory), [skills](https://code.claude.com/docs/en/skills) and [plugins](https://code.claude.com/docs/en/plugins), Claude Code documentation
 - [Configure permissions](https://code.claude.com/docs/en/permissions), Claude Code documentation
 - [Claude Code for VS Code](https://code.claude.com/docs/en/vscode-extension)
 - [Available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets), GitHub documentation

@@ -76,6 +76,10 @@ Everything else is a convention. Common changes:
 
 Keep your changes in the file itself rather than in scattered session instructions, so the setup stays the same from one session to the next. [`examples/julien`](../julien/README.md) shows how far one maintainer adapted it: a second forge, a fixed package manager, and a personal review phrase.
 
+### On top of the plugin
+
+With the [`hug` plugin](../../reference/README.md) installed, you don't need `AGENTS.md`: the plugin loads the same rules into every session and enforces part of them with hooks. Keep only your differences in your own `CLAUDE.md`, such as `~/.claude/CLAUDE.md`. The plugin's rules say that your instructions win where the two conflict, so a section there can add a convention or override a rule without restating the rest. [`examples/julien/CLAUDE.md`](../julien/CLAUDE.md) is one such file.
+
 ## Coverage
 
 | Invariant                              | Instructed by | Enforced by                          |
