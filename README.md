@@ -39,6 +39,8 @@ The [`reference`](reference/README.md) plugin's hooks block bulk staging, pushes
 
 Either way, ask for a small change in a repository, then review the first chunk: read the unstaged diff in your editor, and stage what you approve.
 
+**Your own instructions on top.** The plugin's rules are a base, not a ceiling. Keep your own `~/.claude/CLAUDE.md` for what HuG Flow doesn't say, such as your forge, your tooling, your commit style or the comments you want to approve, and leave out what it already covers. Where the two conflict, your instructions win. The hooks still enforce the same invariants either way.
+
 The spec calls these setups levels L1, L2 and L3 (see [Conformance](spec/hug-flow.md#10-conformance)).
 
 ## What it looks like

@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - A "What it looks like" walkthrough of a first task, after Get started in the README and the article. It replaces the README's "The flow in one paragraph".
 - A comment rule in `examples/julien/CLAUDE.md`, `examples/minimal/AGENTS.md` and the article: the agent shows the maintainer every issue or pull request comment before posting it, posts exactly what they approve, and drafts a pull request comment on a choice, a finding or a minor issue met along the way. A draft waiting for approval never blocks a commit or a push. Issue and pull request titles and bodies need no approval, so the pull request opens right after the first push.
 - A ready sound in `examples/julien`: the agent plays `sounds/icq.mp3` with `afplay` in the same command that records a chunk's fingerprint, so the maintainer hears when a chunk is ready for review. The README gives its install path, `~/.claude/sounds/`, and notes that `afplay` is macOS only. The article quotes the new lines.
+- A precedence rule in the plugin's rules: the user's own instructions, their `CLAUDE.md` and what it imports, may add to or override HuG Flow's rules, and win where they conflict. The README and the article explain keeping only those additions and overrides in a personal `CLAUDE.md` on top of the plugin.
 
 ### Changed
 
@@ -44,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The plugin's version stayed `0.1.0` after the worktree fix, so installs kept the old guard. It is now `0.1.1`.
 - The worktree handoff (`git -C <path> diff HEAD | git apply`) dropped new files, which are untracked in the worktree, and failed to apply once chunk N was committed, since the diff contained chunk N again.
 - The ready sound in `examples/julien/CLAUDE.md` and the article plays only once the check passes, as the last step of the fingerprint command, wrapped in a subshell. At the end of an `&&` chain, its bare `&` backgrounded the whole chain, so the tool call returned at once and the sound was cut off, and nothing kept it from playing for a chunk that failed the check.
+- The plugin's version stayed `0.1.1` after the issue and pull request templates reached its rules, so installs kept the rules without them. It is now `0.1.2`.
 
 ## [0.3.0] - 2026-09-27
 
