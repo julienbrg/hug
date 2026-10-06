@@ -64,20 +64,20 @@ Apart from staging, you never touch Git, and nothing enters the history without 
 
 ## Contents
 
-| Path                                                                     | What it is                                                                                                   |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| [`spec/hug-flow.md`](spec/hug-flow.md)                                   | The specification: roles, artifacts, lifecycle phases, approval matrix, invariants                           |
-| [`spec/bindings/`](spec/bindings/)                                       | How other agents, forges, version control systems and review tools fill each step of the spec                |
-| [`article/hug-flow.md`](article/hug-flow.md)                             | The [published article](https://julienberanger.com/hug-flow), verbatim                                       |
-| [`.claude/skills/check-article/`](.claude/skills/check-article/SKILL.md) | `/check-article`: reports what the post is missing, or has out of date, given the repo                       |
-| [`scripts/publish-post.ts`](scripts/publish-post.ts)                     | Publishes the article to the blog when it differs from the live post; run by the `publish` workflow          |
-| [`SETUP.md`](SETUP.md)                                                   | Setup steps for an agent, behind the one-phrase install                                                      |
-| [`skills/hug/`](skills/hug/SKILL.md)                                     | `/hug on \| off \| status`: turns the minimal setup on, and back off                                         |
-| [`scripts/hug.sh`](scripts/hug.sh)                                       | Records, applies and reverts the setup for `/hug`, in POSIX `sh`                                             |
-| [`reference/`](reference/README.md)                                      | The reference implementation: a Claude Code plugin whose hooks enforce the flow, `hug init`, `hug audit`     |
-| [`conformance/`](conformance/)                                           | Scenario tests proving the reference implementation's L2 level, run by `pnpm test`                           |
-| [`examples/minimal/`](examples/minimal/README.md)                        | A generic setup to start from and adapt: `AGENTS.md`, an intake skill, a `commit-msg` hook, a GitHub ruleset |
-| [`examples/julien/`](examples/julien/README.md)                          | A personal setup on VS Code, Claude Code and GitHub: `CLAUDE.md`, an intake skill, settings, CI              |
+| Path                                                                     | What it is                                                                                                                  |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| [`spec/hug-flow.md`](spec/hug-flow.md)                                   | The specification: roles, artifacts, lifecycle phases, approval matrix, invariants                                          |
+| [`spec/bindings/`](spec/bindings/)                                       | How other agents, forges, version control systems and review tools fill each step of the spec                               |
+| [`article/hug-flow.md`](article/hug-flow.md)                             | The [published article](https://julienberanger.com/hug-flow), verbatim                                                      |
+| [`.claude/skills/check-article/`](.claude/skills/check-article/SKILL.md) | `/check-article`: reports what the post is missing, or has out of date, given the repo                                      |
+| [`scripts/publish-post.ts`](scripts/publish-post.ts)                     | Publishes the article to the blog when it differs from the live post; run by the `publish` workflow                         |
+| [`SETUP.md`](SETUP.md)                                                   | Setup steps for an agent, behind the one-phrase install                                                                     |
+| [`skills/hug/`](skills/hug/SKILL.md)                                     | `/hug on \| off \| status`: turns the minimal setup on, and back off                                                        |
+| [`scripts/hug.sh`](scripts/hug.sh)                                       | Records, applies and reverts the setup for `/hug`, in POSIX `sh`                                                            |
+| [`reference/`](reference/README.md)                                      | The reference implementation: a Claude Code plugin whose hooks enforce the flow, `hug init`, `hug audit`                    |
+| [`conformance/`](conformance/)                                           | Scenario tests proving the reference implementation's L2 level, run by `pnpm test`                                          |
+| [`examples/minimal/`](examples/minimal/README.md)                        | A generic setup to start from and adapt: `AGENTS.md`, an intake skill, a `commit-msg` hook, a GitHub ruleset                |
+| [`examples/julien/`](examples/julien/README.md)                          | A personal setup on VS Code, Claude Code and GitHub: the `hug` plugin, a slim `CLAUDE.md` on top, an intake skill, settings |
 
 ## Contributing
 
