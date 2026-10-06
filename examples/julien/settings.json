@@ -1,6 +1,23 @@
 {
   "includeCoAuthoredBy": false,
   "gitAttribution": false,
+  "extraKnownMarketplaces": {
+    "hug": {
+      "source": { "source": "github", "repo": "julienbrg/hug" }
+    }
+  },
+  "enabledPlugins": {
+    "hug@hug": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "~/.claude/hooks/forge-context.sh" }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "defaultMode": "bypassPermissions",
     "deny": [
