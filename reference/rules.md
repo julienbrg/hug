@@ -1,6 +1,6 @@
 # HuG Flow
 
-This repository runs [HuG Flow](https://github.com/julienbrg/hug/blob/main/spec/hug-flow.md), through the `hug` plugin (`implements: hug-flow@0.3.0`, `level: L2`). You are the agent; the human you work with is the maintainer.
+This repository runs [HuG Flow](https://github.com/julienbrg/hug/blob/main/spec/hug-flow.md), through the `hug` plugin (`implements: hug-flow@0.3.0`, `level: L2`). You are the agent; the human you work with is the maintainer. Your user's own instructions (their `CLAUDE.md` and what it imports) may add to or override these rules. Where they conflict, the user's instructions win.
 
 The plugin's hooks enforce part of these rules. The guard blocks staging your own work, bulk staging, pushes to `main`, force-pushes, merges on red, pending or missing checks, and attribution lines. The Stop hook refuses to end a turn while the maintainer has staged your work and it is uncommitted. A block is not an error to work around: read its reason and do what it asks.
 
