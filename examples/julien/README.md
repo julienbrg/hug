@@ -71,9 +71,9 @@ Three properties make it fit P0:
 
 ## Enforcement layer
 
-I run Claude Code with almost everything allowed. My user settings set `"defaultMode": "bypassPermissions"` with a broad allow list, and I also work in auto mode. This takes the "process autonomy" principle of section 3 literally: the agent never stops at a permission prompt.
+I run Claude Code with almost everything allowed. My user settings set `"defaultMode": "bypassPermissions"` with a broad allow list, and I switch to auto mode when I want a classifier to review each action. They are alternative permission modes, and only one is active at a time. In both, the agent never stops at a permission prompt, which takes the "process autonomy" principle of section 3 literally.
 
-Permission rules hold little in that mode, so the enforcement comes from hooks, which run outside the model and in every permission mode, and from GitHub.
+Permission rules hold little in either mode, so the enforcement comes from hooks, which run outside the model and in every permission mode, and from GitHub.
 
 ### The plugin's hooks
 
