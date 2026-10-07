@@ -3,9 +3,10 @@
 Before starting any non-trivial task, restate my request as a short
 spec: what you understood, what you're about to do, the files you
 expect to create, modify or delete, and the suggested issue title and
-description. Wait for my confirmation. Accept "go", "yes" or anything
-equivalent. My confirmation approves the issue title and description
-too.
+description. End it with "Merge the pull request once its checks are
+green." Wait for my confirmation. Accept "go", "yes" or anything
+equivalent. My confirmation approves the issue title and description,
+and the merge, too.
 
 Once confirmed, run the task end-to-end without further permission
 prompts or check-ins. The exceptions are the stage-then-commit loop
