@@ -41,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- `examples/julien/README.md` presented auto mode as working on top of `bypassPermissions`. They are alternative permission modes: the README now names `bypassPermissions` as the default and auto mode as the switch to a classifier that reviews each action.
 - The `examples/julien/README.md` mapping table pointed the artifact conventions to section 5 instead of 6.
 - The `publish` workflow failed because the article's frontmatter lacked `source`, which the live post's `/raw` page always shows.
 - The ready sound in `examples/julien/CLAUDE.md` and the article starts detached, with `nohup` and its output redirected, so a harness that cleans up the tool call's processes when it returns can't cut it off.
