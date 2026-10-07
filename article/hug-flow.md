@@ -15,6 +15,8 @@ HuG Flow is an issue-driven development lifecycle for building software with a c
 
 It extends the [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow) with an explicit division of labor between a human and an agent: **process autonomy, content control**.
 
+The spec, the Claude Code plugin and the example setups live in [julienbrg/hug](https://github.com/julienbrg/hug).
+
 ## Motivation
 
 In July 2026, Linus Torvalds said this:
