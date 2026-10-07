@@ -15,8 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - A comment rule in `examples/julien/CLAUDE.md`, `examples/minimal/AGENTS.md` and the article: the agent shows the maintainer every issue or pull request comment before posting it, posts exactly what they approve, and drafts a pull request comment on a choice, a finding or a minor issue met along the way. A draft waiting for approval never blocks a commit or a push. Issue and pull request titles and bodies need no approval, so the pull request opens right after the first push.
 - A ready sound in `examples/julien`: the agent plays `sounds/icq.mp3` with `afplay` in the same command that records a chunk's fingerprint, so the maintainer hears when a chunk is ready for review. The README gives its install path, `~/.claude/sounds/`, and notes that `afplay` is macOS only. The article quotes the new lines.
 - A precedence rule in the plugin's rules: the user's own instructions, their `CLAUDE.md` and what it imports, may add to or override HuG Flow's rules, and win where they conflict. The README and the article explain keeping only those additions and overrides in a personal `CLAUDE.md` on top of the plugin.
+- A link to the repository in the article's intro.
 
 ### Changed
+
+- The task spec ends with "Merge the pull request once its checks are green.", and the maintainer's confirmation approves the merge too, in the plugin's rules, both examples and the article. Claude Code's auto mode denies `gh pr merge` unless the conversation shows the maintainer approved it.
 
 - `examples/julien` builds on the `hug` plugin and is L2: its `CLAUDE.md` is a slim personal layer that only adds to or overrides the plugin's rules, with `instructions/PLAN_ISSUES.md` imported and a `hooks/forge-context.sh` SessionStart hook that loads a second forge's commands. `settings.json` enables the plugin, and the README maps each section to what it adds and drops the deviations the plugin's rules fixed. The minimal README explains how to keep only your differences on top of the plugin. The spec, the README, the plugin's README and the article list `examples/julien` as L2.
 - Issues are labelled by kind: `bug`, `enhancement`, or `documentation` for docs-only work. The forge bindings' Open PR commands take the templated body, and CONTRIBUTING points to the forms and the pull request template.
