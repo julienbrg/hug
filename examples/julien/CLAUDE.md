@@ -7,8 +7,10 @@ wins.
 # Task confirmation
 
 The spec also lists the issue title and body (or the existing issue) and
-the pull request title and body. My confirmation approves them, so they
-are published as soon as the workflow reaches them. The only other
+the pull request title and body, and ends with "Merge the pull request
+once its checks are green." My confirmation approves them and the
+merge, so they are published, and the pull request merged, as soon as
+the workflow reaches them. The only other
 approvals are the stage-then-commit loop and [comments](#comments).
 
 # Forges

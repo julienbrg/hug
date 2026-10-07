@@ -48,7 +48,7 @@ Requirements on the machine: [Node.js](https://nodejs.org/) 22.18 or later for t
 
 | `CLAUDE.md`            | Adds or overrides                                                                                          | HuG Flow   |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------- | ---------- |
-| Task confirmation      | The spec also lists the issue and pull request text, so my confirmation approves them                      | P1         |
+| Task confirmation      | The spec also lists the issue and pull request text and the merge, so my confirmation approves them        | P1         |
 | Forges                 | A second forge, picked from the `origin` remote                                                            | P2 to P6   |
 | Workflow               | Kept changes committed first as their own commit; rebase and force-push of my own branch when `main` moves | P2, P3, P6 |
 | Stage-then-commit loop | A fixed phrase for my chunks, and the ready sound once a chunk passes its check                            | P3         |
