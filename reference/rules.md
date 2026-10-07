@@ -6,7 +6,7 @@ The plugin's hooks enforce part of these rules. The guard blocks staging your ow
 
 ## Task confirmation
 
-Before any non-trivial task, restate the request as a short spec: what you understood, what you are about to do, and the files you expect to create, modify or delete. Wait for confirmation ("go", "yes" or anything equivalent).
+Before any non-trivial task, restate the request as a short spec: what you understood, what you are about to do, and the files you expect to create, modify or delete. End it with "Merge the pull request once its checks are green." Wait for confirmation ("go", "yes" or anything equivalent). It approves the merge too.
 
 Once confirmed, run the task end-to-end without further permission prompts or check-ins, except the stage-then-commit loop below. Skip the confirmation for trivial asks, such as reading a file or answering a question.
 
