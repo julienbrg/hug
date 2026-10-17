@@ -25,18 +25,19 @@ const start = /^start track #?(\d+)$/i.exec(prompt);
 
 if (start && track.file(cwd)) {
   const tracking = Number(start[1]);
+  // An issue has at most 100 sub-issues, so one page holds them all. No --jq
+  // filter: on Windows, gh runs through cmd, which would read its | as a pipe.
   const result = run(
     "gh",
-    [
-      "api",
-      "--paginate",
-      `repos/{owner}/{repo}/issues/${tracking}/sub_issues`,
-      "--jq",
-      '.[] | select(.state == "open") | .number',
-    ],
+    ["api", `repos/{owner}/{repo}/issues/${tracking}/sub_issues?per_page=100`],
     cwd,
   );
-  const issues = result.stdout.split(/\s+/).filter(Boolean).map(Number);
+  let issues: number[] = [];
+  try {
+    issues = (JSON.parse(result.stdout) as { number: number; state: string }[])
+      .filter((issue) => issue.state === "open")
+      .map((issue) => issue.number);
+  } catch {}
   if (!result.ok || !issues.length) {
     say(
       `HuG Flow: track #${tracking} not started: ${result.ok ? "it has no open sub-issues" : result.stderr.trim()}.`,

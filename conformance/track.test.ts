@@ -10,7 +10,7 @@ import { bash, git, hook, repo } from "./helpers.ts";
 
 const file = (cwd: string) => join(cwd, ".git", "hug", "track.json");
 
-function prompt(cwd: string, text: string, issues = "3,5") {
+function prompt(cwd: string, text: string, issues = "3,4:closed,5") {
   return hook(
     "track",
     { hook_event_name: "UserPromptSubmit", prompt: text, cwd },
