@@ -151,3 +151,38 @@ test("the agent cannot hand claude a prompt from Bash", () => {
     assert.equal(bash(cwd, command).code, 0, command);
   }
 });
+
+function session(cwd: string, env: Record<string, string>) {
+  const outcome = hook(
+    "session-start",
+    { hook_event_name: "SessionStart", cwd },
+    env,
+  );
+  return JSON.parse(outcome.stdout).hookSpecificOutput.additionalContext;
+}
+
+test("a new session hears about an active track and its issues' states", () => {
+  const cwd = repo();
+  prompt(cwd, "Start track #2", "3,4,5");
+  const context = session(cwd, {
+    HUG_STUB_SUBISSUES: "3:closed,4,5",
+    HUG_STUB_PRS: JSON.stringify([{ number: 9, headRefName: "4-add-thing" }]),
+  });
+  assert.match(context, /track #2 is active/);
+  assert.match(context, /#3: closed/);
+  assert.match(context, /#4: pull request #9 open/);
+  assert.match(context, /#5: not started/);
+});
+
+test("without gh, the session still names the track and its issues", () => {
+  const cwd = repo();
+  prompt(cwd, "Start track #2", "3,5");
+  const context = session(cwd, {});
+  assert.match(context, /track #2 is active/);
+  assert.match(context, /#3, #5; their states are unknown/);
+});
+
+test("without a track, the session gets the rules only", () => {
+  const cwd = repo();
+  assert.doesNotMatch(session(cwd, {}), /Active track/);
+});

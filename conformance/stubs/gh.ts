@@ -2,6 +2,7 @@
 // JSON in HUG_STUB_CHECKS, "none" for a pull request without checks, or
 // "error" for a failing gh. `gh api` on sub_issues answers with the issues
 // in HUG_STUB_SUBISSUES, such as "3,4:closed,5", open unless marked closed.
+// `gh pr list` answers with the JSON in HUG_STUB_PRS.
 
 const [command, action] = process.argv.slice(2);
 const checks = process.env.HUG_STUB_CHECKS ?? "error";
@@ -27,6 +28,13 @@ if (command === "api" && process.argv.some((a) => a.includes("/sub_issues"))) {
         return { number: Number(number), state };
       });
     process.stdout.write(JSON.stringify(list));
+    process.exit(0);
+  }
+}
+if (command === "pr" && action === "list") {
+  const prs = process.env.HUG_STUB_PRS;
+  if (prs !== undefined) {
+    process.stdout.write(prs);
     process.exit(0);
   }
 }
