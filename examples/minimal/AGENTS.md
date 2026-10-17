@@ -175,6 +175,10 @@ confirmation of its plan.
   stage it by naming the files, commit and push. Open the pull request
   after the first push and don't wait for the checks between pushes.
   Review your own pull request before the `CHANGELOG.md` chunk.
+- Run each issue in its own subagent, one at a time: hand it the issue,
+  its line of the plan and these rules, wait for its report (branch,
+  pull request, merged or stuck), tell me in one line where the track
+  stands, then start the next.
 - After the last push, wait for the checks. On a second red run, read
   the online docs of what failed before trying again. Merge on green and
   start the next issue.
