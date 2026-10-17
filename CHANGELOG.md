@@ -45,6 +45,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- A track's confirmation is no longer lost when the agent has moved the session out of the repository: the plugin's `UserPromptSubmit` hook (0.2.1) falls back to `CLAUDE_PROJECT_DIR`, and `Start track` and `Stop track` always answer in the session. The rules, `examples/julien/CLAUDE.md` and the article say to take no track action until the plugin says the track is confirmed.
+- The agent can no longer forge a track's confirmation through a child session: the guard blocks prompts handed to `claude` from Bash (`-p`, `--print`, a prompt argument or piped text), directly or through a package runner, and lines it cannot read that mention `claude`.
 - `examples/julien/README.md` presented auto mode as working on top of `bypassPermissions`. They are alternative permission modes: the README now names `bypassPermissions` as the default and auto mode as the switch to a classifier that reviews each action.
 - The `examples/julien/README.md` mapping table pointed the artifact conventions to section 5 instead of 6.
 - The `publish` workflow failed because the article's frontmatter lacked `source`, which the live post's `/raw` page always shows.
