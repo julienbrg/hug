@@ -1,6 +1,7 @@
 // PreToolUse hook on Bash. Parses the command and blocks, with exit code 2,
 // anything that breaks I2 (unreviewed content), I3 (merge without green CI),
-// I4 (push to main, force-push) or I5 (attribution). A hook's exit 2 holds
+// I4 (push to main, force-push) or I5 (attribution), and prompts handed to
+// claude, which could forge a track's confirmation. A hook's exit 2 holds
 // under every permission mode, bypassPermissions included.
 
 import { existsSync, readFileSync, statSync } from "node:fs";
@@ -44,9 +45,54 @@ const WRITERS: Record<string, string> = {
   replace: "rewrites history",
 };
 
+// The claude subcommands that take no prompt.
+const CLAUDE_SUBCOMMANDS = new Set([
+  "agents",
+  "auth",
+  "config",
+  "doctor",
+  "install",
+  "mcp",
+  "migrate-installer",
+  "plugin",
+  "setup-token",
+  "update",
+]);
+
+const PROMPT =
+  "a prompt given to claude from Bash starts a session whose prompts the hooks take as the maintainer's, such as `Start track #<n>`";
+
+// A child session's UserPromptSubmit hook would take its prompt as typed by
+// the maintainer, so the agent could forge a track's confirmation.
+function claude(command: Command): Verdict {
+  if (command.args.some((a) => ["-p", "--print"].includes(a.value))) {
+    return PROMPT;
+  }
+  const first = command.args.find((a) => !a.value.startsWith("-"));
+  if (first ? !CLAUDE_SUBCOMMANDS.has(first.value) : command.stdin !== null) {
+    return PROMPT;
+  }
+  return null;
+}
+
+// claude itself, or claude run through a package runner such as
+// `npx @anthropic-ai/claude-code`, with the arguments it receives.
+function launched(command: Command): Command | null {
+  if (command.program === "claude") return command;
+  if (!["npx", "pnpx", "bunx", "pnpm", "yarn", "bun"].includes(command.program))
+    return null;
+  const i = command.args.findIndex((a) =>
+    /^(@anthropic-ai\/claude-code|claude)(@.*)?$/.test(a.value),
+  );
+  return i === -1 ? null : { ...command, args: command.args.slice(i + 1) };
+}
+
 function check(line: string, cwd: string): Verdict {
   const parsed = parse(line);
   if (!parsed.ok) {
+    if (/(^|[^\w.-])claude([^\w.-]|$)/i.test(line)) {
+      return `the guard cannot read this command with confidence (${parsed.reason}), and it runs claude; ${PROMPT}`;
+    }
     return mentionsGitOrGh(line)
       ? `the guard cannot read this command with confidence (${parsed.reason}); rewrite it as plain git or gh commands`
       : null;
@@ -66,7 +112,9 @@ function check(line: string, cwd: string): Verdict {
         ? checkGit(command, dir, 0)
         : command.tool === "gh"
           ? checkGh(command, dir ?? cwd)
-          : null;
+          : launched(command)
+            ? claude(launched(command)!)
+            : null;
     if (verdict) return verdict;
   }
   return null;

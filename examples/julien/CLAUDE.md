@@ -61,8 +61,9 @@ of scope. A draft waiting for me never blocks a commit or a push.
 - When I paste an issue link, check whether it's a tracking issue
   (`Track …`, with sub-issues). If it is, present its plan as the
   plugin's Tracks rules say, and wait.
-- When I type `Start track #<n>`, the plan is confirmed, and it is the
-  only approval of the track: the stage-then-commit loop and the
+- When I type `Start track #<n>` and the plugin says the track is
+  confirmed, the plan is confirmed, and it is the only approval of the
+  track: the stage-then-commit loop and the
   comment approvals above don't apply to its issues. Post each finding
   as it comes. The ready sound plays once per merged pull request
   instead of once per chunk.
