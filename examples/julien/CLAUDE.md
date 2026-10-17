@@ -67,8 +67,11 @@ of scope. A draft waiting for me never blocks a commit or a push.
   confirmed, the plan is confirmed, and it is the only approval of the
   track: the stage-then-commit loop and the
   comment approvals above don't apply to its issues. Post each finding
-  as it comes. The ready sound plays once per merged pull request
-  instead of once per chunk.
+  as it comes.
+- In a track, the ready sound plays whenever I'm needed, never per
+  chunk or per merge: when the plan waits for `Start track #<n>`, and
+  whenever a step needs me to act. Outside a track, it plays per chunk
+  only, never on a merge.
 
 # Commits
 
