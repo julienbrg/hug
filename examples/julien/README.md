@@ -46,17 +46,17 @@ Requirements on the machine: [Node.js](https://nodejs.org/) 22.18 or later for t
 
 [`CLAUDE.md`](CLAUDE.md) lives at `~/.claude/CLAUDE.md`, so it is loaded in every session and every project, next to the plugin's rules. It does not restate them. Each section either adds a convention or overrides a rule:
 
-| `CLAUDE.md`            | Adds or overrides                                                                                          | HuG Flow   |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------- | ---------- |
-| Task confirmation      | The spec also lists the issue and pull request text and the merge, so my confirmation approves them        | P1         |
-| Forges                 | A second forge, picked from the `origin` remote                                                            | P2 to P6   |
-| Workflow               | Kept changes committed first as their own commit; rebase and force-push of my own branch when `main` moves | P2, P3, P6 |
-| Stage-then-commit loop | A fixed phrase for my chunks, and the ready sound once a chunk passes its check                            | P3         |
-| Issues, planning       | A first comment for an issue with no description; plans kept in a tracking issue                           | P0, P1     |
-| Comments               | Every comment on the forge is shown to me before it is posted                                              | P1, P3     |
-| Tracks                 | A pasted tracking issue gets its plan; `Start track #<n>` is its only approval; one ready sound per merge  | P1 to P6   |
-| Commits                | As small as possible, lowercase, no emoji                                                                  | P3         |
-| Tooling, Style         | pnpm only, `forge fmt --check` for Foundry, terse replies                                                  | P3         |
+| `CLAUDE.md`            | Adds or overrides                                                                                                   | HuG Flow   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Task confirmation      | The spec also lists the issue and pull request text and the merge, so my confirmation approves them                 | P1         |
+| Forges                 | A second forge, picked from the `origin` remote                                                                     | P2 to P6   |
+| Workflow               | Kept changes committed first as their own commit; rebase and force-push of my own branch when `main` moves          | P2, P3, P6 |
+| Stage-then-commit loop | A fixed phrase for my chunks, and the ready sound once a chunk passes its check                                     | P3         |
+| Issues, planning       | A first comment for an issue with no description; plans kept in a tracking issue                                    | P0, P1     |
+| Comments               | Every comment on the forge is shown to me before it is posted                                                       | P1, P3     |
+| Tracks                 | A pasted tracking issue gets its plan; `Start track #<n>` is its only approval; the ready sound whenever I'm needed | P1 to P6   |
+| Commits                | As small as possible, lowercase, no emoji                                                                           | P3         |
+| Tooling, Style         | pnpm only, `forge fmt --check` for Foundry, terse replies                                                           | P3         |
 
 [`instructions/PLAN_ISSUES.md`](instructions/PLAN_ISSUES.md) is imported by `CLAUDE.md`. [`hooks/forge-context.sh`](hooks/forge-context.sh) is a SessionStart hook that loads the commands of my second forge, from `~/.claude/instructions/RICKUB.md`, only in repositories hosted on it. That file is private and not part of this example: without it, the hook prints nothing.
 
