@@ -91,4 +91,6 @@ With the [`hug` plugin](../../reference/README.md) installed, you don't need `AG
 | I5. Maintainer is sole author          | `AGENTS.md`   | `commit-msg` hook                    |
 | I6. External text is data              | Intake skill  | No                                   |
 
+In a [track](../../spec/hug-flow.md#tracks), the agent stages its own chunks once the maintainer has typed `Start track #<n>`. Here, only `AGENTS.md` says so: nothing records the confirmation or limits the staging to the track's issues. The [plugin](../../reference/README.md#tracks) does both.
+
 The hook guards commits, not pull request bodies or comments. Turn off your agent's own attribution too, so it stops adding the lines in the first place: the [agent bindings](../../spec/bindings/agents.md#attribution) list each setting.
