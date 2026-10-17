@@ -56,6 +56,17 @@ and post exactly what I approve. Draft a PR comment when you make a
 choice I didn't specify, find something new, or hit a minor issue out
 of scope. A draft waiting for me never blocks a commit or a push.
 
+# Tracks
+
+- When I paste an issue link, check whether it's a tracking issue
+  (`Track …`, with sub-issues). If it is, present its plan as the
+  plugin's Tracks rules say, and wait.
+- When I type `Start track #<n>`, the plan is confirmed, and it is the
+  only approval of the track: the stage-then-commit loop and the
+  comment approvals above don't apply to its issues. Post each finding
+  as it comes. The ready sound plays once per merged pull request
+  instead of once per chunk.
+
 # Commits
 
 As small as possible, lowercase including the first word, no emoji.
