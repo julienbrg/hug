@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - A Tracks section in `examples/minimal/AGENTS.md`, instructed only, and a note in its README on what the plugin adds.
 - In a track, each issue runs in its own subagent, one at a time, in the spec (0.4.1, SHOULD run in a fresh context), the plugin's rules (0.2.2), `examples/minimal/AGENTS.md` and the article. The main session keeps the plan, waits for each report (branch, pull request, merged or stuck) and says in one line where the track stands, so its context no longer grows with every issue.
 - In `examples/julien/CLAUDE.md`, a pasted tracking issue link gets its plan presented, and `Start track #<n>` is the track's only approval.
+- Resuming a track after an interrupted session, in the spec (0.4.2), the plugin's rules (0.2.3), both examples and the article: the agent re-reads the tracking issue and its comment trail to rebuild where the track stands, treats uncommitted or staged work on a recorded issue's branch as its own (finish or discard it, never keep it as the maintainer's at step 1), and skips issues already reported stuck unless the maintainer says otherwise.
+- The plugin's `SessionStart` hook says when a track is active, with each recorded issue's state: closed, pull request open or not started. If `gh` fails, it still names the issues. Conformance tests cover both cases.
 
 ### Changed
 
