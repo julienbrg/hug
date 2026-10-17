@@ -3,7 +3,7 @@
 | Field   | Value           |
 | ------- | --------------- |
 | Status  | Draft           |
-| Version | 0.4.1           |
+| Version | 0.4.2           |
 | Author  | Julien Béranger |
 | Created | 2026-09-25      |
 | License | MIT             |
@@ -275,7 +275,7 @@ There are three conformance levels. Each level includes every requirement of the
 
 An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
 
-The reference implementation, a Claude Code plugin in [`reference`](../reference/README.md), declares `implements: hug-flow@0.4.1` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](../conformance/), runs in CI.
+The reference implementation, a Claude Code plugin in [`reference`](../reference/README.md), declares `implements: hug-flow@0.4.2` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](../conformance/), runs in CI.
 
 ### Invariant predicates
 
