@@ -3,7 +3,7 @@
 | Field   | Value           |
 | ------- | --------------- |
 | Status  | Draft           |
-| Version | 0.4.0           |
+| Version | 0.4.1           |
 | Author  | Julien Béranger |
 | Created | 2026-09-25      |
 | License | MIT             |
@@ -205,6 +205,7 @@ A track runs a planned series of issues end to end on a single confirmation. The
 - **Input:** a tracking issue whose body lists its issues in order, each one also linked as a [sub-issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/adding-sub-issues).
 - **Plan:** the agent reads the tracking issue and its open sub-issues, checks whether any is already fixed, and reads the online documentation of every external component the issues use (libraries, APIs, data sources). It presents the order, each issue's scope and expected files, the documentation it read, with links, and the decisions it expects to make alone. The maintainer MAY edit the plan; the agent writes the edits to the tracking issue and its sub-issues once the plan is confirmed.
 - **Confirmation:** the maintainer confirms with a fixed phrase that the implementation can recognize as typed by the maintainer, such as `Start track #<n>`. The confirmation records the tracking issue and the sub-issues listed at that moment, so the plan cannot grow afterwards. An equivalent phrase, such as `Stop track`, ends the track at any time.
+- **Context:** the agent SHOULD run each listed issue in a fresh context, such as a subagent, so that the context does not grow with every issue and no issue inherits another's. The session that holds the plan hands over the issue, its line of the plan and these rules, waits for the report (branch, pull request, merged or stuck), says in one line where the track stands, and starts the next issue.
 - **Build:** for each listed issue, in order, the agent runs P2, then writes each chunk, runs the check pipeline on it, stages it by naming its files, commits and pushes. It opens the pull request after the first push and does not wait for the checks between pushes. Before the changelog chunk, it reviews its own pull request and fixes what it finds.
 - **Validate and merge:** after the last push, the agent watches the checks as in P5 and merges as in P6, then starts the next issue. On a second red run, it reads the online documentation of what failed before trying again.
 - **Findings:** a choice the plan did not specify, something new, a minor issue out of scope or a deviation from the plan. The agent reads the relevant online documentation first, then posts a pull request comment, and a comment on the tracking issue with a one-line recap and a link to it.
