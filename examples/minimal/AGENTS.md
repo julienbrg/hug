@@ -26,7 +26,9 @@ no `origin` remote, commit locally only and ask before adding one.
 1. Check for uncommitted or untracked changes. If there are any,
    recap them and ask whether to keep them or stash them. Keep going
    while I answer, and resolve it before step 3. Kept changes go
-   through the stage-then-commit loop with the new work.
+   through the stage-then-commit loop with the new work. In an active
+   track, work left on a recorded issue's branch is yours, not mine
+   (see Tracks).
 2. If the task comes from an existing issue, use it. Otherwise create
    one (see Issues).
 3. Create the branch from `main` and check it out:
@@ -189,6 +191,11 @@ confirmation of its plan.
 - If you can't fix a red check, or a decision would change the scope,
   leave the pull request open, post a finding and move on to the next
   issue that isn't blocked by it.
+- A track outlives the session that started it. To resume one,
+  re-read the tracking issue and its comment trail to see where it
+  stands. Uncommitted or staged work on a recorded issue's branch was
+  left by an interrupted run: finish it or discard it, never keep it
+  as mine. Skip issues already reported stuck unless I say otherwise.
 - `Stop track` ends it. Within a track, its confirmation replaces the
   stage-then-commit loop and the comment approvals, for its issues
   only.

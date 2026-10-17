@@ -18,7 +18,7 @@ Never add `Co-Authored-By` trailers or "Generated with" footers to commits, pull
 
 The repository is hosted on GitHub and `gh` is logged in. If there is no `origin` remote, commit locally only and ask before adding one.
 
-1. Check for uncommitted or untracked changes. If there are any, recap them and ask whether to keep or stash them. Keep going while the maintainer answers, and resolve it before step 3; without an answer, keep them. Kept changes go through the loop with the new work.
+1. Check for uncommitted or untracked changes. If there are any, recap them and ask whether to keep or stash them. Keep going while the maintainer answers, and resolve it before step 3; without an answer, keep them. Kept changes go through the loop with the new work. In an active track, work left on a recorded issue's branch is yours, not the maintainer's (see Resuming).
 2. If the task comes from an existing issue, use it. Otherwise create one (see Issues).
 3. Create the branch from `main` and check it out: `gh issue develop <number> --checkout`.
 4. Commit through the stage-then-commit loop, and push after each commit.
@@ -61,6 +61,7 @@ A track runs the issues of a tracking issue end to end on one confirmation of it
 - **Merge.** After the last push, wait for the checks (step 7). On a second red run, read the online docs of what failed before trying again. Merge on green (steps 8 and 9) and start the next issue.
 - **Findings.** A choice the plan didn't specify, something new, a minor issue out of scope or a deviation from the plan: read the relevant online docs first, then post a pull request comment, and a comment on the tracking issue with a one-line recap and a link to it. Neither needs approval.
 - **Stuck.** If you can't fix a red check, or a decision would change the scope, leave the pull request open, post a finding, and move on to the next issue that isn't blocked by it.
+- **Resuming.** A confirmation outlives the session that started it, and the session start says when a track is active, with each recorded issue's state. To resume, re-read the tracking issue and its comment trail to rebuild where the track stands. Uncommitted or staged work on a recorded issue's branch was left by an interrupted subagent: finish it through Build or discard it, and never keep it as the maintainer's at step 1. Skip issues already reported stuck unless the maintainer says otherwise.
 
 In a track, the plan's confirmation replaces the stage-then-commit loop and any approval of comments, for the recorded issues only. Every other rule holds.
 

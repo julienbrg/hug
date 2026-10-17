@@ -27,7 +27,9 @@ Run `git remote get-url origin` before anything else:
   is checked out, before any new work, stage them by naming the files,
   check the staged content, commit them as their own commit, and push.
   If the check fails, `git restore --staged` them and tell me what
-  failed; I fix it as a new unstaged chunk.
+  failed; I fix it as a new unstaged chunk. Work left on a recorded
+  issue's branch of an active track isn't mine: resume it as the
+  plugin's Tracks rules say.
 - Create `CHANGELOG.md` if it doesn't exist.
 - If `main` moves under a long-lived branch, rebase it onto `main` and
   force-push: it is your own unshared branch.
