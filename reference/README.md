@@ -54,7 +54,8 @@ pnpm hug init <owner>/<repo> --dry-run  # print the plan without applying it
 - other writers of the index or of history (`rm`, `mv`, `apply --cached`, `update-index`, `revert`, `commit-tree`), and moves that would bring in a commit that is neither on the branch nor on a remote, such as a worktree's WIP commit;
 - pushes to the default branch in any refspec form, force-pushes, except `--force-with-lease` on the current issue branch, and pushes of a commit that is on no local branch and no remote, such as a worktree's WIP commit;
 - `gh pr merge` without `--squash`, with `--admin` or `--auto`, or while `gh pr checks` reports a failing, pending or cancelled check, or none at all;
-- `Co-Authored-By` trailers and generated-by footers in commit messages, pull requests and issue comments, and `--author`.
+- `Co-Authored-By` trailers and generated-by footers in commit messages, pull requests and issue comments, and `--author`;
+- prompts handed to `claude`, directly or through a package runner such as `npx`: `-p`, `--print`, a prompt argument or piped text, and any line it cannot read that mentions `claude`. A child session's prompts would reach the hooks as the maintainer's, and could start a track.
 
 A staging command with a private `GIT_INDEX_FILE`, as used to fingerprint a chunk, is allowed. The path must be literal: a variable such as `$T` leaves the guard unable to tell the private index from the real one, so it blocks. A git or `gh` command the parser cannot read with confidence is blocked, with a request to rewrite it in plain form. Other commands are left alone.
 
@@ -64,12 +65,13 @@ The loop is symmetric: the agent stages the maintainer's chunks, so `git add` ca
 
 ### Tracks
 
-Only the maintainer types prompts, so the confirmation of a [track](../spec/hug-flow.md#tracks) is read from them. When the maintainer types exactly `Start track #<n>`, [`track.ts`](src/hooks/track.ts) asks `gh` for the open sub-issues of issue `n` and records them, with `n`, in `.git/hug/track.json`. `Stop track` removes the file. While it exists, the guard lets the agent stage the files it wrote on a branch `<n>-<slug>` whose issue is recorded; the other rules, bulk staging included, still hold. The ledger fingerprints the file before each Bash call, and revokes the track when an agent's Edit, Write or Bash call changes it.
+Only the maintainer types prompts, so the confirmation of a [track](../spec/hug-flow.md#tracks) is read from them. When the maintainer types exactly `Start track #<n>`, [`track.ts`](src/hooks/track.ts) asks `gh` for the open sub-issues of issue `n` and records them, with `n`, in `.git/hug/track.json`. `Stop track` removes the file. Both always answer in the session. If the agent has moved the session out of the repository, the hook records the track for `CLAUDE_PROJECT_DIR`, the project's root, instead. While it exists, the guard lets the agent stage the files it wrote on a branch `<n>-<slug>` whose issue is recorded; the other rules, bulk staging included, still hold. The ledger fingerprints the file before each Bash call, and revokes the track when an agent's Edit, Write or Bash call changes it.
 
 ## Limits
 
 - The guard checks the repository as it is before the command runs. A branch switch and a push in the same command line are blocked, and must run as two commands.
 - A file the maintainer edits while an agent Bash call is running is recorded as the agent's. The guard then refuses to stage it, and the maintainer stages it instead.
+- The `claude` block reads the command line, like the rest of the guard: a launcher it doesn't know, or a script that calls `claude` itself, gets past it.
 - In a track, the plan is reviewed and the content is not: the agent stages its own chunks on the recorded issues.
 - I2 is verified procedurally: nothing in the history shows who staged a chunk, and no hook can tell whether the maintainer read it. I6 is not enforced at all; it rests on the rules.
 - GitHub only. Rulesets on private repositories may require a paid GitHub plan; without them, `hug init` reports it and the repository stays at L2.
