@@ -15,6 +15,7 @@ import {
   scratch,
 } from "../lib/git.ts";
 import * as ledger from "../lib/ledger.ts";
+import * as track from "../lib/track.ts";
 import { mentionsGitOrGh, parse } from "../lib/parse.ts";
 import type { Command, Word } from "../lib/parse.ts";
 
@@ -243,7 +244,9 @@ function stage(command: Command, dir: string | null): Verdict {
   if (bulk)
     return `git add ${bulk} stages everything; the maintainer stages chunks`;
   const repo = ledger.repo(dir);
-  const written = repo ? ledger.read(repo) : new Set<string>();
+  // In a confirmed track, the maintainer approved the plan instead.
+  const written =
+    repo && !track.covers(dir) ? ledger.read(repo) : new Set<string>();
   for (const path of operands) {
     if (path.dynamic) return "a path given to git add is not static";
     if (/[*?[]/.test(path.value) || path.glob) {

@@ -2,6 +2,7 @@
 // - PostToolUse on Edit, Write, MultiEdit and NotebookEdit: the file path.
 // - PreToolUse on Bash: a snapshot of the dirty files and their hashes.
 // - PostToolUse on Bash: every file that became dirty or changed since.
+// Any tool call that changes a track's confirmation revokes the track.
 // Each update also drops the paths that match HEAD again, once committed.
 
 import { spawnSync } from "node:child_process";
@@ -9,6 +10,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { run } from "../lib/git.ts";
 import * as ledger from "../lib/ledger.ts";
+import * as track from "../lib/track.ts";
 
 // Maps each dirty path's ledger key to the hash of its working-tree content.
 function dirty(repo: ledger.Repo): Map<string, string> {
@@ -39,9 +41,22 @@ function dirty(repo: ledger.Repo): Map<string, string> {
   return map;
 }
 
+// Only the maintainer starts a track, so an agent's tool call that touches
+// its confirmation ends it.
+function revoke(cwd: string) {
+  track.remove(cwd);
+  process.stdout.write(
+    JSON.stringify({
+      systemMessage:
+        "HuG Flow: the agent changed the track's confirmation, so the track is revoked. Type `Start track #<n>` to start it again.",
+    }),
+  );
+}
+
 const payload = JSON.parse(readFileSync(0, "utf8") || "{}");
 const cwd: string = payload.cwd ?? process.cwd();
 const repo = ledger.repo(cwd);
+const trackFile = track.file(cwd);
 
 if (repo) {
   const snapshot = join(dirname(repo.file), "snapshot.json");
@@ -50,23 +65,40 @@ if (repo) {
     payload.hook_event_name === "PreToolUse"
   ) {
     mkdirSync(dirname(snapshot), { recursive: true });
-    writeFileSync(snapshot, JSON.stringify(Object.fromEntries(dirty(repo))));
+    writeFileSync(
+      snapshot,
+      JSON.stringify({
+        dirty: Object.fromEntries(dirty(repo)),
+        track: track.fingerprint(cwd),
+      }),
+    );
   } else {
     const written = ledger.read(repo);
     const now = dirty(repo);
     if (payload.tool_name === "Bash") {
-      let before: Record<string, string> = {};
+      let before: { dirty: Record<string, string>; track?: string } = {
+        dirty: {},
+      };
       try {
         before = JSON.parse(readFileSync(snapshot, "utf8"));
       } catch {}
       for (const [path, hash] of now) {
-        if (before[path] !== hash) written.add(path);
+        if (before.dirty?.[path] !== hash) written.add(path);
+      }
+      if (before.track && before.track !== track.fingerprint(cwd)) {
+        revoke(cwd);
       }
       rmSync(snapshot, { force: true });
     } else {
       const input = payload.tool_input ?? {};
       const file = input.file_path ?? input.notebook_path;
-      if (typeof file === "string") {
+      if (
+        typeof file === "string" &&
+        trackFile &&
+        ledger.key(repo, resolve(cwd, file)) === ledger.key(repo, trackFile)
+      ) {
+        revoke(cwd);
+      } else if (typeof file === "string") {
         const key = ledger.key(repo, resolve(cwd, file));
         if (!key.startsWith("..")) written.add(key);
       }
