@@ -76,7 +76,7 @@ Apart from staging, you never touch Git, and nothing enters the history without 
 | Field   | Value           |
 | ------- | --------------- |
 | Status  | Draft           |
-| Version | 0.4.1           |
+| Version | 0.4.2           |
 | Author  | Julien Béranger |
 | Created | 2026-09-25      |
 | License | MIT             |
@@ -212,7 +212,7 @@ When the repository has its own [issue templates](https://docs.github.com/en/com
 #### P2. Branch
 
 - **Input:** the issue number.
-- **Activities:** before branching, the agent checks for uncommitted work and asks whether to keep or stash it. It then creates the branch from `main`, linked to the issue, and checks it out — one forge operation ([`gh issue develop <n> --checkout`](https://cli.github.com/manual/gh_issue_develop) on GitHub).
+- **Activities:** before branching, the agent checks for uncommitted work and asks whether to keep or stash it. In an active track, work on a listed issue's branch is the agent's own (see Tracks, Resuming). It then creates the branch from `main`, linked to the issue, and checks it out — one forge operation ([`gh issue develop <n> --checkout`](https://cli.github.com/manual/gh_issue_develop) on GitHub).
 - **Output:** a local branch linked to the issue.
 - **Exit criterion:** the working tree is on the new branch.
 
@@ -283,6 +283,7 @@ A track runs a planned series of issues end to end on a single confirmation. The
 - **Validate and merge:** after the last push, the agent watches the checks as in P5 and merges as in P6, then starts the next issue. On a second red run, it reads the online documentation of what failed before trying again.
 - **Findings:** a choice the plan did not specify, something new, a minor issue out of scope or a deviation from the plan. The agent reads the relevant online documentation first, then posts a pull request comment, and a comment on the tracking issue with a one-line recap and a link to it.
 - **Stuck:** if the agent cannot fix a red check, or a decision would change the scope, it leaves the pull request open, posts a finding, and moves to the next issue that is not blocked by it.
+- **Resuming:** the confirmation outlives the session that started it, but the plan and the progress live in that session. An implementation SHOULD tell a new session that a track is active, with the state of each listed issue. The agent then re-reads the tracking issue and its comment trail to rebuild where the track stands. Uncommitted or staged work on a listed issue's branch is the agent's, left by an interrupted run: it finishes or discards it, and MUST NOT keep it as the maintainer's in P2. It skips issues already reported stuck unless the maintainer says otherwise.
 - **Output:** one squash commit on `main` per merged issue, and a comment trail on the tracking issue.
 - **Exit criterion:** every listed issue is merged or reported stuck, or the maintainer has ended the track.
 
@@ -347,7 +348,7 @@ There are three conformance levels. Each level includes every requirement of the
 
 An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
 
-The reference implementation, a Claude Code plugin in [`reference`](https://github.com/julienbrg/hug/tree/main/reference), declares `implements: hug-flow@0.4.1` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](https://github.com/julienbrg/hug/tree/main/conformance), runs in CI.
+The reference implementation, a Claude Code plugin in [`reference`](https://github.com/julienbrg/hug/tree/main/reference), declares `implements: hug-flow@0.4.2` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](https://github.com/julienbrg/hug/tree/main/conformance), runs in CI.
 
 #### Invariant predicates
 
@@ -427,7 +428,9 @@ Run `git remote get-url origin` before anything else:
   is checked out, before any new work, stage them by naming the files,
   check the staged content, commit them as their own commit, and push.
   If the check fails, `git restore --staged` them and tell me what
-  failed; I fix it as a new unstaged chunk.
+  failed; I fix it as a new unstaged chunk. Work left on a recorded
+  issue's branch of an active track isn't mine: resume it as the
+  plugin's Tracks rules say.
 - Create `CHANGELOG.md` if it doesn't exist.
 - If `main` moves under a long-lived branch, rebase it onto `main` and
   force-push: it is your own unshared branch.
