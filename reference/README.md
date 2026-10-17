@@ -3,7 +3,7 @@
 A [Claude Code plugin](https://code.claude.com/docs/en/plugins) and a small CLI that enforce [HuG Flow](../spec/hug-flow.md) instead of only instructing it.
 
 ```text
-implements: hug-flow@0.3.0
+implements: hug-flow@0.4.0
 level: L2 (L3 once `hug init` has applied the ruleset)
 ```
 
@@ -39,6 +39,7 @@ pnpm hug init <owner>/<repo> --dry-run  # print the plan without applying it
 | [`rules.md`](rules.md)             | Loaded into every session by a SessionStart hook                                               | P0–P6          |
 | [`guard.ts`](src/hooks/guard.ts)   | PreToolUse hook on Bash: parses the command and blocks it with exit code 2                     | I2, I3, I4, I5 |
 | [`ledger.ts`](src/hooks/ledger.ts) | Records every path the agent writes, through Edit, Write or Bash, so the guard can refuse it   | I2             |
+| [`track.ts`](src/hooks/track.ts)   | UserPromptSubmit hook: records a track when the maintainer types `Start track #<n>`            | Tracks         |
 | [`stop.ts`](src/hooks/stop.ts)     | Stop hook: the turn cannot end while the maintainer has staged the agent's work and it waits   | P3             |
 | [`hug init`](src/cli/init.ts)      | Squash-only merges, merged branches deleted, and the [`hug-flow` ruleset](github/ruleset.json) | I1, I3, I4, P6 |
 | [`hug audit`](src/cli/audit.ts)    | A pass or fail per after-the-fact predicate of §10, over the default branch's history          | I1, I3, I4, I5 |
@@ -61,9 +62,14 @@ A staging command with a private `GIT_INDEX_FILE`, as used to fingerprint a chun
 
 The loop is symmetric: the agent stages the maintainer's chunks, so `git add` cannot be denied outright. Instead, the ledger, in `.git/hug/ledger.json`, lists the paths the agent wrote. Edits and writes are recorded directly. For Bash, a snapshot of the dirty files and their hashes is taken before each call, and every file that changed during the call is recorded. A path leaves the ledger once it matches `HEAD` again.
 
+### Tracks
+
+Only the maintainer types prompts, so the confirmation of a [track](../spec/hug-flow.md#tracks) is read from them. When the maintainer types exactly `Start track #<n>`, [`track.ts`](src/hooks/track.ts) asks `gh` for the open sub-issues of issue `n` and records them, with `n`, in `.git/hug/track.json`. `Stop track` removes the file. While it exists, the guard lets the agent stage the files it wrote on a branch `<n>-<slug>` whose issue is recorded; the other rules, bulk staging included, still hold. The ledger fingerprints the file before each Bash call, and revokes the track when an agent's Edit, Write or Bash call changes it.
+
 ## Limits
 
 - The guard checks the repository as it is before the command runs. A branch switch and a push in the same command line are blocked, and must run as two commands.
 - A file the maintainer edits while an agent Bash call is running is recorded as the agent's. The guard then refuses to stage it, and the maintainer stages it instead.
+- In a track, the plan is reviewed and the content is not: the agent stages its own chunks on the recorded issues.
 - I2 is verified procedurally: nothing in the history shows who staged a chunk, and no hook can tell whether the maintainer read it. I6 is not enforced at all; it rests on the rules.
 - GitHub only. Rulesets on private repositories may require a paid GitHub plan; without them, `hug init` reports it and the repository stays at L2.
