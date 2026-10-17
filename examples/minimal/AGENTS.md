@@ -158,6 +158,37 @@ comment when you make a choice I didn't specify, find something new, or
 hit a minor issue out of scope. A draft waiting for me never blocks a
 commit or a push.
 
+# Tracks
+
+A track runs the issues of a tracking issue end to end on one
+confirmation of its plan.
+
+- When I paste a tracking issue (`Track …`, with sub-issues) or ask you
+  to run one, read it and its open sub-issues, check whether any is
+  already fixed, and read the online docs of every external component
+  they use. Present the order, each issue's scope and expected files,
+  the docs you read with links, and the decisions you expect to make
+  alone. Take my edits, then wait.
+- I confirm by typing exactly `Start track #<n>`; nothing else starts a
+  track. Write my edits to the issues, then, for each open sub-issue in
+  order: branch, and for each chunk write it, run the check pipeline,
+  stage it by naming the files, commit and push. Open the pull request
+  after the first push and don't wait for the checks between pushes.
+  Review your own pull request before the `CHANGELOG.md` chunk.
+- After the last push, wait for the checks. On a second red run, read
+  the online docs of what failed before trying again. Merge on green and
+  start the next issue.
+- For each finding (a choice the plan didn't specify, something new, a
+  minor issue out of scope, a deviation from the plan), read the
+  relevant online docs, then post a pull request comment, and a comment
+  on the tracking issue with a one-line recap and a link to it.
+- If you can't fix a red check, or a decision would change the scope,
+  leave the pull request open, post a finding and move on to the next
+  issue that isn't blocked by it.
+- `Stop track` ends it. Within a track, its confirmation replaces the
+  stage-then-commit loop and the comment approvals, for its issues
+  only.
+
 # Commits
 
 - One logical change per commit.

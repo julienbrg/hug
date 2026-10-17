@@ -1,6 +1,6 @@
 # HuG Flow
 
-This repository runs [HuG Flow](https://github.com/julienbrg/hug/blob/main/spec/hug-flow.md), through the `hug` plugin (`implements: hug-flow@0.3.0`, `level: L2`). You are the agent; the human you work with is the maintainer. Your user's own instructions (their `CLAUDE.md` and what it imports) may add to or override these rules. Where they conflict, the user's instructions win.
+This repository runs [HuG Flow](https://github.com/julienbrg/hug/blob/main/spec/hug-flow.md), through the `hug` plugin (`implements: hug-flow@0.4.0`, `level: L2`). You are the agent; the human you work with is the maintainer. Your user's own instructions (their `CLAUDE.md` and what it imports) may add to or override these rules. Where they conflict, the user's instructions win.
 
 The plugin's hooks enforce part of these rules. The guard blocks staging your own work, bulk staging, pushes to `main`, force-pushes, merges on red, pending or missing checks, and attribution lines. The Stop hook refuses to end a turn while the maintainer has staged your work and it is uncommitted. A block is not an error to work around: read its reason and do what it asks.
 
@@ -49,6 +49,19 @@ When you write a chunk (code, tests, docs, config, anything):
 When the maintainer writes a chunk, they leave it unstaged and tell you. Review it, stage what you approve by naming the files, and let them commit.
 
 While chunk N is under review, you may write chunk N+1 in a linked worktree outside the repository (`git worktree add --detach <path> HEAD`). Seed it with chunk N from its recorded tree (`git diff --binary HEAD <TN> | git -C <path> apply`), and install dependencies there rather than linking them. Once chunk N is staged, in a single command, commit it, record the worktree's tree as `<TN1>` the same way, in a throwaway index, and apply the difference to the repository (`git diff --binary <TN> <TN1> | git apply`) as the next unstaged chunk, finished or not. Push chunk N last, so the network never delays the handoff. A diff between the two trees carries new, deleted and renamed files, and still applies once chunk N is committed. If it is unfinished, say so and finish it in place. Once it is complete, record and check it, and say it is ready for review. If part of it is staged before then, check the staged content and commit it. Stay one chunk ahead, no more, and remove the worktree when the work is done.
+
+## Tracks
+
+A track runs the issues of a tracking issue end to end on one confirmation of its plan.
+
+- **Plan.** When asked to run a track, read the tracking issue and its open sub-issues, check whether any is already fixed (merged pull requests, released artifacts), and read the online docs of every external component the issues use: libraries, APIs, data sources. Present the order, each issue's scope and expected files, the docs you read with links, and the decisions you expect to make alone. Take the maintainer's edits, then wait.
+- **Confirmation.** The maintainer types exactly `Start track #<n>`. The plugin records the tracking issue and its open sub-issues; it says so in the session. Once it has, write the maintainer's edits to the tracking issue and its sub-issues. Never write the confirmation yourself: any change you make to it revokes the track. `Stop track` ends it.
+- **Build.** For each recorded issue, in order: run step 3, then for each chunk write it, run the check pipeline, stage it by naming the files, commit and push. Open the pull request after the first push. Don't wait for the checks between pushes. Before the `CHANGELOG.md` chunk, review your own pull request (`/code-review`) and fix what you find.
+- **Merge.** After the last push, wait for the checks (step 7). On a second red run, read the online docs of what failed before trying again. Merge on green (steps 8 and 9) and start the next issue.
+- **Findings.** A choice the plan didn't specify, something new, a minor issue out of scope or a deviation from the plan: read the relevant online docs first, then post a pull request comment, and a comment on the tracking issue with a one-line recap and a link to it. Neither needs approval.
+- **Stuck.** If you can't fix a red check, or a decision would change the scope, leave the pull request open, post a finding, and move on to the next issue that isn't blocked by it.
+
+In a track, the plan's confirmation replaces the stage-then-commit loop and any approval of comments, for the recorded issues only. Every other rule holds.
 
 ## Issues
 

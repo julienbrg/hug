@@ -54,6 +54,7 @@ Requirements on the machine: [Node.js](https://nodejs.org/) 22.18 or later for t
 | Stage-then-commit loop | A fixed phrase for my chunks, and the ready sound once a chunk passes its check                            | P3         |
 | Issues, planning       | A first comment for an issue with no description; plans kept in a tracking issue                           | P0, P1     |
 | Comments               | Every comment on the forge is shown to me before it is posted                                              | P1, P3     |
+| Tracks                 | A pasted tracking issue gets its plan; `Start track #<n>` is its only approval; one ready sound per merge  | P1 to P6   |
 | Commits                | As small as possible, lowercase, no emoji                                                                  | P3         |
 | Tooling, Style         | pnpm only, `forge fmt --check` for Foundry, terse replies                                                  | P3         |
 

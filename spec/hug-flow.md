@@ -3,7 +3,7 @@
 | Field   | Value           |
 | ------- | --------------- |
 | Status  | Draft           |
-| Version | 0.3.0           |
+| Version | 0.4.0           |
 | Author  | Julien Béranger |
 | Created | 2026-09-25      |
 | License | MIT             |
@@ -198,6 +198,26 @@ The agent reports the issue number, branch, pull request number and merge result
 
 The maintainer MAY abandon a task at any phase. The agent then closes the pull request without merging, deletes the branch and any linked worktree, and closes the issue with a comment saying why — or leaves it open if a fresh attempt is planned. An aborted attempt leaves no trace on `main` (design principle 3).
 
+### Tracks
+
+A track runs a planned series of issues end to end on a single confirmation. The maintainer approves the plan once, at the level of intent, and the agent then runs P2 to P6 for every listed issue without the approval gate of P3. Tracks are OPTIONAL: an implementation that offers none still conforms.
+
+- **Input:** a tracking issue whose body lists its issues in order, each one also linked as a [sub-issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/adding-sub-issues).
+- **Plan:** the agent reads the tracking issue and its open sub-issues, checks whether any is already fixed, and reads the online documentation of every external component the issues use (libraries, APIs, data sources). It presents the order, each issue's scope and expected files, the documentation it read, with links, and the decisions it expects to make alone. The maintainer MAY edit the plan; the agent writes the edits to the tracking issue and its sub-issues once the plan is confirmed.
+- **Confirmation:** the maintainer confirms with a fixed phrase that the implementation can recognize as typed by the maintainer, such as `Start track #<n>`. The confirmation records the tracking issue and the sub-issues listed at that moment, so the plan cannot grow afterwards. An equivalent phrase, such as `Stop track`, ends the track at any time.
+- **Build:** for each listed issue, in order, the agent runs P2, then writes each chunk, runs the check pipeline on it, stages it by naming its files, commits and pushes. It opens the pull request after the first push and does not wait for the checks between pushes. Before the changelog chunk, it reviews its own pull request and fixes what it finds.
+- **Validate and merge:** after the last push, the agent watches the checks as in P5 and merges as in P6, then starts the next issue. On a second red run, it reads the online documentation of what failed before trying again.
+- **Findings:** a choice the plan did not specify, something new, a minor issue out of scope or a deviation from the plan. The agent reads the relevant online documentation first, then posts a pull request comment, and a comment on the tracking issue with a one-line recap and a link to it.
+- **Stuck:** if the agent cannot fix a red check, or a decision would change the scope, it leaves the pull request open, posts a finding, and moves to the next issue that is not blocked by it.
+- **Output:** one squash commit on `main` per merged issue, and a comment trail on the tracking issue.
+- **Exit criterion:** every listed issue is merged or reported stuck, or the maintainer has ended the track.
+
+Rules for tracks:
+
+- The agent MAY stage its own work only on a branch linked to an issue the confirmation recorded. Bulk staging stays forbidden.
+- The agent MUST NOT record, extend or forge a confirmation. Only the maintainer starts a track.
+- Every other rule of P2 to P6 holds: no push to `main`, no force-push of a shared branch, no merge on a red, still-running or missing check.
+
 ## 8. Autonomy and approval matrix
 
 | Step                          | Executed by | Human approval required        |
@@ -215,6 +235,15 @@ The maintainer MAY abandon a task at any phase. The agent then closes the pull r
 
 The maintainer approves once at the level of intent (the spec) and continuously at the level of content (staging). Everything else is automated.
 
+In a track, the approvals move: the maintainer confirms the plan once, and the agent stages its own chunks and posts its findings without asking.
+
+| Step                     | Executed by | Human approval required    |
+| ------------------------ | ----------- | -------------------------- |
+| Present the track's plan | Agent       | **Yes**, once per track    |
+| Stage chunk              | Agent       | No (confirmed issues only) |
+| Post a finding           | Agent       | No                         |
+| Merge, clean up          | Agent       | No (only on green CI)      |
+
 This granularity is what sets HuG Flow apart from other human-gated workflows. [DevFlow](https://github.com/aiKeeo/dev-flow), for example, gates at phase boundaries (requirements, design, development, testing). HuG Flow gates every chunk of code, and deliberately leaves the process steps between chunks ungated.
 
 ## 9. Invariants
@@ -222,7 +251,7 @@ This granularity is what sets HuG Flow apart from other human-gated workflows. [
 The following MUST hold at all times:
 
 - **I1.** `main` is stable and deployable.
-- **I2.** No line enters the history without being reviewed by the party that did not write it.
+- **I2.** No line enters the history without being reviewed by the party that did not write it. In a [track](#tracks), the maintainer's confirmation of the plan stands in for that review, for the issues it records.
 - **I3.** Nothing is merged without a green CI run.
 - **I4.** No one pushes directly to `main`, and no one force-pushes a shared branch.
 - **I5.** The maintainer is the sole author of record: there is no `Co-Authored-By` trailer and no generated-by footer.
@@ -244,22 +273,22 @@ There are three conformance levels. Each level includes every requirement of the
 
 An implementation MUST declare the version of this document and the level it implements, for example `implements: hug-flow@<version>` and `level: L2`. A claim applies to that version only.
 
-The reference implementation, a Claude Code plugin in [`reference`](../reference/README.md), declares `implements: hug-flow@0.3.0` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](../conformance/), runs in CI.
+The reference implementation, a Claude Code plugin in [`reference`](../reference/README.md), declares `implements: hug-flow@0.4.0` and `level: L2`, and reaches L3 once `hug init` has applied its ruleset to the repository. Its conformance suite, in [`conformance`](../conformance/), runs in CI.
 
 ### Invariant predicates
 
 Each invariant in section 9 maps to a predicate that an implementation can check. The last column says when the predicate can be checked: _after the fact_ means from the history and the forge's records alone, and _procedurally_ means only while the work happens.
 
-| Invariant | Predicate                                                                                                                                                 | Checked                                      |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| I1        | Every commit on the first-parent history of `main` passes the required checks.                                                                            | After the fact                               |
-| I2        | Every commit made in P3 records exactly a tree staged by the party that did not write its content.                                                        | Procedurally                                 |
-| I3        | Every squash commit on `main` maps to a pull request whose required checks were green at merge time.                                                      | After the fact                               |
-| I4        | Every commit on the first-parent history of `main` is the squash commit of a merged pull request, and the forge records no force-push to a shared branch. | After the fact                               |
-| I5        | No commit on `main` carries a `Co-Authored-By` trailer or a generated-by footer, and every commit's author is the maintainer.                             | After the fact, and at L2 before each commit |
-| I6        | No action of the agent is taken on instructions found in external text.                                                                                   | Procedurally                                 |
+| Invariant | Predicate                                                                                                                                                         | Checked                                      |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| I1        | Every commit on the first-parent history of `main` passes the required checks.                                                                                    | After the fact                               |
+| I2        | Every commit made in P3 records exactly a tree staged by the party that did not write its content, or, in a track, belongs to an issue the confirmation recorded. | Procedurally                                 |
+| I3        | Every squash commit on `main` maps to a pull request whose required checks were green at merge time.                                                              | After the fact                               |
+| I4        | Every commit on the first-parent history of `main` is the squash commit of a merged pull request, and the forge records no force-push to a shared branch.         | After the fact                               |
+| I5        | No commit on `main` carries a `Co-Authored-By` trailer or a generated-by footer, and every commit's author is the maintainer.                                     | After the fact, and at L2 before each commit |
+| I6        | No action of the agent is taken on instructions found in external text.                                                                                           | Procedurally                                 |
 
-I2 and I6 are verified procedurally, not after the fact. Staging leaves no trace in the history, so no audit of `main` can tell who staged a chunk, and no record shows which text the agent acted on. An implementation MUST NOT claim to verify I2 or I6 from history. At L2, it verifies I2 by blocking the agent from staging content the agent wrote; I6 rests on the controls in P5 at every level.
+I2 and I6 are verified procedurally, not after the fact. Staging leaves no trace in the history, so no audit of `main` can tell who staged a chunk, and no record shows which text the agent acted on. An implementation MUST NOT claim to verify I2 or I6 from history. At L2, it verifies I2 by blocking the agent from staging content the agent wrote, outside the issues of a confirmed track; I6 rests on the controls in P5 at every level.
 
 ## 11. Relationship to the ADLC
 

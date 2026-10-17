@@ -1,6 +1,7 @@
 // Stands in for gh in the scenario tests. `gh pr checks` answers with the
 // JSON in HUG_STUB_CHECKS, "none" for a pull request without checks, or
-// "error" for a failing gh.
+// "error" for a failing gh. `gh api` on sub_issues answers with the issues
+// in HUG_STUB_SUBISSUES, such as "3,4:closed,5", open unless marked closed.
 
 const [command, action] = process.argv.slice(2);
 const checks = process.env.HUG_STUB_CHECKS ?? "error";
@@ -12,6 +13,20 @@ if (command === "pr" && action === "checks") {
   }
   if (checks !== "error") {
     process.stdout.write(checks);
+    process.exit(0);
+  }
+}
+if (command === "api" && process.argv.some((a) => a.includes("/sub_issues"))) {
+  const issues = process.env.HUG_STUB_SUBISSUES;
+  if (issues !== undefined) {
+    const list = issues
+      .split(",")
+      .filter(Boolean)
+      .map((issue) => {
+        const [number, state = "open"] = issue.split(":");
+        return { number: Number(number), state };
+      });
+    process.stdout.write(JSON.stringify(list));
     process.exit(0);
   }
 }
