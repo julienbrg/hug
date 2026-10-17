@@ -40,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The fingerprint's throwaway index is a `<literal tmp path>` in `examples/julien/CLAUDE.md`, `examples/minimal/AGENTS.md` and the article, as in the plugin's rules, since the guard blocks a variable one.
 - The pipelining handoff diffs fingerprints instead of the worktree's `HEAD`, in the spec, the plugin's rules, both examples and the article: the worktree is seeded with `git diff --binary HEAD <TN>`, and chunk N+1 reaches the repository through `git diff --binary <TN> <TN1> | git apply`. It needs no WIP commit.
 - The guard's hints for `git mv` and `git rm` name plain `mv` and `rm`, and the rules and both examples say to use them, leaving both paths unstaged.
+- In a track, the ready sound in `examples/julien/CLAUDE.md`, its README and the article plays whenever the maintainer is needed, when the plan waits for `Start track #<n>` and whenever a step needs them to act, instead of once per merged pull request. Outside a track, it plays per chunk only, never on a merge.
 
 ### Removed
 
