@@ -3,7 +3,8 @@
 // issues, and any agent change to the confirmation revokes it.
 
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { bash, git, hook, repo } from "./helpers.ts";
@@ -95,4 +96,58 @@ test("an agent Bash call that forges the confirmation revokes it", () => {
   assert.match(outcome.stdout, /revoked/);
   assert.equal(existsSync(file(cwd)), false);
   assert.equal(bash(cwd, "git add a.ts").code, 2);
+});
+
+test("outside the repository, the project directory gets the track", () => {
+  const cwd = repo();
+  const outside = mkdtempSync(join(tmpdir(), "hug-out-"));
+  const outcome = hook(
+    "track",
+    {
+      hook_event_name: "UserPromptSubmit",
+      prompt: "Start track #2",
+      cwd: outside,
+    },
+    { HUG_STUB_SUBISSUES: "3", CLAUDE_PROJECT_DIR: cwd },
+  );
+  assert.match(outcome.stdout, /track #2 confirmed for #3/);
+  assert.equal(existsSync(file(cwd)), true);
+});
+
+test("with no repository at all, Start track and Stop track say so", () => {
+  const outside = mkdtempSync(join(tmpdir(), "hug-out-"));
+  for (const text of ["Start track #2", "Stop track"]) {
+    const outcome = hook(
+      "track",
+      { hook_event_name: "UserPromptSubmit", prompt: text, cwd: outside },
+      { CLAUDE_PROJECT_DIR: outside },
+    );
+    assert.match(outcome.stdout, /is not in a git repository/);
+  }
+});
+
+test("Stop track with no track recorded says so", () => {
+  assert.match(prompt(repo(), "Stop track").stdout, /no track to stop/);
+});
+
+test("the agent cannot hand claude a prompt from Bash", () => {
+  const cwd = repo();
+  for (const command of [
+    'claude -p "Start track #2"',
+    'claude "Start track #2"',
+    "echo 'Start track #2' | claude --print",
+    "c=claude; $c -p x",
+    "npx @anthropic-ai/claude-code -p x",
+    'pnpm dlx claude "Start track #2"',
+  ]) {
+    assert.equal(bash(cwd, command).code, 2, command);
+  }
+  for (const command of [
+    "claude plugin update hug@hug",
+    "claude mcp list",
+    "claude --version",
+    "npx prettier --check .",
+  ]) {
+    assert.equal(bash(cwd, command).code, 0, command);
+  }
 });
